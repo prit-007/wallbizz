@@ -212,7 +212,7 @@ void main() {
 
       expect(wallpaper.wallhavenId, '94x38z');
       expect(wallpaper.urlFull, 'https://w.wallhaven.cc/full/94/wallhaven-94x38z.jpg');
-      expect(wallpaper.urlThumb, 'https://th.wallhaven.cc/orig/94/94x38z.jpg');
+      expect(wallpaper.urlThumb, 'https://th.wallhaven.cc/small/94/94x38z.jpg');
       expect(wallpaper.resolution, '6742x3534');
       expect(wallpaper.width, 6742);
       expect(wallpaper.height, 3534);

@@ -156,7 +156,7 @@ void main() {
       expect(result.wallpapers.length, 1);
       expect(result.wallpapers[0].wallhavenId, 'abc123');
       expect(result.wallpapers[0].urlFull, 'https://w.wallhaven.cc/full/ab/abc123.jpg');
-      expect(result.wallpapers[0].urlThumb, 'https://th.wallhaven.cc/orig/ab/abc123.jpg');
+      expect(result.wallpapers[0].urlThumb, 'https://th.wallhaven.cc/sm/ab/abc123.jpg');
       expect(result.currentPage, 1);
       expect(result.lastPage, 5);
       expect(result.total, 120);

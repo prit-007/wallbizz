@@ -129,7 +129,7 @@ void main() {
   });
 
   group('SearchScreen search behavior', () {
-    testWidgets('entering text triggers debounced search', (tester) async {
+    testWidgets('pressing search button triggers search', (tester) async {
       String? requestedUrl;
       final client = http_testing.MockClient((request) async {
         requestedUrl = request.url.toString();
@@ -149,9 +149,10 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'nature');
+      await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(requestedUrl, isNotNull);
@@ -179,9 +180,10 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'nature');
+      await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('1920x1080'), findsOneWidget);
@@ -208,9 +210,10 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'nature');
+      await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Search millions of wallpapers'), findsNothing);
@@ -222,10 +225,11 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'xyznonexistent');
+      await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('No wallpapers found'), findsOneWidget);
     });
@@ -255,22 +259,22 @@ void main() {
       ));
 
       await tester.enterText(find.byType(TextField), 'test');
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(requestedUrl, contains('purity=100'));
 
       await tester.tap(find.byKey(const Key('purity_sketchy')));
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(requestedUrl, contains('purity=110'));
 
       await tester.tap(find.byKey(const Key('purity_nsfw')));
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(requestedUrl, contains('purity=111'));
