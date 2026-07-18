@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vivek_app/config/theme_config.dart';
 import 'package:vivek_app/screens/home_screen.dart';
 import 'package:vivek_app/screens/search_screen.dart';
 
@@ -9,6 +13,10 @@ void main() {
     try {
       await dotenv.load();
     } catch (_) {}
+    SharedPreferences.setMockInitialValues({});
+    Hive.init(Directory.systemTemp.path);
+    await Hive.openBox('downloads');
+    await ThemeConfig.load();
   });
 
   setUp(() {

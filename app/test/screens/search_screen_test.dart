@@ -64,7 +64,7 @@ void main() {
 
     testWidgets('renders sorting dropdown', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
-      expect(find.text('Toplist'), findsOneWidget);
+      expect(find.text('Latest'), findsOneWidget);
     });
 
     testWidgets('renders category dropdown', (tester) async {
