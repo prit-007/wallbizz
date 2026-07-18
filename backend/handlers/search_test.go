@@ -102,9 +102,9 @@ func TestSearchProxy_MissingAuth(t *testing.T) {
 		t.Fatalf("Request failed: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusUnauthorized {
+	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		t.Errorf("Expected 401, got %d: %s", resp.StatusCode, string(body))
+		t.Errorf("Expected 200 (unauthenticated SFW allowed), got %d: %s", resp.StatusCode, string(body))
 	}
 }
 

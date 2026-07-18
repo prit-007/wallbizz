@@ -12,6 +12,7 @@ type Config struct {
 	SupabaseURL        string
 	SupabaseServiceKey string
 	WallhavenAPIKey    string
+	LogLevel           string
 }
 
 func LoadConfig() Config {
@@ -24,6 +25,7 @@ func LoadConfig() Config {
 		SupabaseURL:        os.Getenv("SUPABASE_URL"),
 		SupabaseServiceKey: os.Getenv("SUPABASE_SERVICE_KEY"),
 		WallhavenAPIKey:    os.Getenv("WALLHAVEN_API_KEY"),
+		LogLevel:           getEnv("LOG_LEVEL", "info"),
 	}
 
 	cfg.validate()

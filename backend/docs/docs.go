@@ -40,7 +40,7 @@ const docTemplate = `{
         },
         "/search": {
             "get": {
-                "description": "Proxies search requests to Wallhaven. Requires a valid Supabase JWT. All query params are forwarded to Wallhaven.",
+                "description": "Proxies search requests to Wallhaven. Auth is optional — if a valid JWT is provided it will be verified, otherwise the request is proxied without auth (SFW only).",
                 "consumes": [
                     "application/json"
                 ],
@@ -56,8 +56,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Bearer \u003cJWT\u003e",
                         "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "string",

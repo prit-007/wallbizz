@@ -14,11 +14,11 @@ import (
 
 // SearchProxy godoc
 // @Summary Search Wallhaven via proxy
-// @Description Proxies search requests to Wallhaven. Requires a valid Supabase JWT. All query params are forwarded to Wallhaven.
+// @Description Proxies search requests to Wallhaven. Auth is optional — if a valid JWT is provided it will be verified, otherwise the request is proxied without auth (SFW only).
 // @Tags search
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer <JWT>"
+// @Param Authorization header string false "Bearer <JWT>"
 // @Param q query string false "Search query"
 // @Param categories query string false "Category filter (e.g. 010, 100, 111)"
 // @Param purity query string false "Purity filter (100=SFW, 110=Sketchy, 111=NSFW)"
@@ -39,15 +39,14 @@ func searchProxyHandler(cfg config.Config, wallhavenBase string) func(*fiber.Ctx
 		log := logger.Log()
 
 		authHeader := c.Get("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			log.Warn().Str("path", c.Path()).Msg("Search request missing authorization")
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid authorization"})
-		}
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-
-		if err := verifySupabaseToken(cfg, token); err != nil {
-			log.Warn().Err(err).Msg("Invalid JWT token")
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token"})
+		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+			token := strings.TrimPrefix(authHeader, "Bearer ")
+			if err := verifySupabaseToken(cfg, token); err != nil {
+				log.Warn().Err(err).Msg("Invalid JWT token")
+				return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token"})
+			}
+		} else {
+			log.Debug().Str("path", c.Path()).Msg("Search request without authorization (SFW proxy)")
 		}
 
 		query := c.Request().URI().QueryString()

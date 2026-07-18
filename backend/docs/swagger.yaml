@@ -81,13 +81,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Proxies search requests to Wallhaven. Requires a valid Supabase
-        JWT. All query params are forwarded to Wallhaven.
+      description: Proxies search requests to Wallhaven. Auth is optional — if a valid
+        JWT is provided it will be verified, otherwise the request is proxied without
+        auth (SFW only).
       parameters:
       - description: Bearer <JWT>
         in: header
         name: Authorization
-        required: true
         type: string
       - description: Search query
         in: query
