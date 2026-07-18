@@ -19,6 +19,8 @@ class WallpaperCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -64,8 +66,8 @@ class WallpaperCard extends StatelessWidget {
                   ),
                   child: Text(
                     wallpaper.resolution,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: cs.onSurface,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -86,7 +88,7 @@ class WallpaperCard extends StatelessWidget {
                       ),
                       child: Icon(
                         isWishlisted ? Icons.favorite : Icons.favorite_border,
-                        color: isWishlisted ? Colors.red : Colors.white,
+                        color: isWishlisted ? Colors.red : cs.onSurface,
                         size: 18,
                       ),
                     ),

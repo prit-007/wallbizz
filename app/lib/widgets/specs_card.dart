@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 
 class SpecsCard extends StatelessWidget {
@@ -10,6 +11,9 @@ class SpecsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -17,45 +21,42 @@ class SpecsCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: vk.glassBackground,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: vk.glassBorder,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Resolution
               Text(
                 wallpaper.resolution.replaceAll('x', ' × '),
                 style: GoogleFonts.oswald(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: cs.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
 
-              // File size
               Text(
                 wallpaper.formattedFileSize,
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: Colors.white70,
+                  color: vk.onSurfaceSubtle,
                 ),
               ),
               const SizedBox(height: 12),
 
-              // Category chip
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: vk.glassBackground,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -63,7 +64,7 @@ class SpecsCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: cs.onSurface,
                     letterSpacing: 1.2,
                   ),
                 ),

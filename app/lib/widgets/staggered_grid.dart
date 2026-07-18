@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../widgets/wallpaper_card.dart';
 import '../services/supabase_service.dart';
+import '../services/wallpaper_actions.dart';
 
 class StaggeredGrid extends StatefulWidget {
   final String? category;
@@ -93,6 +95,8 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     if (_wallpapers.isEmpty && _isLoading) {
       return _buildLoadingSkeleton();
     }
@@ -116,10 +120,10 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             itemCount: _wallpapers.length + (_hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == _wallpapers.length) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                    child: CircularProgressIndicator(color: cs.primary),
                   ),
                 );
               }
@@ -127,6 +131,10 @@ class _StaggeredGridState extends State<StaggeredGrid> {
               return WallpaperCard(
                 wallpaper: _wallpapers[index],
                 onTap: () => widget.onWallpaperTap?.call(_wallpapers[index]),
+                onHeartTap: () => WallpaperActions.handleHeartTap(
+                  context,
+                  _wallpapers[index],
+                ),
               );
             },
           );
@@ -136,6 +144,8 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   }
 
   Widget _buildLoadingSkeleton() {
+    final vk = context.vivek;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 900
@@ -155,7 +165,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             return Container(
               height: heights[index % heights.length],
               decoration: BoxDecoration(
-                color: Colors.grey[900],
+                color: vk.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
             );

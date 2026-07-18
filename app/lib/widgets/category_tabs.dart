@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../config/theme_config.dart';
 
 class CategoryTabs extends StatefulWidget {
   final String selectedCategory;
@@ -26,6 +27,9 @@ class _CategoryTabsState extends State<CategoryTabs> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return SizedBox(
       height: 120,
       child: ListView.separated(
@@ -44,15 +48,15 @@ class _CategoryTabsState extends State<CategoryTabs> {
               width: 100,
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.grey[900],
+                color: isSelected ? cs.primary : vk.surfaceContainer,
                 borderRadius: BorderRadius.circular(16),
                 border: isSelected
-                    ? Border.all(color: Colors.white, width: 2)
+                    ? Border.all(color: cs.primary, width: 2)
                     : null,
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: cs.primary.withValues(alpha: 0.2),
                           blurRadius: 12,
                           spreadRadius: 2,
                         )
@@ -73,7 +77,7 @@ class _CategoryTabsState extends State<CategoryTabs> {
                     style: GoogleFonts.bebasNeue(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.black : Colors.white,
+                      color: isSelected ? cs.onPrimary : cs.onSurface,
                       letterSpacing: 1.2,
                     ),
                   ),

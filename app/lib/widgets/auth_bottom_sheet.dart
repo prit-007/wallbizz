@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/theme_config.dart';
 import '../services/wallpaper_actions.dart';
 
 void showAuthBottomSheet(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.grey[950],
+    backgroundColor: cs.surfaceContainerHighest,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -82,20 +85,30 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
 
   Future<void> _signInWithGoogle() async {
     try {
+      setState(() => _isLoading = true);
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
       );
+      if (mounted) {
+        WallpaperActions.onAuthSuccess();
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Google sign-in failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 24,
@@ -107,13 +120,12 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle bar
           Center(
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[600],
+                color: vk.onSurfaceFaint,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -125,7 +137,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -133,12 +145,11 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             'Your collection syncs across devices',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Colors.white54,
+              color: vk.onSurfaceSubtle,
             ),
           ),
           const SizedBox(height: 24),
 
-          // Google Sign-In button
           SizedBox(
             height: 52,
             child: ElevatedButton.icon(
@@ -162,59 +173,55 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
           ),
           const SizedBox(height: 20),
 
-          // Divider
           Row(
             children: [
-              const Expanded(child: Divider(color: Colors.white24)),
+              Expanded(child: Divider(color: vk.glassBorder)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'or',
-                  style: GoogleFonts.inter(color: Colors.white54),
+                  style: GoogleFonts.inter(color: vk.onSurfaceSubtle),
                 ),
               ),
-              const Expanded(child: Divider(color: Colors.white24)),
+              Expanded(child: Divider(color: vk.glassBorder)),
             ],
           ),
           const SizedBox(height: 20),
 
-          // Email field
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: 'Email',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: vk.onSurfaceFaint),
               filled: true,
-              fillColor: Colors.grey[900],
+              fillColor: vk.surfaceContainer,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
             ),
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: cs.onSurface),
           ),
           const SizedBox(height: 12),
 
-          // Password field
           TextField(
             controller: _passwordController,
             obscureText: true,
             decoration: InputDecoration(
               hintText: 'Password',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: vk.onSurfaceFaint),
               filled: true,
-              fillColor: Colors.grey[900],
+              fillColor: vk.surfaceContainer,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
             ),
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: cs.onSurface),
           ),
           const SizedBox(height: 16),
 
-          // Sign In / Create Account button
           SizedBox(
             height: 52,
             child: ElevatedButton(
@@ -246,7 +253,6 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
           ),
           const SizedBox(height: 12),
 
-          // Toggle sign in / sign up
           TextButton(
             onPressed: () {
               setState(() => _isSignUp = !_isSignUp);
@@ -256,7 +262,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   ? 'Already have an account? Sign in'
                   : "Don't have an account? Create one",
               style: GoogleFonts.inter(
-                color: Colors.white54,
+                color: vk.onSurfaceSubtle,
                 fontSize: 14,
               ),
             ),
