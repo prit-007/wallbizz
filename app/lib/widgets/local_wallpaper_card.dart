@@ -1,24 +1,32 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../config/theme_config.dart';
 import '../models/downloaded_wallpaper.dart';
 
 class LocalWallpaperCard extends StatelessWidget {
   final DownloadedWallpaper wallpaper;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final bool isSelected;
 
   const LocalWallpaperCard({
     super.key,
     required this.wallpaper,
     this.onTap,
+    this.onLongPress,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     final file = File(wallpaper.localPath);
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: AspectRatio(
@@ -29,12 +37,16 @@ class LocalWallpaperCard extends StatelessWidget {
               file.existsSync()
                   ? Image.file(file, fit: BoxFit.cover)
                   : Container(
-                      color: Colors.grey[900],
-                      child: const Icon(
+                      color: vk.surfaceContainer,
+                      child: Icon(
                         Icons.broken_image,
-                        color: Colors.white24,
+                        color: vk.onSurfaceDim,
                       ),
                     ),
+              if (isSelected)
+                Container(
+                  color: cs.primary.withValues(alpha: 0.25),
+                ),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -67,8 +79,8 @@ class LocalWallpaperCard extends StatelessWidget {
                   ),
                   child: Text(
                     wallpaper.resolution,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: cs.onSurface,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -81,12 +93,12 @@ class LocalWallpaperCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
+                    color: isSelected ? cs.primary : Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
+                  child: Icon(
+                    isSelected ? Icons.check_circle : Icons.check,
+                    color: cs.onSurface,
                     size: 14,
                   ),
                 ),

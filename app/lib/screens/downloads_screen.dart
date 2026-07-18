@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../config/theme_config.dart';
 import '../models/downloaded_wallpaper.dart';
 import '../services/downloads_service.dart';
 import '../widgets/local_wallpaper_card.dart';
@@ -17,32 +18,154 @@ class DownloadsScreen extends StatefulWidget {
 
 class _DownloadsScreenState extends State<DownloadsScreen> {
   String _searchQuery = '';
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
+
+  void _exitSelectionMode() {
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+  }
+
+  void _toggleSelection(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+        if (_selectedIds.isEmpty) {
+          _selectionMode = false;
+        }
+      } else {
+        _selectedIds.add(id);
+      }
+    });
+  }
+
+  void _enterSelectionMode(String id) {
+    setState(() {
+      _selectionMode = true;
+      _selectedIds.add(id);
+    });
+  }
+
+  Future<void> _deleteSelected() async {
+    if (_selectedIds.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final c = Theme.of(ctx).colorScheme;
+        final v = ctx.vivek;
+        return AlertDialog(
+          title: Text(
+            'Delete ${_selectedIds.length} wallpaper${_selectedIds.length == 1 ? '' : 's'}?',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              color: c.onSurface,
+            ),
+          ),
+          content: Text(
+            'This will permanently delete the selected wallpaper${_selectedIds.length == 1 ? '' : 's'} from your device.',
+            style: GoogleFonts.inter(color: v.onSurfaceSubtle),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancel', style: GoogleFonts.inter()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(
+                'Delete',
+                style: GoogleFonts.inter(color: c.error),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    for (final id in _selectedIds.toList()) {
+      await DownloadsService.removeDownload(id);
+    }
+
+    if (!mounted) return;
+
+    _exitSelectionMode();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Deleted ${_selectedIds.length} wallpaper${_selectedIds.length == 1 ? '' : 's'}'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: TextField(
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: 'Search downloads...',
-              hintStyle: GoogleFonts.inter(color: Colors.white54),
-              prefixIcon: const Icon(Icons.search, color: Colors.white54),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.1),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+        if (_selectionMode)
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              4,
+              MediaQuery.of(context).padding.top + 4,
+              4,
+              4,
             ),
-            onChanged: (value) {
-              setState(() => _searchQuery = value.toLowerCase());
-            },
+            color: cs.surfaceContainerHighest,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _exitSelectionMode,
+                  color: cs.onSurface,
+                ),
+                Expanded(
+                  child: Text(
+                    '${_selectedIds.length} selected',
+                    style: GoogleFonts.inter(
+                      color: cs.onSurface,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: _selectedIds.isNotEmpty ? _deleteSelected : null,
+                  color: _selectedIds.isNotEmpty ? cs.error : vk.onSurfaceFaint,
+                ),
+              ],
+            ),
           ),
-        ),
+        if (!_selectionMode)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: TextField(
+              style: GoogleFonts.inter(color: cs.onSurface, fontSize: 16),
+              decoration: InputDecoration(
+                hintText: 'Search downloads...',
+                hintStyle: GoogleFonts.inter(color: vk.onSurfaceSubtle),
+                prefixIcon: Icon(Icons.search, color: vk.onSurfaceSubtle),
+                filled: true,
+                fillColor: vk.surfaceOverlay,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+              onChanged: (value) {
+                setState(() => _searchQuery = value.toLowerCase());
+              },
+            ),
+          ),
         Expanded(
           child: ValueListenableBuilder(
             valueListenable: Hive.box('downloads').listenable(),
@@ -86,8 +209,17 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Widget _buildDownloadCard(DownloadedWallpaper data) {
+    if (_selectionMode) {
+      return LocalWallpaperCard(
+        wallpaper: data,
+        isSelected: _selectedIds.contains(data.wallhavenId),
+        onTap: () => _toggleSelection(data.wallhavenId),
+      );
+    }
+
     return LocalWallpaperCard(
       wallpaper: data,
+      isSelected: false,
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -95,10 +227,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           ),
         );
       },
+      onLongPress: () => _enterSelectionMode(data.wallhavenId),
     );
   }
 
   Widget _buildEmptyView() {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +242,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           Icon(
             Icons.download_for_offline_outlined,
             size: 80,
-            color: Colors.white.withValues(alpha: 0.15),
+            color: vk.glassBackground,
           )
               .animate(
                 onPlay: (controller) => controller.repeat(reverse: true),
@@ -123,7 +259,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -132,7 +268,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Colors.white54,
+              color: vk.onSurfaceSubtle,
               height: 1.5,
             ),
           ),
