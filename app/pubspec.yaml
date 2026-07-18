@@ -21,12 +21,18 @@ dependencies:
 
   # Cropping & Setting
   image_cropper: ^12.2.1
+  async_wallpaper: ^3.1.0
   url_launcher: ^6.2.4
+  share_plus: ^10.1.4
 
   # State & Database
   supabase_flutter: ^2.5.0
   shared_preferences: ^2.2.2
   http: ^1.2.0
+
+  # Local Storage (Downloads)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
   # Environment
   flutter_dotenv: ^5.1.0
