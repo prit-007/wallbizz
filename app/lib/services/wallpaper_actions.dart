@@ -7,6 +7,7 @@ import '../widgets/auth_bottom_sheet.dart';
 class WallpaperActions {
   static Wallpaper? _pendingWallpaper;
   static VoidCallback? _onPendingComplete;
+  static bool _isProcessing = false;
 
   /// Handle heart tap on a wallpaper card.
   /// Shows auth bottom sheet if user is not logged in.
@@ -15,6 +16,8 @@ class WallpaperActions {
     Wallpaper wallpaper, {
     VoidCallback? onComplete,
   }) {
+    if (_isProcessing) return;
+
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) {
@@ -33,18 +36,23 @@ class WallpaperActions {
     Wallpaper wallpaper,
     VoidCallback? onComplete,
   ) async {
-    final isInList = await SupabaseService.instance.isInWishlist(
-      userId,
-      wallpaper.id,
-    );
+    _isProcessing = true;
+    try {
+      final isInList = await SupabaseService.instance.isInWishlist(
+        userId,
+        wallpaper.id,
+      );
 
-    if (isInList) {
-      await SupabaseService.instance.removeFromWishlist(userId, wallpaper.id);
-    } else {
-      await SupabaseService.instance.addToWishlist(userId, wallpaper.id);
+      if (isInList) {
+        await SupabaseService.instance.removeFromWishlist(userId, wallpaper.id);
+      } else {
+        await SupabaseService.instance.addToWishlist(userId, wallpaper.id);
+      }
+
+      onComplete?.call();
+    } finally {
+      _isProcessing = false;
     }
-
-    onComplete?.call();
   }
 
   /// Called when auth state changes to signed in.

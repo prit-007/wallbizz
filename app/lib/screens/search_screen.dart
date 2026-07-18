@@ -7,7 +7,9 @@ import '../models/wallpaper.dart';
 import '../services/wallhaven_search.dart';
 import '../widgets/wallpaper_card.dart';
 import '../widgets/auth_bottom_sheet.dart';
+import '../services/wallpaper_actions.dart';
 import 'detail_screen.dart';
+import '../config/theme_config.dart';
 
 class SearchScreen extends StatefulWidget {
   final dynamic httpClient;
@@ -40,8 +42,8 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _hasSearched = false;
 
   String _purity = '100';
-  String _sorting = 'toplist';
-  String _topRange = '3M';
+  String _sorting = 'date_added';
+  String _topRange = '';
   String _categories = '';
   String _ratios = '';
 
@@ -171,8 +173,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -186,13 +189,15 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchBar() {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
         children: [
           IconButton(
             key: const Key('back_button'),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: cs.onSurface),
             onPressed: () => Navigator.of(context).pop(),
           ),
           Expanded(
@@ -202,24 +207,24 @@ class _SearchScreenState extends State<SearchScreen> {
               autofocus: true,
               onSubmitted: (_) => _onSearch(),
               onChanged: (_) => setState(() {}),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: cs.onSurface),
               decoration: InputDecoration(
                 hintText: 'Search wallpapers...',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: TextStyle(color: vk.onSurfaceFaint),
                 filled: true,
-                fillColor: Colors.grey[900],
+                fillColor: vk.surfaceContainer,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 20),
+                prefixIcon: Icon(Icons.search, color: vk.onSurfaceFaint, size: 20),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_controller.text.isNotEmpty)
                       IconButton(
                         key: const Key('clear_button'),
-                        icon: const Icon(Icons.clear, color: Colors.white38, size: 20),
+                        icon: Icon(Icons.clear, color: vk.onSurfaceFaint, size: 20),
                         onPressed: () {
                           _controller.clear();
                           setState(() {});
@@ -227,7 +232,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                     IconButton(
                       key: const Key('search_button'),
-                      icon: const Icon(Icons.search, color: Colors.white, size: 20),
+                      icon: Icon(Icons.search, color: cs.onSurface, size: 20),
                       onPressed: _onSearch,
                     ),
                   ],
@@ -288,6 +293,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 value: _topRange,
                 label: 'Range',
                 items: const [
+                  DropdownMenuItem(value: '', child: Text('All Time')),
                   DropdownMenuItem(value: '1d', child: Text('1 Day')),
                   DropdownMenuItem(value: '3d', child: Text('3 Days')),
                   DropdownMenuItem(value: '1w', child: Text('1 Week')),
@@ -348,6 +354,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildPurityChip(
       String label, String value, Key key, bool enabled) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     final isSelected = _purity == value;
     return GestureDetector(
       onTap: enabled ? () => _setPurity(value) : null,
@@ -355,14 +363,14 @@ class _SearchScreenState extends State<SearchScreen> {
         key: key,
         label: Text(label),
         selected: isSelected,
-        selectedColor: Colors.white,
-        backgroundColor: enabled ? Colors.grey[900] : Colors.grey[800],
+        selectedColor: cs.onSurface,
+        backgroundColor: enabled ? vk.surfaceContainer : vk.surfaceContainerHigh,
         labelStyle: TextStyle(
           color: isSelected
-              ? Colors.black
+              ? cs.surface
               : enabled
-                  ? Colors.white
-                  : Colors.white24,
+                  ? cs.onSurface
+                  : vk.onSurfaceDim,
           fontWeight: FontWeight.w600,
         ),
         onSelected: enabled ? (_) => _setPurity(value) : (_) {},
@@ -376,10 +384,12 @@ class _SearchScreenState extends State<SearchScreen> {
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: vk.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<T>(
@@ -388,19 +398,21 @@ class _SearchScreenState extends State<SearchScreen> {
         onChanged: onChanged,
         underline: const SizedBox.shrink(),
         isDense: true,
-        dropdownColor: Colors.grey[900],
-        style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-        hint: Text(label, style: const TextStyle(color: Colors.white54)),
+        dropdownColor: vk.surfaceContainer,
+        style: GoogleFonts.inter(color: cs.onSurface, fontSize: 13),
+        hint: Text(label, style: TextStyle(color: vk.onSurfaceSubtle)),
       ),
     );
   }
 
   Widget _buildBody() {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     if (!_hasSearched) {
-      return const Center(
+      return Center(
         child: Text(
           'Search millions of wallpapers',
-          style: TextStyle(color: Colors.white38, fontSize: 16),
+          style: TextStyle(color: vk.onSurfaceFaint, fontSize: 16),
         ),
       );
     }
@@ -410,10 +422,10 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     if (_results.isEmpty && !_isLoading) {
-      return const Center(
+      return Center(
         child: Text(
           'No wallpapers found',
-          style: TextStyle(color: Colors.white38, fontSize: 16),
+          style: TextStyle(color: vk.onSurfaceFaint, fontSize: 16),
         ),
       );
     }
@@ -435,10 +447,10 @@ class _SearchScreenState extends State<SearchScreen> {
           itemCount: _results.length + (_isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == _results.length) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(color: Colors.white),
+                  padding: const EdgeInsets.all(16),
+                  child: CircularProgressIndicator(color: cs.primary),
                 ),
               );
             }
@@ -452,6 +464,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 );
               },
+              onHeartTap: () => WallpaperActions.handleHeartTap(
+                context,
+                _results[index],
+              ),
             );
           },
         );
@@ -460,6 +476,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSkeletonGrid() {
+    final vk = context.vivek;
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 900
@@ -480,12 +497,12 @@ class _SearchScreenState extends State<SearchScreen> {
             return Container(
               height: heights[index % heights.length],
               decoration: BoxDecoration(
-                color: Colors.grey[900],
+                color: vk.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
             )
                 .animate(onPlay: (controller) => controller.repeat())
-                .shimmer(duration: 1200.ms, color: Colors.white10);
+                .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
           },
         );
       },
