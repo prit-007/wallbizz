@@ -1,0 +1,27 @@
+# Backend
+backend/.env
+backend/wallpaper-backend
+
+# Flutter
+app/.env
+app/.dart_tool/
+app/.packages
+app/.pub/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/pubspec.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
