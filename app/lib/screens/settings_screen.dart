@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/download_service.dart';
+import '../services/gallery_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,7 +12,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDarkMode = true;
-  String _downloadPath = '';
+  String _storageChoice = 'pictures';
 
   @override
   void initState() {
@@ -21,10 +22,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final storage = await GalleryService.selectedStorage;
     if (mounted) {
       setState(() {
         _isDarkMode = prefs.getBool('dark_mode') ?? true;
-        _downloadPath = prefs.getString('download_path') ?? '';
+        _storageChoice = storage;
       });
     }
   }
@@ -37,46 +39,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _editDownloadPath() async {
-    final controller = TextEditingController(text: _downloadPath);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Download Path',
-            style: TextStyle(color: Colors.white)),
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: 'Enter full directory path',
-            hintStyle: const TextStyle(color: Colors.white38),
-            filled: true,
-            fillColor: Colors.grey[800],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+  Future<void> _selectStorage(String key) async {
+    if (key == 'app_private') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Private Storage?',
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
+          content: Text(
+            'Images saved to app storage will be deleted when you uninstall the app and won\'t appear in your gallery.',
+            style: GoogleFonts.inter(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('Use Anyway', style: GoogleFonts.inter(color: Colors.white)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+      );
+      if (confirmed != true) return;
+    }
 
-    if (result != null && result.isNotEmpty && result != _downloadPath) {
-      await DownloadService.setDownloadPath(result);
-      if (mounted) {
-        setState(() => _downloadPath = result);
-      }
+    await GalleryService.setSelectedStorage(key);
+    if (mounted) {
+      setState(() => _storageChoice = key);
     }
   }
 
@@ -85,9 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
+        Text(
           'Settings',
-          style: TextStyle(
+          style: GoogleFonts.inter(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -95,13 +95,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 24),
         SwitchListTile(
-          title: const Text(
+          title: Text(
             'Dark Mode',
-            style: TextStyle(color: Colors.white),
+            style: GoogleFonts.inter(color: Colors.white),
           ),
-          subtitle: const Text(
+          subtitle: Text(
             'Use dark theme throughout the app',
-            style: TextStyle(color: Colors.white54),
+            style: GoogleFonts.inter(color: Colors.white54),
           ),
           value: _isDarkMode,
           onChanged: _toggleTheme,
@@ -111,45 +111,133 @@ class _SettingsScreenState extends State<SettingsScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        const SizedBox(height: 16),
-        ListTile(
-          title: const Text(
-            'Download Location',
-            style: TextStyle(color: Colors.white),
+        const SizedBox(height: 24),
+        Text(
+          'STORAGE',
+          style: GoogleFonts.oswald(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+            color: Colors.white54,
           ),
-          subtitle: Text(
-            _downloadPath.isNotEmpty ? _downloadPath : 'Default',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 13,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: const Icon(Icons.edit, color: Colors.white54, size: 20),
-          tileColor: Colors.grey[900],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          onTap: _editDownloadPath,
         ),
-        const SizedBox(height: 16),
-        ListTile(
-          title: const Text(
-            'About',
-            style: TextStyle(color: Colors.white),
+        const SizedBox(height: 12),
+        Text(
+          'Where should downloaded wallpapers be saved?',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: Colors.white54,
           ),
-          subtitle: const Text(
-            'Vivek Wallpapers v1.0.0',
-            style: TextStyle(color: Colors.white54),
-          ),
-          trailing: const Icon(Icons.chevron_right, color: Colors.white54),
-          tileColor: Colors.grey[900],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+        ),
+        const SizedBox(height: 12),
+        _buildStorageOption(
+          key: 'pictures',
+          title: 'Pictures',
+          subtitle: 'Pictures/VivekWallpapers',
+          icon: Icons.photo_library_outlined,
+          description: 'Visible in gallery, persists after uninstall',
+        ),
+        const SizedBox(height: 8),
+        _buildStorageOption(
+          key: 'download',
+          title: 'Download',
+          subtitle: 'Download/VivekWallpapers',
+          icon: Icons.download_outlined,
+          description: 'Visible in Downloads app, persists after uninstall',
+        ),
+        const SizedBox(height: 8),
+        _buildStorageOption(
+          key: 'app_private',
+          title: 'App Storage',
+          subtitle: 'Private to Vivek Wallpapers',
+          icon: Icons.phone_android,
+          description: 'Hidden from gallery, deleted with app',
         ),
       ],
+    );
+  }
+
+  Widget _buildStorageOption({
+    required String key,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String description,
+  }) {
+    final isSelected = _storageChoice == key;
+
+    return GestureDetector(
+      onTap: () => _selectStorage(key),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.15)
+              : Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.4)
+                : Colors.transparent,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.white54,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.white54,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: key == 'app_private'
+                          ? Colors.orange.withValues(alpha: 0.8)
+                          : Colors.green.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: Colors.white, size: 22),
+          ],
+        ),
+      ),
     );
   }
 }
