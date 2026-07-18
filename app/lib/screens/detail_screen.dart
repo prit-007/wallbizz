@@ -1,19 +1,47 @@
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import '../config/backend_config.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
+import '../services/downloads_service.dart';
 import '../utils/color_utils.dart';
 import '../widgets/dynamic_theme.dart';
 import '../widgets/specs_card.dart';
 import '../widgets/network_image.dart';
+import 'wallpaper_editor_screen.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   final Wallpaper wallpaper;
 
   const DetailScreen({super.key, required this.wallpaper});
+
+  @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  bool _isDownloading = false;
+  bool _isDownloaded = false;
+
+  Wallpaper get wallpaper => widget.wallpaper;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkDownloadState();
+  }
+
+  void _checkDownloadState() {
+    if (!kIsWeb) {
+      setState(() {
+        _isDownloaded = DownloadsService.isDownloaded(wallpaper.wallhavenId);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +94,25 @@ class DetailScreen extends StatelessWidget {
               ),
             ),
             Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: GestureDetector(
+                onTap: () => _shareWallpaper(context),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.share,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
               bottom: 0,
               left: 0,
               right: 0,
@@ -80,19 +127,42 @@ class DetailScreen extends StatelessWidget {
                     SizedBox(
                       height: 52,
                       child: ElevatedButton.icon(
-                        onPressed: () => _downloadWallpaper(context),
-                        icon: const Icon(Icons.download),
+                        onPressed: _isDownloading
+                            ? null
+                            : () => _downloadWallpaper(context),
+                        icon: _isDownloading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Icon(
+                                _isDownloaded
+                                    ? Icons.check_circle
+                                    : Icons.download,
+                              ),
                         label: Text(
-                          'Download Wallpaper',
+                          _isDownloading
+                              ? 'Downloading...'
+                              : _isDownloaded
+                                  ? 'Downloaded'
+                                  : 'Download Wallpaper',
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              ColorUtils.hexToColor(wallpaper.primaryColor),
+                          backgroundColor: _isDownloaded
+                              ? Colors.white.withValues(alpha: 0.15)
+                              : ColorUtils.hexToColor(wallpaper.primaryColor),
                           foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              Colors.white.withValues(alpha: 0.1),
+                          disabledForegroundColor: Colors.white70,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -134,6 +204,8 @@ class DetailScreen extends StatelessWidget {
   }
 
   Future<void> _downloadWallpaper(BuildContext context) async {
+    if (_isDownloaded || _isDownloading) return;
+
     final imageUrl = kIsWeb
         ? BackendConfig.proxyImageUrl(wallpaper.urlFull)
         : wallpaper.urlFull;
@@ -141,40 +213,9 @@ class DetailScreen extends StatelessWidget {
     final progress = ValueNotifier<double>(0.0);
     final fileName = DownloadService.fileNameFromUrl(wallpaper.urlFull);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Downloading...',
-                style: TextStyle(color: Colors.white)),
-            const SizedBox(height: 16),
-            ValueListenableBuilder<double>(
-              valueListenable: progress,
-              builder: (_, value, _) => LinearProgressIndicator(
-                value: value > 0 ? value : null,
-                backgroundColor: Colors.white24,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ColorUtils.hexToColor(wallpaper.primaryColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ValueListenableBuilder<double>(
-              valueListenable: progress,
-              builder: (_, value, _) => Text(
-                '${(value * 100).toStringAsFixed(0)}%',
-                style:
-                    const TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() => _isDownloading = true);
+
+    showGlassmorphismProgress(context, progress);
 
     try {
       await DownloadService.downloadImage(
@@ -182,15 +223,34 @@ class DetailScreen extends StatelessWidget {
         fileName: fileName,
         onProgress: (p) => progress.value = p,
       );
+
+      if (!kIsWeb) {
+        await DownloadsService.downloadAndSave(wallpaper);
+      }
+
       if (context.mounted) {
         Navigator.of(context).pop();
+        setState(() {
+          _isDownloading = false;
+          _isDownloaded = true;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Download complete!')),
+          SnackBar(
+            content: const Text('Download complete!'),
+            action: SnackBarAction(
+              label: 'VIEW',
+              textColor: Colors.white,
+              onPressed: () {
+                // Navigate to downloads tab
+              },
+            ),
+          ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
+        setState(() => _isDownloading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Download failed: $e')),
         );
@@ -198,11 +258,118 @@ class DetailScreen extends StatelessWidget {
     }
   }
 
-  void _setWallpaper(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Wallpaper setting requires native Android build'),
+  void showGlassmorphismProgress(
+    BuildContext context,
+    ValueNotifier<double> progress,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ValueListenableBuilder<double>(
+                        valueListenable: progress,
+                        builder: (_, value, _) => SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CircularProgressIndicator(
+                                value: value > 0 ? value : null,
+                                strokeWidth: 4,
+                                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  ColorUtils.hexToColor(wallpaper.primaryColor),
+                                ),
+                              ),
+                              Center(
+                                child: value > 0
+                                    ? Text(
+                                        '${(value * 100).toInt()}%',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.download,
+                                        color: Colors.white70,
+                                        size: 24,
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'DOWNLOADING',
+                        style: GoogleFonts.oswald(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        wallpaper.resolution.replaceAll('x', ' × '),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  void _setWallpaper(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WallpaperEditorScreen(
+          localPath: '',
+          urlFull: wallpaper.urlFull,
+          primaryColor: wallpaper.primaryColor,
+          resolution: wallpaper.resolution,
+          width: wallpaper.width,
+          height: wallpaper.height,
+        ),
+      ),
+    );
+  }
+
+  void _shareWallpaper(BuildContext context) {
+    Share.share(
+      'Check out this wallpaper from Vivek Wallpapers!\n${wallpaper.urlFull}',
+      subject: 'Vivek Wallpapers',
     );
   }
 }

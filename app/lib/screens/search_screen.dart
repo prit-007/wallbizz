@@ -201,6 +201,7 @@ class _SearchScreenState extends State<SearchScreen> {
               focusNode: _focusNode,
               autofocus: true,
               onSubmitted: (_) => _onSearch(),
+              onChanged: (_) => setState(() {}),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search wallpapers...',

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/staggered_grid.dart';
 import 'detail_screen.dart';
 import 'search_screen.dart';
 import 'wishlist_screen.dart';
 import 'settings_screen.dart';
+import 'downloads_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,30 +26,65 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: _buildCurrentScreen(),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentNavIndex,
-        onDestinationSelected: (index) {
-          setState(() => _currentNavIndex = index);
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: Hive.box('downloads').listenable(),
+        builder: (context, Box box, _) {
+          final count = box.length;
+          return NavigationBar(
+            selectedIndex: _currentNavIndex,
+            onDestinationSelected: (index) {
+              setState(() => _currentNavIndex = index);
+            },
+            backgroundColor: Colors.black,
+            indicatorColor: Colors.white.withValues(alpha: 0.1),
+            destinations: [
+              const NavigationDestination(
+                icon: Icon(Icons.grid_view, color: Colors.white54),
+                selectedIcon: Icon(Icons.grid_view, color: Colors.white),
+                label: 'Home',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.favorite_border, color: Colors.white54),
+                selectedIcon: Icon(Icons.favorite, color: Colors.white),
+                label: 'My Collection',
+              ),
+              NavigationDestination(
+                icon: Badge(
+                  isLabelVisible: count > 0,
+                  label: Text(
+                    count > 99 ? '99+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.download_outlined, color: Colors.white54),
+                ),
+                selectedIcon: Badge(
+                  isLabelVisible: count > 0,
+                  label: Text(
+                    count > 99 ? '99+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.download, color: Colors.white),
+                ),
+                label: 'Downloads',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.settings_outlined, color: Colors.white54),
+                selectedIcon: Icon(Icons.settings, color: Colors.white),
+                label: 'Settings',
+              ),
+            ],
+          );
         },
-        backgroundColor: Colors.black,
-        indicatorColor: Colors.white.withValues(alpha: 0.1),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.grid_view, color: Colors.white54),
-            selectedIcon: Icon(Icons.grid_view, color: Colors.white),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border, color: Colors.white54),
-            selectedIcon: Icon(Icons.favorite, color: Colors.white),
-            label: 'My Collection',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined, color: Colors.white54),
-            selectedIcon: Icon(Icons.settings, color: Colors.white),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }
@@ -129,6 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return const WishlistScreen();
       case 2:
+        return const DownloadsScreen();
+      case 3:
         return const SettingsScreen();
       default:
         return const SizedBox.shrink();
