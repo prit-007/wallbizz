@@ -1,6 +1,12 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"wallpaper-backend/config"
 	"wallpaper-backend/handlers"
 	"wallpaper-backend/logger"
@@ -26,7 +32,9 @@ func main() {
 	logger.Init()
 	log := logger.Log()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
@@ -44,7 +52,6 @@ func main() {
 		handlers.FetchAndSyncWallpapers(cfg)
 	})
 	c.Start()
-	defer c.Stop()
 
 	log.Info().Msg("Cron scheduler started (runs at 2:00 AM and 2:00 PM UTC)")
 
@@ -58,6 +65,30 @@ func main() {
 	v1.Get("/proxy-image", handlers.ProxyImage())
 	v1.Get("/health", handlers.HealthCheck())
 
-	log.Info().Str("port", cfg.Port).Msg("Server starting")
-	log.Fatal().Err(app.Listen(":" + cfg.Port)).Msg("Server failed to start")
+	// Graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Info().Str("port", cfg.Port).Msg("Server starting")
+		if err := app.Listen(":" + cfg.Port); err != nil {
+			log.Fatal().Err(err).Msg("Server failed to start")
+		}
+	}()
+
+	sig := <-quit
+	log.Warn().Str("signal", sig.String()).Msg("Shutdown signal received")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	log.Info().Msg("Stopping cron scheduler...")
+	c.Stop()
+
+	log.Info().Msg("Shutting down Fiber server...")
+	if err := app.ShutdownWithContext(ctx); err != nil {
+		log.Error().Err(err).Msg("Fiber shutdown error")
+	}
+
+	log.Info().Msg("Server stopped gracefully")
 }

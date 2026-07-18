@@ -58,7 +58,7 @@ func TestWallhavenResponse_Parse(t *testing.T) {
 		{"Colors count", len(img.Colors), 3},
 		{"First color", img.Colors[0], "#000000"},
 		{"Thumb original", img.Thumbs.Original, "https://th.wallhaven.cc/orig/94/94x38z.jpg"},
-		{"Meta total", resp.Meta.Total, 848},
+		{"Meta total", int(resp.Meta.Total), 848},
 	}
 
 	for _, tt := range tests {

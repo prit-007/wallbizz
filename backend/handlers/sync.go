@@ -47,63 +47,72 @@ func FetchAndSyncWallpapers(cfg config.Config) {
 func fetchCategory(cfg config.Config, category, extraParams string) int {
 	log := logger.Log()
 
-	params := fmt.Sprintf("?apikey=%s&purity=100&sorting=toplist&topRange=3M", cfg.WallhavenAPIKey)
+	baseParams := fmt.Sprintf("apikey=%s&purity=100&sorting=toplist&topRange=3M", cfg.WallhavenAPIKey)
 	if extraParams != "" {
-		params += "&" + extraParams
-	}
-	url := wallhavenBaseURL + params
-
-	resp, err := httpClient.Get(url)
-	if err != nil {
-		log.Error().Str("category", category).Err(err).Msg("Failed to fetch from Wallhaven")
-		return 0
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		log.Error().Str("category", category).Int("status", resp.StatusCode).Str("body", string(body)).Msg("Wallhaven returned error")
-		return 0
+		baseParams += "&" + extraParams
 	}
 
-	var wallData models.WallhavenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&wallData); err != nil {
-		log.Error().Str("category", category).Err(err).Msg("Failed to decode Wallhaven response")
-		return 0
-	}
+	totalInserted := 0
 
-	if len(wallData.Data) == 0 {
-		log.Warn().Str("category", category).Msg("No wallpapers returned")
-		return 0
-	}
+	for page := 1; page <= 3; page++ {
+		url := fmt.Sprintf("%s?%s&page=%d", wallhavenBaseURL, baseParams, page)
 
-	toInsert := make([]models.WallpaperInsert, 0, len(wallData.Data))
-	for _, item := range wallData.Data {
-		primaryColor := "#000000"
-		if len(item.Colors) > 0 {
-			primaryColor = item.Colors[0]
+		resp, err := httpClient.Get(url)
+		if err != nil {
+			log.Error().Str("category", category).Int("page", page).Err(err).Msg("Failed to fetch from Wallhaven")
+			continue
 		}
 
-		toInsert = append(toInsert, models.WallpaperInsert{
-			WallhavenID:  item.ID,
-			URLFull:      item.Path,
-			URLThumb:     item.Thumbs.Original,
-			Resolution:   item.Resolution,
-			Width:        item.DimensionX,
-			Height:       item.DimensionY,
-			FileSize:     item.FileSize,
-			PrimaryColor: primaryColor,
-			Category:     item.Category,
-			SourceQuery:  category,
-		})
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			log.Error().Str("category", category).Int("page", page).Int("status", resp.StatusCode).Str("body", string(body)).Msg("Wallhaven returned error")
+			continue
+		}
+
+		var wallData models.WallhavenResponse
+		if err := json.NewDecoder(resp.Body).Decode(&wallData); err != nil {
+			resp.Body.Close()
+			log.Error().Str("category", category).Int("page", page).Err(err).Msg("Failed to decode Wallhaven response")
+			continue
+		}
+		resp.Body.Close()
+
+		if len(wallData.Data) == 0 {
+			log.Debug().Str("category", category).Int("page", page).Msg("No more wallpapers on this page")
+			break
+		}
+
+		toInsert := make([]models.WallpaperInsert, 0, len(wallData.Data))
+		for _, item := range wallData.Data {
+			primaryColor := "#000000"
+			if len(item.Colors) > 0 {
+				primaryColor = item.Colors[0]
+			}
+
+			toInsert = append(toInsert, models.WallpaperInsert{
+				WallhavenID:  item.ID,
+				URLFull:      item.Path,
+				URLThumb:     item.Thumbs.Original,
+				Resolution:   item.Resolution,
+				Width:        item.DimensionX,
+				Height:       item.DimensionY,
+				FileSize:     item.FileSize,
+				PrimaryColor: primaryColor,
+				Category:     item.Category,
+				SourceQuery:  category,
+			})
+		}
+
+		if err := upsertToSupabase(cfg, toInsert); err != nil {
+			log.Error().Str("category", category).Int("page", page).Err(err).Msg("Failed to upsert to Supabase")
+			continue
+		}
+
+		totalInserted += len(toInsert)
 	}
 
-	if err := upsertToSupabase(cfg, toInsert); err != nil {
-		log.Error().Str("category", category).Err(err).Msg("Failed to upsert to Supabase")
-		return 0
-	}
-
-	return len(toInsert)
+	return totalInserted
 }
 
 func upsertToSupabase(cfg config.Config, wallpapers []models.WallpaperInsert) error {
@@ -119,6 +128,7 @@ func upsertToSupabase(cfg config.Config, wallpapers []models.WallpaperInsert) er
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
+	req.Header.Set("apikey", cfg.SupabaseServiceKey)
 	req.Header.Set("Authorization", "Bearer "+cfg.SupabaseServiceKey)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Prefer", "resolution=merge-duplicates")

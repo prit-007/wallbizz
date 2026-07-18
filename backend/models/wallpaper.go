@@ -1,13 +1,46 @@
 package models
 
+import (
+	"encoding/json"
+	"strconv"
+)
+
+// FlexInt accepts both JSON number and string when unmarshaling
+type FlexInt int
+
+func (f *FlexInt) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	// Try number first
+	if data[0] != '"' {
+		var i int
+		if err := json.Unmarshal(data, &i); err == nil {
+			*f = FlexInt(i)
+			return nil
+		}
+	}
+	// Try string
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+	*f = FlexInt(n)
+	return nil
+}
+
 // WallhavenResponse is the top-level response from /api/v1/search
 type WallhavenResponse struct {
 	Data []WallhavenImage `json:"data"`
 	Meta struct {
-		CurrentPage int `json:"current_page"`
-		LastPage    int `json:"last_page"`
-		PerPage     int `json:"per_page"`
-		Total       int `json:"total"`
+		CurrentPage FlexInt `json:"current_page"`
+		LastPage    FlexInt `json:"last_page"`
+		PerPage     FlexInt `json:"per_page"`
+		Total       FlexInt `json:"total"`
 	} `json:"meta"`
 }
 
