@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../config/theme_config.dart';
 import '../services/gallery_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -21,52 +21,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
     final storage = await GalleryService.selectedStorage;
     if (mounted) {
       setState(() {
-        _isDarkMode = prefs.getBool('dark_mode') ?? true;
+        _isDarkMode = ThemeConfig.isDarkMode.value;
         _storageChoice = storage;
       });
     }
   }
 
   Future<void> _toggleTheme(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_mode', value);
+    await ThemeConfig.setDarkMode(value);
     if (mounted) {
       setState(() => _isDarkMode = value);
     }
   }
 
   Future<void> _selectStorage(String key) async {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     if (key == 'app_private') {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: Colors.grey[900],
+          backgroundColor: vk.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
             'Private Storage?',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: cs.onSurface,
               fontWeight: FontWeight.w600,
             ),
           ),
           content: Text(
             'Images saved to app storage will be deleted when you uninstall the app and won\'t appear in your gallery.',
-            style: GoogleFonts.inter(color: Colors.white70),
+            style: GoogleFonts.inter(color: cs.onSurface.withValues(alpha: 0.7)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white54)),
+              child: Text('Cancel', style: GoogleFonts.inter(color: vk.onSurfaceSubtle)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text('Use Anyway', style: GoogleFonts.inter(color: Colors.white)),
+              child: Text('Use Anyway', style: GoogleFonts.inter(color: cs.onSurface)),
             ),
           ],
         ),
@@ -82,6 +83,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -90,23 +94,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: GoogleFonts.inter(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 24),
         SwitchListTile(
           title: Text(
             'Dark Mode',
-            style: GoogleFonts.inter(color: Colors.white),
+            style: GoogleFonts.inter(color: cs.onSurface),
           ),
           subtitle: Text(
             'Use dark theme throughout the app',
-            style: GoogleFonts.inter(color: Colors.white54),
+            style: GoogleFonts.inter(color: vk.onSurfaceSubtle),
           ),
           value: _isDarkMode,
           onChanged: _toggleTheme,
-          activeThumbColor: Colors.white,
-          tileColor: Colors.grey[900],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -118,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
-            color: Colors.white54,
+            color: vk.onSurfaceSubtle,
           ),
         ),
         const SizedBox(height: 12),
@@ -126,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'Where should downloaded wallpapers be saved?',
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: Colors.white54,
+            color: vk.onSurfaceSubtle,
           ),
         ),
         const SizedBox(height: 12),
@@ -164,6 +166,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
     required String description,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     final isSelected = _storageChoice == key;
 
     return GestureDetector(
@@ -172,12 +176,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.white.withValues(alpha: 0.15)
-              : Colors.grey[900],
+              ? vk.surfaceOverlay
+              : vk.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? Colors.white.withValues(alpha: 0.4)
+                ? vk.glassBorder
                 : Colors.transparent,
             width: isSelected ? 2 : 1,
           ),
@@ -189,13 +193,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               height: 44,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.05),
+                    ? vk.surfaceOverlay
+                    : vk.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? Colors.white : Colors.white54,
+                color: isSelected ? cs.onSurface : vk.onSurfaceSubtle,
                 size: 22,
               ),
             ),
@@ -209,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: cs.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -217,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: Colors.white54,
+                      color: vk.onSurfaceSubtle,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -234,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 22),
+              Icon(Icons.check_circle, color: cs.onSurface, size: 22),
           ],
         ),
       ),

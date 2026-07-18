@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import '../config/backend_config.dart';
+import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
 import '../services/downloads_service.dart';
@@ -45,8 +46,10 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       body: DynamicTheme(
         primaryColor: wallpaper.primaryColor,
         child: Stack(
@@ -54,7 +57,7 @@ class _DetailScreenState extends State<DetailScreen> {
           children: [
             NetworkImageWidget(
               imageUrl: wallpaper.urlFull,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
             Positioned(
               bottom: 0,
@@ -85,9 +88,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: cs.onSurface,
                     size: 24,
                   ),
                 ),
@@ -104,9 +107,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.share,
-                    color: Colors.white,
+                    color: cs.onSurface,
                     size: 24,
                   ),
                 ),
@@ -131,12 +134,12 @@ class _DetailScreenState extends State<DetailScreen> {
                             ? null
                             : () => _downloadWallpaper(context),
                         icon: _isDownloading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: cs.onSurface,
                                 ),
                               )
                             : Icon(
@@ -157,12 +160,11 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isDownloaded
-                              ? Colors.white.withValues(alpha: 0.15)
+                              ? vk.glassBackground
                               : ColorUtils.hexToColor(wallpaper.primaryColor),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor:
-                              Colors.white.withValues(alpha: 0.1),
-                          disabledForegroundColor: Colors.white70,
+                          foregroundColor: cs.onSurface,
+                          disabledBackgroundColor: vk.surfaceOverlay,
+                          disabledForegroundColor: vk.onSurfaceSubtle,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -184,8 +186,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white24),
+                            foregroundColor: cs.onSurface,
+                            side: BorderSide(color: vk.glassBorder),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -204,6 +206,8 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _downloadWallpaper(BuildContext context) async {
+    final cs = Theme.of(context).colorScheme;
+
     if (_isDownloaded || _isDownloading) return;
 
     final imageUrl = kIsWeb
@@ -239,7 +243,7 @@ class _DetailScreenState extends State<DetailScreen> {
             content: const Text('Download complete!'),
             action: SnackBarAction(
               label: 'VIEW',
-              textColor: Colors.white,
+              textColor: cs.onSurface,
               onPressed: () {
                 // Navigate to downloads tab
               },
@@ -262,6 +266,9 @@ class _DetailScreenState extends State<DetailScreen> {
     BuildContext context,
     ValueNotifier<double> progress,
   ) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -277,10 +284,10 @@ class _DetailScreenState extends State<DetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
+                    color: cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: vk.glassBorder,
                     ),
                   ),
                   child: Column(
@@ -297,7 +304,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               CircularProgressIndicator(
                                 value: value > 0 ? value : null,
                                 strokeWidth: 4,
-                                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                                backgroundColor: vk.glassBorder,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   ColorUtils.hexToColor(wallpaper.primaryColor),
                                 ),
@@ -307,14 +314,14 @@ class _DetailScreenState extends State<DetailScreen> {
                                     ? Text(
                                         '${(value * 100).toInt()}%',
                                         style: GoogleFonts.inter(
-                                          color: Colors.white,
+                                          color: cs.onSurface,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.download,
-                                        color: Colors.white70,
+                                        color: cs.onSurface.withValues(alpha: 0.7),
                                         size: 24,
                                       ),
                               ),
@@ -329,7 +336,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
-                          color: Colors.white,
+                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -337,7 +344,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         wallpaper.resolution.replaceAll('x', ' × '),
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.white54,
+                          color: vk.onSurfaceSubtle,
                         ),
                       ),
                     ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../config/theme_config.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/staggered_grid.dart';
 import 'detail_screen.dart';
@@ -21,8 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SafeArea(
         child: _buildCurrentScreen(),
       ),
@@ -35,17 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onDestinationSelected: (index) {
               setState(() => _currentNavIndex = index);
             },
-            backgroundColor: Colors.black,
-            indicatorColor: Colors.white.withValues(alpha: 0.1),
             destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.grid_view, color: Colors.white54),
-                selectedIcon: Icon(Icons.grid_view, color: Colors.white),
+              NavigationDestination(
+                icon: Icon(Icons.grid_view, color: vk.onSurfaceSubtle),
+                selectedIcon: Icon(Icons.grid_view, color: cs.primary),
                 label: 'Home',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.favorite_border, color: Colors.white54),
-                selectedIcon: Icon(Icons.favorite, color: Colors.white),
+              NavigationDestination(
+                icon: Icon(Icons.favorite_border, color: vk.onSurfaceSubtle),
+                selectedIcon: Icon(Icons.favorite, color: cs.primary),
                 label: 'My Collection',
               ),
               NavigationDestination(
@@ -53,33 +54,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   isLabelVisible: count > 0,
                   label: Text(
                     count > 99 ? '99+' : '$count',
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: cs.primary,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.download_outlined, color: Colors.white54),
+                  backgroundColor: cs.primary,
+                  child: Icon(Icons.download_outlined, color: vk.onSurfaceSubtle),
                 ),
                 selectedIcon: Badge(
                   isLabelVisible: count > 0,
                   label: Text(
                     count > 99 ? '99+' : '$count',
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: cs.surface,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.download, color: Colors.white),
+                  backgroundColor: cs.primary,
+                  child: Icon(Icons.download, color: cs.onSurface),
                 ),
                 label: 'Downloads',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.settings_outlined, color: Colors.white54),
-                selectedIcon: Icon(Icons.settings, color: Colors.white),
+              NavigationDestination(
+                icon: Icon(Icons.settings_outlined, color: vk.onSurfaceSubtle),
+                selectedIcon: Icon(Icons.settings, color: cs.primary),
                 label: 'Settings',
               ),
             ],
@@ -100,12 +101,50 @@ class _HomeScreenState extends State<HomeScreen> {
             final iconSize = isCompact ? 20.0 : 24.0;
             final fontSize = isCompact ? 14.0 : 16.0;
 
+            final brandCs = Theme.of(context).colorScheme;
+            final brandVk = context.vivek;
+
             return Column(
               children: [
                 Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
-                    12,
+                    8,
+                    horizontalPadding,
+                    4,
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'WALLBIZZ',
+                            style: GoogleFonts.oswald(
+                              fontSize: isCompact ? 22 : 28,
+                              fontWeight: FontWeight.bold,
+                              color: brandCs.primary,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                          Text(
+                            'curated wallpapers',
+                            style: GoogleFonts.inter(
+                              fontSize: isCompact ? 11 : 13,
+                              fontWeight: FontWeight.w500,
+                              color: brandVk.onSurfaceSubtle,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    8,
                     horizontalPadding,
                     8,
                   ),
@@ -121,18 +160,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                       height: searchBarHeight,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: context.vivek.surfaceOverlay,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 20),
                       child: Row(
                         children: [
-                          Icon(Icons.search, color: Colors.white54, size: iconSize),
+                          Icon(Icons.search, color: context.vivek.onSurfaceSubtle, size: iconSize),
                           SizedBox(width: isCompact ? 12 : 16),
                           Text(
                             'Search wallpapers...',
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: context.vivek.onSurfaceSubtle,
                               fontSize: fontSize,
                             ),
                           ),

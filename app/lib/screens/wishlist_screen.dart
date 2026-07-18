@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
@@ -59,13 +60,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     if (!_isLoggedIn) {
       return _buildGuestView();
     }
 
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+      return Center(
+        child: CircularProgressIndicator(color: cs.primary),
       );
     }
 
@@ -134,26 +137,29 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildGuestView() {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.favorite_border, size: 80, color: Colors.white24),
+          Icon(Icons.favorite_border, size: 80, color: vk.onSurfaceDim),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Sign in to view your collection',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => showAuthBottomSheet(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -167,24 +173,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildEmptyView() {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.favorite_border, size: 80, color: Colors.white24),
+          Icon(Icons.favorite_border, size: 80, color: vk.onSurfaceDim),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'No wallpapers saved yet',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: cs.onSurface,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Tap the heart icon to start your collection.',
-            style: TextStyle(fontSize: 14, color: Colors.white54),
+            style: TextStyle(fontSize: 14, color: vk.onSurfaceSubtle),
           ),
         ],
       ),

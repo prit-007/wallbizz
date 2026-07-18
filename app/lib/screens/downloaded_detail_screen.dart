@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
+import '../config/theme_config.dart';
 import '../models/downloaded_wallpaper.dart';
 import '../utils/color_utils.dart';
 import '../widgets/dynamic_theme.dart';
@@ -32,34 +33,36 @@ class DownloadedDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     final file = File(downloadedWallpaper.localPath);
     final hasLocalFile = file.existsSync();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: cs.surface,
       body: DynamicTheme(
         primaryColor: downloadedWallpaper.primaryColor,
         child: Stack(
           fit: StackFit.expand,
           children: [
             hasLocalFile
-                ? Image.file(file, fit: BoxFit.cover)
+                ? Image.file(file, fit: BoxFit.contain)
                 : Image.network(
                     downloadedWallpaper.urlFull,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(
-                        color: Colors.grey[900],
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Colors.white24),
+                        color: vk.surfaceContainer,
+                        child: Center(
+                          child: CircularProgressIndicator(color: vk.onSurfaceDim),
                         ),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: Colors.grey[900],
-                        child: const Icon(Icons.error_outline, color: Colors.white24),
+                        color: vk.surfaceContainer,
+                        child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
                       );
                     },
                   ),
@@ -92,9 +95,9 @@ class DownloadedDetailScreen extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: cs.onSurface,
                     size: 24,
                   ),
                 ),
@@ -113,9 +116,9 @@ class DownloadedDetailScreen extends StatelessWidget {
                         color: Colors.black.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.share,
-                        color: Colors.white,
+                        color: cs.onSurface,
                         size: 20,
                       ),
                     ),
@@ -124,10 +127,10 @@ class DownloadedDetailScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: vk.glassBorder,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: vk.glassBorder,
                       ),
                     ),
                     child: Row(
@@ -135,14 +138,14 @@ class DownloadedDetailScreen extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.check_circle,
-                          color: Colors.white,
+                          color: cs.onSurface,
                           size: 16,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Downloaded',
                           style: GoogleFonts.inter(
-                            color: Colors.white,
+                            color: cs.onSurface,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -180,7 +183,7 @@ class DownloadedDetailScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               ColorUtils.hexToColor(downloadedWallpaper.primaryColor),
-                          foregroundColor: Colors.white,
+                          foregroundColor: cs.onSurface,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
