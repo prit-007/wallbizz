@@ -190,7 +190,7 @@ class DownloadedDetailScreen extends StatelessWidget {
                   ],
                 ),
               ).animate().slideY(begin: 0.3, end: 0).fade(),
-            ],
+            ),
           ],
         ),
       ),
