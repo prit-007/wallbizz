@@ -21,7 +21,6 @@ dependencies:
 
   # Cropping & Setting
   image_cropper: ^12.2.1
-  flutter_wallpaper_manager: ^0.0.2
   url_launcher: ^6.2.4
 
   # State & Database

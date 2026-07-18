@@ -28,6 +28,10 @@ vivek_app/
 
 - **Flutter never calls Wallhaven directly** for sync — reads from Supabase REST via `http` package (not supabase-flutter for DB queries)
 - **Search is hybrid**: SFW queries go direct Flutter → Wallhaven; NSFW/Sketchy queries go through backend proxy (JWT-gated)
+- **Images are proxied** on web: `Image.network` on Flutter web uses XHR (not `<img>`), so Wallhaven's CDN triggers CORS errors. `NetworkImageWidget` routes through `BackendConfig.proxyImageUrl()` → `GET /api/v1/proxy-image?url=...` on the Go backend, which fetches the image server-side and returns it with CORS headers.
+- **Download**: `DownloadService.downloadImage()` uses platform-specific paths — `dart:html` Blob (web) or `http` streaming to File (mobile). Progress is reported via callback. Download path is configurable in Settings screen, stored in SharedPreferences (`download_path` key), defaulting to `getApplicationDocumentsDirectory()/VivekWallpapers/`.
+- **Backend**: syncs wallpapers twice daily + proxies NSFW search + proxies images for web
+- **Search is hybrid**: SFW queries go direct Flutter → Wallhaven; NSFW/Sketchy queries go through backend proxy (JWT-gated)
 - **Backend**: syncs wallpapers twice daily + proxies NSFW search requests via `/api/search`
 - **Auth**: gated on heart-tap and NSFW search; browsing is anonymous. Supabase Auth (Email + Google OAuth)
 - **Wishlist**: RLS-enforced `wishlists` table; Flutter CRUDs via Supabase REST with anon key
@@ -58,6 +62,7 @@ All tests pass together — no special order needed.
 - Category mapping in backend `handlers/sync.go` is the source of truth for Wallhaven query params.
 - CORS is wide open (`AllowOrigins: "*"`) on the backend — expected for Flutter web + Railway.
 - `pubspec.lock` is gitignored — `flutter pub get` re-resolves each time.
+- `BACKEND_URL` env var in `app/.env` configures the image proxy base URL for Flutter web (default `http://localhost:3000`).
 
 ## Migrations
 

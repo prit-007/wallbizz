@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,7 +30,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  Timer? _debounce;
+  final FocusNode _focusNode = FocusNode();
   late WallhavenSearch _search;
 
   final List<Wallpaper> _results = [];
@@ -54,9 +54,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _controller.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -67,13 +67,9 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  void _onSearchChanged(String query) {
-    _debounce?.cancel();
-    setState(() {});
-    if (query.trim().isEmpty) return;
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      _searchQuery(reset: true);
-    });
+  void _onSearch() {
+    _focusNode.unfocus();
+    _searchQuery(reset: true);
   }
 
   bool get _isAuthed {
@@ -101,10 +97,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (reset) {
       setState(() {
+        if (_results.isEmpty) _hasSearched = true;
         _results.clear();
         _page = 0;
         _lastPage = 0;
-        _hasSearched = true;
       });
     }
 
@@ -152,6 +148,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (mounted) {
       setState(() {
+        _hasSearched = true;
         _results.addAll(result.wallpapers);
         _page = result.currentPage > 0 ? result.currentPage : _page + 1;
         _lastPage = result.lastPage;
@@ -201,9 +198,9 @@ class _SearchScreenState extends State<SearchScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
+              focusNode: _focusNode,
               autofocus: true,
-              onChanged: _onSearchChanged,
-              onSubmitted: (_) => _searchQuery(reset: true),
+              onSubmitted: (_) => _onSearch(),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search wallpapers...',
@@ -214,19 +211,26 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon:
-                    const Icon(Icons.search, color: Colors.white38, size: 20),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
+                prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 20),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_controller.text.isNotEmpty)
+                      IconButton(
                         key: const Key('clear_button'),
-                        icon: const Icon(Icons.clear,
-                            color: Colors.white38, size: 20),
+                        icon: const Icon(Icons.clear, color: Colors.white38, size: 20),
                         onPressed: () {
                           _controller.clear();
                           setState(() {});
                         },
-                      )
-                    : null,
+                      ),
+                    IconButton(
+                      key: const Key('search_button'),
+                      icon: const Icon(Icons.search, color: Colors.white, size: 20),
+                      onPressed: _onSearch,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -401,9 +405,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     if (_results.isEmpty && _isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      );
+      return _buildSkeletonGrid();
     }
 
     if (_results.isEmpty && !_isLoading) {
@@ -450,6 +452,39 @@ class _SearchScreenState extends State<SearchScreen> {
                 );
               },
             );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSkeletonGrid() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 4
+            : constraints.maxWidth > 600
+                ? 3
+                : 2;
+        final heights = [200.0, 280.0, 240.0, 320.0, 180.0, 260.0];
+
+        return MasonryGridView.count(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          padding: const EdgeInsets.all(8),
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: crossAxisCount * 3,
+          itemBuilder: (context, index) {
+            return Container(
+              height: heights[index % heights.length],
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(12),
+              ),
+            )
+                .animate(onPlay: (controller) => controller.repeat())
+                .shimmer(duration: 1200.ms, color: Colors.white10);
           },
         );
       },

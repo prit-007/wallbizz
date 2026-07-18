@@ -60,7 +60,7 @@ class Wallpaper {
       id: 'wh-${map['id'] ?? ''}',
       wallhavenId: map['id'] ?? '',
       urlFull: map['path'] ?? '',
-      urlThumb: (thumbs?['original'] as String?) ?? '',
+      urlThumb: (thumbs?['small'] as String?) ?? (thumbs?['original'] as String?) ?? '',
       resolution: map['resolution'] ?? '',
       width: map['dimension_x'] ?? 0,
       height: map['dimension_y'] ?? 0,

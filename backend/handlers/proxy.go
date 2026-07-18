@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,10 +32,9 @@ func ProxyImage() func(*fiber.Ctx) error {
 		}
 		defer resp.Body.Close()
 
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"error": "failed to read image response",
+		if resp.StatusCode != http.StatusOK {
+			return c.Status(http.StatusBadGateway).JSON(fiber.Map{
+				"error": fmt.Sprintf("upstream returned status %d", resp.StatusCode),
 			})
 		}
 
@@ -47,6 +45,6 @@ func ProxyImage() func(*fiber.Ctx) error {
 
 		c.Set("Content-Type", contentType)
 		c.Set("Cache-Control", "public, max-age=86400")
-		return c.Status(http.StatusOK).Send(body)
+		return c.SendStream(resp.Body)
 	}
 }
