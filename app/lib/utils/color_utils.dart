@@ -4,11 +4,15 @@ class ColorUtils {
   ColorUtils._();
 
   static Color hexToColor(String hex) {
-    hex = hex.replaceFirst('#', '');
-    if (hex.length == 6) {
-      hex = 'FF$hex';
+    try {
+      hex = hex.replaceFirst('#', '');
+      if (hex.length == 6) {
+        hex = 'FF$hex';
+      }
+      return Color(int.parse(hex, radix: 16));
+    } catch (_) {
+      return Colors.white;
     }
-    return Color(int.parse(hex, radix: 16));
   }
 
   static Color withAlpha(Color color, double opacity) {
