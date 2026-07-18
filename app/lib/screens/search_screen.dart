@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/wallpaper.dart';
@@ -416,22 +417,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 2;
-        if (constraints.maxWidth > 900) {
-          crossAxisCount = 4;
-        } else if (constraints.maxWidth > 600) {
-          crossAxisCount = 3;
-        }
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 4
+            : constraints.maxWidth > 600
+                ? 3
+                : 2;
 
-        return GridView.builder(
-          controller: _scrollController,
+        return MasonryGridView.count(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
           padding: const EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 0.6,
-          ),
+          controller: _scrollController,
           itemCount: _results.length + (_isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == _results.length) {

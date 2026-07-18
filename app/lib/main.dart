@@ -1,13 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/backend_config.dart';
 import 'config/supabase_config.dart';
 import 'screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
+
+  if (kIsWeb) {
+    BackendConfig.init(
+      dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000',
+    );
+  }
 
   await Supabase.initialize(
     url: SupabaseConfig.url,

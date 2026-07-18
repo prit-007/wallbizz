@@ -87,7 +87,7 @@ void main() {
         sorting: 'relevance',
         topRange: '1M',
       );
-      expect(url, contains('my-backend.up.railway.app/api/search'));
+      expect(url, contains('my-backend.up.railway.app/api/v1/search'));
       expect(url, contains('q=nature'));
       expect(url, contains('purity=111'));
       expect(url, contains('sorting=relevance'));
@@ -356,7 +356,7 @@ void main() {
         backendBase: 'https://my-backend.up.railway.app',
       );
 
-      expect(requestedUrl, contains('my-backend.up.railway.app/api/search'));
+      expect(requestedUrl, contains('my-backend.up.railway.app/api/v1/search'));
       expect(requestedUrl, isNot(contains('wallhaven.cc')));
     });
 

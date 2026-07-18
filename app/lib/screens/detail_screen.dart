@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../config/backend_config.dart';
 import '../models/wallpaper.dart';
+import '../services/download_service.dart';
 import '../utils/color_utils.dart';
 import '../widgets/dynamic_theme.dart';
 import '../widgets/specs_card.dart';
+import '../widgets/network_image.dart';
 
 class DetailScreen extends StatelessWidget {
   final Wallpaper wallpaper;
@@ -23,19 +24,10 @@ class DetailScreen extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Full-screen image
-            CachedNetworkImage(
+            NetworkImageWidget(
               imageUrl: wallpaper.urlFull,
               fit: BoxFit.cover,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(Icons.error, color: Colors.white24, size: 48),
-              ),
             ),
-
-            // Gradient overlay
             Positioned(
               bottom: 0,
               left: 0,
@@ -54,8 +46,6 @@ class DetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Back button
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               left: 16,
@@ -75,8 +65,6 @@ class DetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom content
             Positioned(
               bottom: 0,
               left: 0,
@@ -89,8 +77,6 @@ class DetailScreen extends StatelessWidget {
                   children: [
                     SpecsCard(wallpaper: wallpaper),
                     const SizedBox(height: 20),
-
-                    // Download button
                     SizedBox(
                       height: 52,
                       child: ElevatedButton.icon(
@@ -113,8 +99,6 @@ class DetailScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    // Set as Wallpaper (Android only — safe on web via kIsWeb)
                     if (!kIsWeb) ...[
                       const SizedBox(height: 12),
                       SizedBox(
@@ -150,9 +134,67 @@ class DetailScreen extends StatelessWidget {
   }
 
   Future<void> _downloadWallpaper(BuildContext context) async {
-    final url = Uri.parse(wallpaper.urlFull);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+    final imageUrl = kIsWeb
+        ? BackendConfig.proxyImageUrl(wallpaper.urlFull)
+        : wallpaper.urlFull;
+
+    final progress = ValueNotifier<double>(0.0);
+    final fileName = DownloadService.fileNameFromUrl(wallpaper.urlFull);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Downloading...',
+                style: TextStyle(color: Colors.white)),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<double>(
+              valueListenable: progress,
+              builder: (_, value, _) => LinearProgressIndicator(
+                value: value > 0 ? value : null,
+                backgroundColor: Colors.white24,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ColorUtils.hexToColor(wallpaper.primaryColor),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ValueListenableBuilder<double>(
+              valueListenable: progress,
+              builder: (_, value, _) => Text(
+                '${(value * 100).toStringAsFixed(0)}%',
+                style:
+                    const TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      await DownloadService.downloadImage(
+        imageUrl: imageUrl,
+        fileName: fileName,
+        onProgress: (p) => progress.value = p,
+      );
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Download complete!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download failed: $e')),
+        );
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/download_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,18 +11,20 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDarkMode = true;
+  String _downloadPath = '';
 
   @override
   void initState() {
     super.initState();
-    _loadTheme();
+    _loadSettings();
   }
 
-  Future<void> _loadTheme() async {
+  Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
         _isDarkMode = prefs.getBool('dark_mode') ?? true;
+        _downloadPath = prefs.getString('download_path') ?? '';
       });
     }
   }
@@ -31,6 +34,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('dark_mode', value);
     if (mounted) {
       setState(() => _isDarkMode = value);
+    }
+  }
+
+  Future<void> _editDownloadPath() async {
+    final controller = TextEditingController(text: _downloadPath);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Download Path',
+            style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Enter full directory path',
+            hintStyle: const TextStyle(color: Colors.white38),
+            filled: true,
+            fillColor: Colors.grey[800],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && result != _downloadPath) {
+      await DownloadService.setDownloadPath(result);
+      if (mounted) {
+        setState(() => _downloadPath = result);
+      }
     }
   }
 
@@ -64,6 +110,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+        ),
+        const SizedBox(height: 16),
+        ListTile(
+          title: const Text(
+            'Download Location',
+            style: TextStyle(color: Colors.white),
+          ),
+          subtitle: Text(
+            _downloadPath.isNotEmpty ? _downloadPath : 'Default',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 13,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: const Icon(Icons.edit, color: Colors.white54, size: 20),
+          tileColor: Colors.grey[900],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          onTap: _editDownloadPath,
         ),
         const SizedBox(height: 16),
         ListTile(

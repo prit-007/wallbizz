@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/wallpaper.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
+import '../widgets/network_image.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -77,12 +77,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
       onRefresh: _checkAuthAndLoad,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          int crossAxisCount = 2;
-          if (constraints.maxWidth > 900) {
-            crossAxisCount = 4;
-          } else if (constraints.maxWidth > 600) {
-            crossAxisCount = 3;
-          }
+          final crossAxisCount = constraints.maxWidth > 900
+              ? 4
+              : constraints.maxWidth > 600
+                  ? 3
+                  : 2;
 
           return GridView.builder(
             padding: const EdgeInsets.all(8),
@@ -90,7 +89,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 0.6,
             ),
             itemCount: _wishlist.length,
             itemBuilder: (context, index) {
@@ -119,24 +117,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
-                    imageUrl: wallpaper.urlThumb,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[900],
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white24,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[900],
-                      child: const Icon(
-                        Icons.error_outline,
-                        color: Colors.white24,
-                      ),
+                  child: AspectRatio(
+                    aspectRatio: wallpaper.aspectRatio,
+                    child: NetworkImageWidget(
+                      imageUrl: wallpaper.urlThumb,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),

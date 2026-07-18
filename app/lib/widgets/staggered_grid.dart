@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/wallpaper.dart';
 import '../widgets/wallpaper_card.dart';
 import '../services/supabase_service.dart';
@@ -100,31 +101,25 @@ class _StaggeredGridState extends State<StaggeredGrid> {
       onRefresh: _onRefresh,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          int crossAxisCount = 2;
-          if (constraints.maxWidth > 900) {
-            crossAxisCount = 4;
-          } else if (constraints.maxWidth > 600) {
-            crossAxisCount = 3;
-          }
+          final crossAxisCount = constraints.maxWidth > 900
+              ? 4
+              : constraints.maxWidth > 600
+                  ? 3
+                  : 2;
 
-          return GridView.builder(
-            controller: _scrollController,
+          return MasonryGridView.count(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
             padding: const EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 0.6,
-            ),
+            controller: _scrollController,
             itemCount: _wallpapers.length + (_hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == _wallpapers.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: CircularProgressIndicator(color: Colors.white),
                   ),
                 );
               }
@@ -143,23 +138,22 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   Widget _buildLoadingSkeleton() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = 2;
-        if (constraints.maxWidth > 900) {
-          crossAxisCount = 4;
-        } else if (constraints.maxWidth > 600) {
-          crossAxisCount = 3;
-        }
-        return GridView.builder(
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 4
+            : constraints.maxWidth > 600
+                ? 3
+                : 2;
+
+        return MasonryGridView.count(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
           padding: const EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 0.6,
-          ),
           itemCount: 10,
           itemBuilder: (context, index) {
+            final heights = [200.0, 280.0, 240.0, 320.0, 180.0];
             return Container(
+              height: heights[index % heights.length],
               decoration: BoxDecoration(
                 color: Colors.grey[900],
                 borderRadius: BorderRadius.circular(12),
