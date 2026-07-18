@@ -1,0 +1,156 @@
+basePath: /api/v1
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        example: something went wrong
+        type: string
+    type: object
+  models.WallhavenImage:
+    properties:
+      category:
+        type: string
+      colors:
+        items:
+          type: string
+        type: array
+      dimension_x:
+        type: integer
+      dimension_y:
+        type: integer
+      file_size:
+        type: integer
+      id:
+        type: string
+      path:
+        type: string
+      resolution:
+        type: string
+      thumbs:
+        properties:
+          large:
+            type: string
+          original:
+            type: string
+          small:
+            type: string
+        type: object
+    type: object
+  models.WallhavenResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.WallhavenImage'
+        type: array
+      meta:
+        properties:
+          current_page:
+            type: integer
+          last_page:
+            type: integer
+          per_page:
+            type: integer
+          total:
+            type: integer
+        type: object
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Backend API for Vivek Wallpapers — syncs from Wallhaven, proxies search,
+    manages wishlists.
+  title: Vivek Wallpapers API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Returns server health status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Proxies search requests to Wallhaven. Requires a valid Supabase
+        JWT. All query params are forwarded to Wallhaven.
+      parameters:
+      - description: Bearer <JWT>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - description: Category filter (e.g. 010, 100, 111)
+        in: query
+        name: categories
+        type: string
+      - description: Purity filter (100=SFW, 110=Sketchy, 111=NSFW)
+        in: query
+        name: purity
+        type: string
+      - description: Sort order (toplist, date, favorites, etc.)
+        in: query
+        name: sorting
+        type: string
+      - description: Time range for toplist (1M, 3M, 6M, 1Y)
+        in: query
+        name: topRange
+        type: string
+      - description: Aspect ratio filter (e.g. 16x9, 9x16)
+        in: query
+        name: ratios
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WallhavenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Search Wallhaven via proxy
+      tags:
+      - search
+  /sync:
+    post:
+      description: Triggers a background Wallhaven sync for all categories. Returns
+        immediately.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Trigger a manual sync
+      tags:
+      - sync
+schemes:
+- http
+swagger: "2.0"

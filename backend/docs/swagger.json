@@ -1,0 +1,233 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Backend API for Vivek Wallpapers — syncs from Wallhaven, proxies search, manages wishlists.",
+        "title": "Vivek Wallpapers API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api/v1",
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Returns server health status.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "description": "Proxies search requests to Wallhaven. Requires a valid Supabase JWT. All query params are forwarded to Wallhaven.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Search Wallhaven via proxy",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003cJWT\u003e",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category filter (e.g. 010, 100, 111)",
+                        "name": "categories",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Purity filter (100=SFW, 110=Sketchy, 111=NSFW)",
+                        "name": "purity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order (toplist, date, favorites, etc.)",
+                        "name": "sorting",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Time range for toplist (1M, 3M, 6M, 1Y)",
+                        "name": "topRange",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Aspect ratio filter (e.g. 16x9, 9x16)",
+                        "name": "ratios",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.WallhavenResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sync": {
+            "post": {
+                "description": "Triggers a background Wallhaven sync for all categories. Returns immediately.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sync"
+                ],
+                "summary": "Trigger a manual sync",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "something went wrong"
+                }
+            }
+        },
+        "models.WallhavenImage": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dimension_x": {
+                    "type": "integer"
+                },
+                "dimension_y": {
+                    "type": "integer"
+                },
+                "file_size": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "resolution": {
+                    "type": "string"
+                },
+                "thumbs": {
+                    "type": "object",
+                    "properties": {
+                        "large": {
+                            "type": "string"
+                        },
+                        "original": {
+                            "type": "string"
+                        },
+                        "small": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "models.WallhavenResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WallhavenImage"
+                    }
+                },
+                "meta": {
+                    "type": "object",
+                    "properties": {
+                        "current_page": {
+                            "type": "integer"
+                        },
+                        "last_page": {
+                            "type": "integer"
+                        },
+                        "per_page": {
+                            "type": "integer"
+                        },
+                        "total": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
