@@ -41,27 +41,61 @@ class _HomeScreenState extends State<HomeScreen> {
         valueListenable: Hive.box('downloads').listenable(),
         builder: (context, Box box, _) {
           final count = box.length;
+          final itemWidth = (MediaQuery.of(context).size.width - 52) / _navItems.length;
           return Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom + 12,
               left: 16,
               right: 16,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: vk.surfaceOverlay.withValues(alpha: 0.85),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(
-                      color: vk.glassBorder,
-                      width: 0.5,
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color: vk.surfaceContainer,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: vk.glassBorder, width: 0.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.shadow.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment(
+                      (_currentNavIndex * 2 / (_navItems.length - 1)) - 1,
+                      0,
+                    ),
+                    child: SizedBox(
+                      width: itemWidth - 12,
+                      height: 44,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              cs.primary.withValues(alpha: 0.9),
+                              cs.primary,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                              color: cs.primary.withValues(alpha: 0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  child: Row(
+                  Row(
                     children: List.generate(_navItems.length, (i) {
                       final item = _navItems[i];
                       final isSelected = _currentNavIndex == i;
@@ -70,72 +104,62 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Expanded(
                         child: GestureDetector(
                           onTap: () => setState(() => _currentNavIndex = i),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: EdgeInsets.all(isSelected ? 6 : 4),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? cs.primary.withValues(alpha: 0.15)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
+                          child: TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.elasticOut,
+                            tween: Tween(
+                              begin: 1.0,
+                              end: isSelected ? 1.15 : 1.0,
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isDownloadTab)
-                                  Badge(
-                                    isLabelVisible: count > 0,
-                                    label: Text(
-                                      count > 99 ? '99+' : '$count',
-                                      style: TextStyle(
-                                        color: cs.surface,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
+                            builder: (context, scale, _) {
+                              return Transform.scale(
+                                scale: scale,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (isDownloadTab)
+                                      Badge(
+                                        isLabelVisible: count > 0,
+                                        label: Text(
+                                          count > 99 ? '99+' : '$count',
+                                          style: TextStyle(
+                                            color: cs.surface,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        backgroundColor: cs.primary,
+                                        child: Icon(
+                                          isSelected
+                                              ? item.selectedIcon
+                                              : item.icon,
+                                          size: 22,
+                                          color: isSelected
+                                              ? cs.onPrimary
+                                              : vk.onSurfaceSubtle,
+                                        ),
+                                      )
+                                    else
+                                      Icon(
+                                        isSelected
+                                            ? item.selectedIcon
+                                            : item.icon,
+                                        size: 22,
+                                        color: isSelected
+                                            ? cs.onPrimary
+                                            : vk.onSurfaceSubtle,
                                       ),
-                                    ),
-                                    backgroundColor: cs.primary,
-                                    child: Icon(
-                                      isSelected
-                                          ? item.selectedIcon
-                                          : item.icon,
-                                      size: 22,
-                                      color: isSelected
-                                          ? cs.primary
-                                          : vk.onSurfaceSubtle,
-                                    ),
-                                  )
-                                else
-                                  Icon(
-                                    isSelected
-                                        ? item.selectedIcon
-                                        : item.icon,
-                                    size: 22,
-                                    color: isSelected
-                                        ? cs.primary
-                                        : vk.onSurfaceSubtle,
-                                  ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  item.label,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                    color: isSelected
-                                        ? cs.primary
-                                        : vk.onSurfaceSubtle,
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
                         ),
                       );
                     }),
                   ),
-                ),
+                ],
               ),
             ),
           );

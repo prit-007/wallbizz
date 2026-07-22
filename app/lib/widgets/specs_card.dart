@@ -12,20 +12,19 @@ class SpecsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: vk.glassBackground,
+            color: Colors.black.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: vk.glassBorder,
+              color: Colors.white.withValues(alpha: 0.12),
             ),
           ),
           child: Column(
@@ -40,7 +39,7 @@ class SpecsCard extends StatelessWidget {
                     style: GoogleFonts.oswald(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: cs.onSurface,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -50,7 +49,7 @@ class SpecsCard extends StatelessWidget {
                       wallpaper.formattedFileSize,
                       style: GoogleFonts.inter(
                         fontSize: 13,
-                        color: vk.onSurfaceSubtle,
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -61,16 +60,19 @@ class SpecsCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: vk.glassBackground,
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: vk.glassBorder, width: 0.5),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        width: 0.5,
+                      ),
                     ),
                     child: Text(
                       wallpaper.sourceQuery.toUpperCase(),
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: cs.primary,
+                        color: ColorUtils.hexToColor(wallpaper.primaryColor),
                         letterSpacing: 1,
                       ),
                     ),
@@ -97,7 +99,10 @@ class SpecsCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: ColorUtils.hexToColor(wallpaper.primaryColor),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: vk.glassBorder, width: 0.5),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 0.5,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -105,7 +110,7 @@ class SpecsCard extends StatelessWidget {
                     wallpaper.primaryColor.toUpperCase(),
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 11,
-                      color: vk.onSurfaceSubtle,
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
                   const Spacer(),
@@ -113,7 +118,7 @@ class SpecsCard extends StatelessWidget {
                     'ID: ${wallpaper.wallhavenId}',
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 10,
-                      color: vk.onSurfaceFaint,
+                      color: Colors.white.withValues(alpha: 0.4),
                     ),
                   ),
                 ],
@@ -126,25 +131,27 @@ class SpecsCard extends StatelessWidget {
   }
 
   Widget _chip(BuildContext context, String label, IconData icon) {
-    final vk = context.vivek;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: vk.glassBackground,
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: vk.glassBorder, width: 0.3),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 0.3,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 11, color: vk.onSurfaceSubtle),
+          Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.6)),
           const SizedBox(width: 4),
           Text(
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: vk.onSurfaceSubtle,
+              color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
         ],
