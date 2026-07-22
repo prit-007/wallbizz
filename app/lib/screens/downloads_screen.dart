@@ -197,7 +197,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           style: GoogleFonts.oswald(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
-                            color: Colors.white,
+                            color: cs.onSurface,
                             letterSpacing: 4,
                             height: 1.0,
                           ),
@@ -206,23 +206,23 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                         Container(
                           width: 40,
                           height: 3,
-                          color: Colors.white,
+                          color: cs.primary,
                         ),
                       ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: vk.surfaceContainer,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+                        border: Border.all(color: vk.glassBorder, width: 1),
                       ),
                       child: Text(
                         '${allDownloads.length} ITEMS · $storageSizeStr',
                         style: GoogleFonts.oswald(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: cs.onSurface.withValues(alpha: 0.8),
                           letterSpacing: 1,
                         ),
                       ),

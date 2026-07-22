@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../config/theme_config.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/staggered_grid.dart';
 import 'detail_screen.dart';
@@ -35,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: Colors.black,
       extendBody: true,
       body: SafeArea(
         bottom: false,
@@ -61,6 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab(double bottomPadding) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
@@ -79,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.oswald(
                       fontSize: isCompact ? 42 : 56,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: cs.onSurface,
                       letterSpacing: 4.5,
                       height: 1.0,
                     ),
@@ -88,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: 48,
                     height: 3,
-                    color: Colors.white,
+                    color: cs.primary,
                   ).animate().fade(delay: 200.ms).scaleX(begin: 0, end: 1, alignment: Alignment.centerLeft),
                   const SizedBox(height: 24),
                 ],
@@ -113,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(0),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: vk.glassBorder,
                       width: 1.5,
                     ),
                   ),
@@ -123,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'EXPLORE CURATED ARCHIVES...',
                         style: GoogleFonts.inter(
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: vk.onSurfaceSubtle,
                           fontSize: isCompact ? 12 : 14,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.5,
@@ -132,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Spacer(),
                       Icon(
                         Icons.search_rounded,
-                        color: Colors.white,
+                        color: cs.onSurface,
                         size: isCompact ? 20 : 24,
                       ),
                     ],
@@ -193,6 +196,7 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final vk = context.vivek;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return ValueListenableBuilder(
@@ -213,9 +217,9 @@ class _FloatingNavBar extends StatelessWidget {
               child: Container(
                 height: 72,
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: vk.surfaceContainer.withValues(alpha: 0.7),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: vk.glassBorder,
                     width: 1,
                   ),
                 ),
@@ -269,7 +273,8 @@ class _NavBarItemState extends State<_NavBarItem> {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = widget.isSelected ? Colors.black : Colors.white.withValues(alpha: 0.6);
+    final cs = Theme.of(context).colorScheme;
+    final iconColor = widget.isSelected ? cs.surface : cs.onSurface.withValues(alpha: 0.6);
     final iconData = widget.isSelected ? widget.item.selectedIcon : widget.item.icon;
 
     return GestureDetector(
@@ -289,7 +294,7 @@ class _NavBarItemState extends State<_NavBarItem> {
             vertical: 12,
           ),
           decoration: BoxDecoration(
-            color: widget.isSelected ? Colors.white : Colors.transparent,
+            color: widget.isSelected ? cs.onSurface : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -301,12 +306,12 @@ class _NavBarItemState extends State<_NavBarItem> {
                   label: Text(
                     widget.downloadCount > 99 ? '99+' : '${widget.downloadCount}',
                     style: TextStyle(
-                      color: widget.isSelected ? Colors.white : Colors.black,
+                      color: widget.isSelected ? cs.onSurface : cs.surface,
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  backgroundColor: widget.isSelected ? Colors.black : Colors.white,
+                  backgroundColor: widget.isSelected ? cs.surface : cs.onSurface,
                   child: Icon(iconData, size: 22, color: iconColor),
                 )
               else
@@ -319,7 +324,7 @@ class _NavBarItemState extends State<_NavBarItem> {
                   child: Text(
                     widget.item.label,
                     style: GoogleFonts.inter(
-                      color: Colors.black,
+                      color: cs.surface,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
