@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -40,11 +41,36 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     });
   }
 
+  void _selectAll(List<DownloadedWallpaper> items) {
+    setState(() {
+      if (_selectedIds.length == items.length) {
+        _selectedIds.clear();
+        _selectionMode = false;
+      } else {
+        _selectedIds.addAll(items.map((e) => e.wallhavenId));
+      }
+    });
+  }
+
   void _enterSelectionMode(String id) {
     setState(() {
       _selectionMode = true;
       _selectedIds.add(id);
     });
+  }
+
+  String _calculateStorageUsage(List<DownloadedWallpaper> items) {
+    int totalBytes = 0;
+    for (var item in items) {
+      final file = File(item.localPath);
+      if (file.existsSync()) {
+        totalBytes += file.lengthSync();
+      }
+    }
+    if (totalBytes < 1024 * 1024) {
+      return '${(totalBytes / 1024).toStringAsFixed(1)} KB';
+    }
+    return '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
   Future<void> _deleteSelected() async {
@@ -144,118 +170,190 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
-    final bottomPadding = MediaQuery.of(context).padding.bottom + 80;
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 85;
 
-    return Column(
-      children: [
-        if (_selectionMode)
-          Container(
-            padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 16, 16, 16),
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.15),
-              border: Border(bottom: BorderSide(color: cs.primary.withValues(alpha: 0.3))),
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: _exitSelectionMode,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-                    child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    '${_selectedIds.length} SELECTED',
-                    style: GoogleFonts.oswald(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _selectedIds.isNotEmpty ? _deleteSelected : null,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: _selectedIds.isNotEmpty ? cs.error.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
-                    child: Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
-                  ),
-                ),
-              ],
-            ),
-          ).animate().slideY(begin: -1.0, end: 0, duration: 250.ms, curve: Curves.easeOutCubic),
+    return ValueListenableBuilder(
+      valueListenable: Hive.box('downloads').listenable(),
+      builder: (context, Box box, _) {
+        final allDownloads = DownloadsService.getDownloads();
+        final filteredItems = DownloadsService.getDownloads(searchQuery: _searchQuery);
+        final storageSizeStr = _calculateStorageUsage(allDownloads);
 
-        if (!_selectionMode)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15), width: 1),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Icon(Icons.search_rounded, color: vk.onSurfaceSubtle, size: 22),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
-                      decoration: InputDecoration(
-                        hintText: 'Search local downloads...',
-                        hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint, fontSize: 15),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!_selectionMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'DOWNLOADS',
+                          style: GoogleFonts.oswald(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: cs.primary,
+                            letterSpacing: 3,
+                            height: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'OFFLINE GALLERY',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: vk.onSurfaceSubtle,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        Expanded(
-          child: ValueListenableBuilder(
-            valueListenable: Hive.box('downloads').listenable(),
-            builder: (context, Box box, _) {
-              final filteredItems = DownloadsService.getDownloads(searchQuery: _searchQuery);
-
-              if (filteredItems.isEmpty) return _buildEmptyView();
-
-              return RefreshIndicator(
-                onRefresh: () async => setState(() {}),
-                color: cs.primary,
-                backgroundColor: cs.surface,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxisCount = constraints.maxWidth > 900
-                        ? 4
-                        : constraints.maxWidth > 600
-                            ? 3
-                            : 2;
-
-                    return MasonryGridView.count(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
-                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final data = filteredItems[index];
-                        return _buildDownloadCard(data).animate().fade(duration: 400.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 50));
-                      },
-                    );
-                  },
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: vk.surfaceContainer,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15)),
+                      ),
+                      child: Text(
+                        '${allDownloads.length} ITEMS · $storageSizeStr',
+                        style: GoogleFonts.oswald(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+
+            if (_selectionMode)
+              Container(
+                padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 12),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.15),
+                  border: Border(bottom: BorderSide(color: cs.primary.withValues(alpha: 0.3))),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _exitSelectionMode,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
+                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        '${_selectedIds.length} SELECTED',
+                        style: GoogleFonts.oswald(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _selectAll(filteredItems),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
+                        child: Text(
+                          _selectedIds.length == filteredItems.length ? 'DESELECT ALL' : 'SELECT ALL',
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: _selectedIds.isNotEmpty ? _deleteSelected : null,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: _selectedIds.isNotEmpty ? cs.error.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ).animate().slideY(begin: -1.0, end: 0, duration: 250.ms, curve: Curves.easeOutCubic),
+
+            if (!_selectionMode && allDownloads.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15), width: 1),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search_rounded, color: vk.onSurfaceSubtle, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Search downloads by tags or resolution...',
+                            hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint, fontSize: 14),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                        ),
+                      ),
+                      if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () => setState(() => _searchQuery = ''),
+                          child: Icon(Icons.cancel_rounded, color: vk.onSurfaceFaint, size: 18),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+            Expanded(
+              child: filteredItems.isEmpty
+                  ? _buildEmptyView()
+                  : RefreshIndicator(
+                      onRefresh: () async => setState(() {}),
+                      color: cs.primary,
+                      backgroundColor: cs.surface,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final crossAxisCount = constraints.maxWidth > 900
+                              ? 4
+                              : constraints.maxWidth > 600
+                                  ? 3
+                                  : 2;
+
+                          return MasonryGridView.count(
+                            crossAxisCount: crossAxisCount,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
+                            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                            itemCount: filteredItems.length,
+                            itemBuilder: (context, index) {
+                              final data = filteredItems[index];
+                              return _buildDownloadCard(data).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 40));
+                            },
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 
