@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'trending';
   int _currentNavIndex = 0;
-  final List<bool> _tabBuilt = [true, false, false, false];
+  final List<Widget?> _tabWidgets = List.filled(4, null);
   final List<ScrollController> _scrollControllers = [
     ScrollController(),
     ScrollController(),
@@ -63,25 +63,25 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: false,
         child: Stack(
           children: [
-            if (_tabBuilt[0])
+            if (_tabWidgets[0] != null || _currentNavIndex == 0)
               Offstage(
                 offstage: _currentNavIndex != 0,
                 child: _buildHomeTab(bottomInset + 90),
               ),
-            if (_tabBuilt[1])
+            if (_tabWidgets[1] != null)
               Offstage(
                 offstage: _currentNavIndex != 1,
-                child: _LazyTab(builder: () => const WishlistScreen()),
+                child: _tabWidgets[1]!,
               ),
-            if (_tabBuilt[2])
+            if (_tabWidgets[2] != null)
               Offstage(
                 offstage: _currentNavIndex != 2,
-                child: _LazyTab(builder: () => const DownloadsScreen()),
+                child: _tabWidgets[2]!,
               ),
-            if (_tabBuilt[3])
+            if (_tabWidgets[3] != null)
               Offstage(
                 offstage: _currentNavIndex != 3,
-                child: _LazyTab(builder: () => const SettingsScreen()),
+                child: _tabWidgets[3]!,
               ),
           ],
         ),
@@ -95,13 +95,22 @@ class _HomeScreenState extends State<HomeScreen> {
             _scrollToTop(index);
           } else {
             setState(() {
-              _tabBuilt[index] = true;
+              _tabWidgets[index] ??= _buildTabContent(index);
               _currentNavIndex = index;
             });
           }
         },
       ),
     );
+  }
+
+  Widget _buildTabContent(int index) {
+    switch (index) {
+      case 1: return const WishlistScreen();
+      case 2: return const DownloadsScreen();
+      case 3: return const SettingsScreen();
+      default: return const SizedBox.shrink();
+    }
   }
 
   Widget _buildHomeTab(double bottomPadding) {
@@ -218,24 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
-}
-
-class _LazyTab extends StatefulWidget {
-  final Widget Function() builder;
-  const _LazyTab({required this.builder});
-
-  @override
-  State<_LazyTab> createState() => _LazyTabState();
-}
-
-class _LazyTabState extends State<_LazyTab> {
-  Widget? _child;
-
-  @override
-  Widget build(BuildContext context) {
-    _child ??= widget.builder();
-    return _child!;
   }
 }
 
