@@ -18,11 +18,11 @@ class CategoryTabs extends StatefulWidget {
 
 class _CategoryTabsState extends State<CategoryTabs> {
   final List<Map<String, String>> _categories = [
-    {'label': 'Trending', 'value': 'trending', 'icon': '🔥'},
-    {'label': 'Anime', 'value': 'anime', 'icon': '🌸'},
-    {'label': 'AMOLED', 'value': 'amoled', 'icon': '⬛'},
-    {'label': 'Desktop', 'value': 'desktop', 'icon': '🖥'},
-    {'label': 'Mobile', 'value': 'mobile', 'icon': '📱'},
+    {'label': 'Trending', 'value': 'trending', 'icon': '\u{1F525}'},
+    {'label': 'Anime', 'value': 'anime', 'icon': '\u{1F338}'},
+    {'label': 'AMOLED', 'value': 'amoled', 'icon': '\u{2B1B}'},
+    {'label': 'Desktop', 'value': 'desktop', 'icon': '\u{1F5A5}'},
+    {'label': 'Mobile', 'value': 'mobile', 'icon': '\u{1F4F1}'},
   ];
 
   @override
@@ -31,12 +31,13 @@ class _CategoryTabsState extends State<CategoryTabs> {
     final vk = context.vivek;
 
     return SizedBox(
-      height: 120,
+      height: 54,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        physics: const BouncingScrollPhysics(),
         itemCount: _categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
+        separatorBuilder: (context, index) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final cat = _categories[index];
           final isSelected = widget.selectedCategory == cat['value'];
@@ -44,38 +45,34 @@ class _CategoryTabsState extends State<CategoryTabs> {
           return GestureDetector(
             onTap: () => widget.onCategorySelected(cat['value']!),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 100,
-              clipBehavior: Clip.hardEdge,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: isSelected ? cs.primary : vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-                border: isSelected
-                    ? Border.all(color: cs.primary, width: 2)
-                    : null,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? cs.primary : vk.glassBorder.withValues(alpha: 0.12),
+                  width: 1,
+                ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.2),
-                          blurRadius: 12,
-                          spreadRadius: 2,
+                          color: cs.primary.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
                         )
                       ]
-                    : null,
+                    : [],
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
                 children: [
+                  Text(cat['icon']!, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(width: 8),
                   Text(
-                    cat['icon']!,
-                    style: const TextStyle(fontSize: 22),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    cat['label']!,
-                    style: GoogleFonts.bebasNeue(
-                      fontSize: 15,
+                    cat['label']!.toUpperCase(),
+                    style: GoogleFonts.oswald(
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: isSelected ? cs.onPrimary : cs.onSurface,
                       letterSpacing: 1.2,

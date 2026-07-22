@@ -23,185 +23,59 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentNavIndex = 0;
 
   static const _navItems = [
-    _DockItem(Icons.grid_view, Icons.grid_view, 'Home'),
-    _DockItem(Icons.favorite_border, Icons.favorite, 'Collection'),
-    _DockItem(Icons.download_outlined, Icons.download, 'Downloads'),
-    _DockItem(Icons.settings_outlined, Icons.settings, 'Settings'),
+    _DockItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'Home'),
+    _DockItem(Icons.favorite_outline_rounded, Icons.favorite_rounded, 'Collection'),
+    _DockItem(Icons.download_outlined, Icons.download_rounded, 'Downloads'),
+    _DockItem(Icons.tune_outlined, Icons.tune_rounded, 'Settings'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
+      extendBody: true, // Enables true edge-to-edge content bleeding under the floating dock
       body: SafeArea(
-        child: _buildCurrentScreen(),
+        bottom: false,
+        child: IndexedStack(
+          index: _currentNavIndex,
+          children: [
+            _buildHomeTab(bottomInset + 80), // Extra padding for the floating bar
+            const WishlistScreen(),
+            const DownloadsScreen(),
+            const SettingsScreen(),
+          ],
+        ),
       ),
-      bottomNavigationBar: ValueListenableBuilder(
-        valueListenable: Hive.box('downloads').listenable(),
-        builder: (context, Box box, _) {
-          final count = box.length;
-          final itemWidth = (MediaQuery.of(context).size.width - 52) / _navItems.length;
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom + 12,
-              left: 16,
-              right: 16,
-            ),
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: vk.glassBorder, width: 0.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: cs.shadow.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AnimatedAlign(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment(
-                      (_currentNavIndex * 2 / (_navItems.length - 1)) - 1,
-                      0,
-                    ),
-                    child: SizedBox(
-                      width: itemWidth - 12,
-                      height: 44,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              cs.primary.withValues(alpha: 0.9),
-                              cs.primary,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: cs.primary.withValues(alpha: 0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: List.generate(_navItems.length, (i) {
-                      final item = _navItems[i];
-                      final isSelected = _currentNavIndex == i;
-                      final isDownloadTab = i == 2;
-
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _currentNavIndex = i),
-                          child: TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.elasticOut,
-                            tween: Tween(
-                              begin: 1.0,
-                              end: isSelected ? 1.15 : 1.0,
-                            ),
-                            builder: (context, scale, _) {
-                              return Transform.scale(
-                                scale: scale,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (isDownloadTab)
-                                      Badge(
-                                        isLabelVisible: count > 0,
-                                        label: Text(
-                                          count > 99 ? '99+' : '$count',
-                                          style: TextStyle(
-                                            color: cs.surface,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        backgroundColor: cs.primary,
-                                        child: Icon(
-                                          isSelected
-                                              ? item.selectedIcon
-                                              : item.icon,
-                                          size: 22,
-                                          color: isSelected
-                                              ? cs.onPrimary
-                                              : vk.onSurfaceSubtle,
-                                        ),
-                                      )
-                                    else
-                                      Icon(
-                                        isSelected
-                                            ? item.selectedIcon
-                                            : item.icon,
-                                        size: 22,
-                                        color: isSelected
-                                            ? cs.onPrimary
-                                            : vk.onSurfaceSubtle,
-                                      ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+      bottomNavigationBar: _FloatingNavBar(
+        currentIndex: _currentNavIndex,
+        navItems: _navItems,
+        onTap: (index) => setState(() => _currentNavIndex = index),
       ),
     );
   }
 
-  Widget _buildCurrentScreen() {
-    return IndexedStack(
-      index: _currentNavIndex,
-      children: [
-        _buildHomeTab(),
-        const WishlistScreen(),
-        const DownloadsScreen(),
-        const SettingsScreen(),
-      ],
-    );
-  }
-
-  Widget _buildHomeTab() {
+  Widget _buildHomeTab(double bottomPadding) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
         final horizontalPadding = isCompact ? 16.0 : 24.0;
-        final searchBarHeight = isCompact ? 44.0 : 52.0;
-        final iconSize = isCompact ? 20.0 : 24.0;
-        final fontSize = isCompact ? 14.0 : 16.0;
-
+        final searchBarHeight = isCompact ? 48.0 : 54.0;
         final brandCs = Theme.of(context).colorScheme;
         final brandVk = context.vivek;
 
         return Column(
           children: [
+            // Header Section
             Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                8,
+                12,
                 horizontalPadding,
-                4,
+                6,
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,19 +83,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'WALLBIZZ',
                         style: GoogleFonts.oswald(
-                          fontSize: isCompact ? 22 : 28,
+                          fontSize: isCompact ? 24 : 30,
                           fontWeight: FontWeight.bold,
                           color: brandCs.primary,
-                          letterSpacing: 3,
+                          letterSpacing: 3.5,
+                          height: 1.0,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
-                        'curated wallpapers',
+                        'CURATED WALLPAPERS',
                         style: GoogleFonts.inter(
-                          fontSize: isCompact ? 11 : 13,
-                          fontWeight: FontWeight.w500,
+                          fontSize: isCompact ? 10 : 12,
+                          fontWeight: FontWeight.w600,
                           color: brandVk.onSurfaceSubtle,
-                          letterSpacing: 2,
+                          letterSpacing: 2.5,
                         ),
                       ),
                     ],
@@ -229,12 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+
+            // Search Bar Trigger
             Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                8,
+                10,
                 horizontalPadding,
-                8,
+                10,
               ),
               child: GestureDetector(
                 key: const Key('search_bar'),
@@ -248,19 +126,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   height: searchBarHeight,
                   decoration: BoxDecoration(
-                    color: context.vivek.surfaceOverlay,
-                    borderRadius: BorderRadius.circular(24),
+                    color: brandVk.surfaceOverlay,
+                    borderRadius: BorderRadius.circular(27),
+                    border: Border.all(
+                      color: brandVk.glassBorder.withValues(alpha: 0.12),
+                      width: 1,
+                    ),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 16 : 20,
+                  ),
                   child: Row(
                     children: [
-                      Icon(Icons.search, color: context.vivek.onSurfaceSubtle, size: iconSize),
+                      Icon(
+                        Icons.search_rounded,
+                        color: brandVk.onSurfaceSubtle,
+                        size: isCompact ? 20 : 22,
+                      ),
                       SizedBox(width: isCompact ? 12 : 16),
                       Text(
-                        'Search wallpapers...',
-                        style: TextStyle(
-                          color: context.vivek.onSurfaceSubtle,
-                          fontSize: fontSize,
+                        'Search wallpapers, anime, art...',
+                        style: GoogleFonts.inter(
+                          color: brandVk.onSurfaceSubtle,
+                          fontSize: isCompact ? 13 : 15,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
@@ -268,23 +157,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+            // Category Filter Bar
             CategoryTabs(
               selectedCategory: _selectedCategory,
               onCategorySelected: (category) {
                 setState(() => _selectedCategory = category);
               },
             ),
+
+            // Main Staggered Grid
             Expanded(
-              child: StaggeredGrid(
-                key: ValueKey(_selectedCategory),
-                category: _selectedCategory,
-                onWallpaperTap: (wallpaper) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => DetailScreen(wallpaper: wallpaper),
-                    ),
-                  );
-                },
+              child: Padding(
+                padding: EdgeInsets.only(bottom: bottomPadding),
+                child: StaggeredGrid(
+                  key: ValueKey(_selectedCategory),
+                  category: _selectedCategory,
+                  onWallpaperTap: (wallpaper) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DetailScreen(wallpaper: wallpaper),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -294,9 +190,171 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// Private Dock Data Structure
 class _DockItem {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
   const _DockItem(this.icon, this.selectedIcon, this.label);
+}
+
+// Optimized Floating Frosted-Glass Bottom Navigation Bar
+class _FloatingNavBar extends StatelessWidget {
+  final int currentIndex;
+  final List<_DockItem> navItems;
+  final ValueChanged<int> onTap;
+
+  const _FloatingNavBar({
+    required this.currentIndex,
+    required this.navItems,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return ValueListenableBuilder(
+      valueListenable: Hive.box('downloads').listenable(),
+      builder: (context, Box box, _) {
+        final downloadCount = box.length;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            bottom: bottomInset > 0 ? bottomInset + 4 : 16,
+          ),
+          child: Container(
+            height: 64,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 24,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer.withValues(alpha: 0.82),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: vk.glassBorder.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(navItems.length, (i) {
+                      final item = navItems[i];
+                      final isSelected = currentIndex == i;
+                      final isDownloadTab = i == 2;
+
+                      return GestureDetector(
+                        onTap: () => onTap(i),
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSelected ? 16 : 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? cs.primary
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: cs.primary.withValues(alpha: 0.35),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    )
+                                  ]
+                                : [],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildIcon(
+                                item: item,
+                                isSelected: isSelected,
+                                isDownloadTab: isDownloadTab,
+                                downloadCount: downloadCount,
+                                cs: cs,
+                                vk: vk,
+                              ),
+                              if (isSelected) ...[
+                                const SizedBox(width: 8),
+                                AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 200),
+                                  opacity: isSelected ? 1.0 : 0.0,
+                                  child: Text(
+                                    item.label,
+                                    style: GoogleFonts.inter(
+                                      color: cs.onPrimary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIcon({
+    required _DockItem item,
+    required bool isSelected,
+    required bool isDownloadTab,
+    required int downloadCount,
+    required ColorScheme cs,
+    required dynamic vk,
+  }) {
+    final iconColor = isSelected ? cs.onPrimary : vk.onSurfaceSubtle;
+    final iconData = isSelected ? item.selectedIcon : item.icon;
+
+    if (isDownloadTab) {
+      return Badge(
+        isLabelVisible: downloadCount > 0,
+        label: Text(
+          downloadCount > 99 ? '99+' : '$downloadCount',
+          style: TextStyle(
+            color: isSelected ? cs.primary : cs.onPrimary,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: isSelected ? cs.onPrimary : cs.primary,
+        child: Icon(iconData, size: 22, color: iconColor),
+      );
+    }
+
+    return Icon(iconData, size: 22, color: iconColor);
+  }
 }

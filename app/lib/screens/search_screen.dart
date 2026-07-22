@@ -40,12 +40,24 @@ class _SearchScreenState extends State<SearchScreen> {
   int _lastPage = 0;
   bool _isLoading = false;
   bool _hasSearched = false;
+  String? _errorMessage;
 
   String _purity = '100';
   String _sorting = 'date_added';
   String _topRange = '';
   String _categories = '';
   String _ratios = '';
+
+  static const List<String> _trendingTags = [
+    'Cyberpunk',
+    'Studio Ghibli',
+    'Amoled',
+    'Neon City',
+    'Minimalist',
+    'Pixel Art',
+    'Space',
+    'Gothic',
+  ];
 
   @override
   void initState() {
@@ -103,15 +115,14 @@ class _SearchScreenState extends State<SearchScreen> {
         _results.clear();
         _page = 0;
         _lastPage = 0;
+        _errorMessage = null;
       });
     }
 
     final needsAuth = _purity != '100';
-    if (needsAuth) {
-      if (!_isAuthed) {
-        if (mounted) showAuthBottomSheet(context);
-        return;
-      }
+    if (needsAuth && !_isAuthed) {
+      if (mounted) showAuthBottomSheet(context);
+      return;
     }
 
     setState(() => _isLoading = true);
@@ -151,6 +162,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (mounted) {
       setState(() {
         _hasSearched = true;
+        _errorMessage = result.error;
         _results.addAll(result.wallpapers);
         _page = result.currentPage > 0 ? result.currentPage : _page + 1;
         _lastPage = result.lastPage;
@@ -181,6 +193,7 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             _buildSearchBar(),
             _buildFilters(),
+            const SizedBox(height: 8),
             Expanded(child: _buildBody()),
           ],
         ),
@@ -192,51 +205,75 @@ class _SearchScreenState extends State<SearchScreen> {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         children: [
           IconButton(
             key: const Key('back_button'),
-            icon: Icon(Icons.arrow_back, color: cs.onSurface),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: cs.onSurface, size: 20),
+            style: IconButton.styleFrom(
+              backgroundColor: vk.surfaceContainer,
+              padding: const EdgeInsets.all(12),
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          const SizedBox(width: 12),
           Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              autofocus: true,
-              onSubmitted: (_) => _onSearch(),
-              onChanged: (_) => setState(() {}),
-              style: TextStyle(color: cs.onSurface),
-              decoration: InputDecoration(
-                hintText: 'Search wallpapers...',
-                hintStyle: TextStyle(color: vk.onSurfaceFaint),
-                filled: true,
-                fillColor: vk.surfaceContainer,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: vk.surfaceContainer,
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(
+                        color: vk.glassBorder.withValues(alpha: 0.15),
+                  width: 1,
                 ),
-                prefixIcon: Icon(Icons.search, color: vk.onSurfaceFaint, size: 20),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_controller.text.isNotEmpty)
-                      IconButton(
-                        key: const Key('clear_button'),
-                        icon: Icon(Icons.clear, color: vk.onSurfaceFaint, size: 20),
-                        onPressed: () {
-                          _controller.clear();
-                          setState(() {});
-                        },
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(Icons.search_rounded, color: vk.onSurfaceSubtle, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      onSubmitted: (_) => _onSearch(),
+                      onChanged: (_) => setState(() {}),
+                      style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                      decoration: InputDecoration(
+                        hintText: 'Search wallpapers...',
+                        hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint, fontSize: 15),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
-                    IconButton(
-                      key: const Key('search_button'),
-                      icon: Icon(Icons.search, color: cs.onSurface, size: 20),
-                      onPressed: _onSearch,
                     ),
-                  ],
-                ),
+                  ),
+                  if (_controller.text.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        _controller.clear();
+                        setState(() {});
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(Icons.cancel_rounded, color: vk.onSurfaceFaint, size: 18),
+                      ),
+                    ),
+                  GestureDetector(
+                    onTap: _onSearch,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.arrow_forward_rounded, color: cs.onPrimary, size: 16),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -249,26 +286,27 @@ class _SearchScreenState extends State<SearchScreen> {
     return Column(
       children: [
         SizedBox(
-          height: 48,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            children: [
-              _buildPurityChip('SFW', '100', Key('purity_sfw'), true),
-              const SizedBox(width: 8),
-              _buildPurityChip(
-                  'Sketchy', '110', Key('purity_sketchy'), _isAuthed),
-              const SizedBox(width: 8),
-              _buildPurityChip(
-                  'NSFW', '111', Key('purity_nsfw'), _isAuthed),
-            ],
-          ),
-        ),
-        SizedBox(
           height: 44,
           child: ListView(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            physics: const BouncingScrollPhysics(),
+            children: [
+              _buildPurityChip('SFW', '100', const Key('purity_sfw'), true, Icons.check_circle_rounded),
+              const SizedBox(width: 8),
+              _buildPurityChip('Sketchy', '110', const Key('purity_sketchy'), _isAuthed, _isAuthed ? Icons.remove_red_eye_rounded : Icons.lock_rounded),
+              const SizedBox(width: 8),
+              _buildPurityChip('NSFW', '111', const Key('purity_nsfw'), _isAuthed, _isAuthed ? Icons.explicit_rounded : Icons.lock_rounded),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 38,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
+            physics: const BouncingScrollPhysics(),
             children: [
               _buildDropdown<String>(
                 value: _sorting,
@@ -277,8 +315,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   DropdownMenuItem(value: 'toplist', child: Text('Toplist')),
                   DropdownMenuItem(value: 'date_added', child: Text('Latest')),
                   DropdownMenuItem(value: 'views', child: Text('Views')),
-                  DropdownMenuItem(
-                      value: 'favorites', child: Text('Favorites')),
+                  DropdownMenuItem(value: 'favorites', child: Text('Favorites')),
                   DropdownMenuItem(value: 'random', child: Text('Random')),
                 ],
                 onChanged: (v) {
@@ -295,11 +332,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 items: const [
                   DropdownMenuItem(value: '', child: Text('All Time')),
                   DropdownMenuItem(value: '1d', child: Text('1 Day')),
-                  DropdownMenuItem(value: '3d', child: Text('3 Days')),
                   DropdownMenuItem(value: '1w', child: Text('1 Week')),
                   DropdownMenuItem(value: '1M', child: Text('1 Month')),
-                  DropdownMenuItem(value: '3M', child: Text('3 Months')),
-                  DropdownMenuItem(value: '6M', child: Text('6 Months')),
                   DropdownMenuItem(value: '1y', child: Text('1 Year')),
                 ],
                 onChanged: (v) {
@@ -314,7 +348,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 value: _categories.isEmpty ? 'all' : _categories,
                 label: 'Category',
                 items: const [
-                  DropdownMenuItem(value: 'all', child: Text('All')),
+                  DropdownMenuItem(value: 'all', child: Text('All Categories')),
                   DropdownMenuItem(value: '100', child: Text('General')),
                   DropdownMenuItem(value: '010', child: Text('Anime')),
                   DropdownMenuItem(value: '001', child: Text('People')),
@@ -331,11 +365,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 value: _ratios.isEmpty ? 'all' : _ratios,
                 label: 'Ratio',
                 items: const [
-                  DropdownMenuItem(value: 'all', child: Text('All')),
+                  DropdownMenuItem(value: 'all', child: Text('All Ratios')),
                   DropdownMenuItem(value: '16x9', child: Text('16:9')),
                   DropdownMenuItem(value: '9x16', child: Text('9:16')),
-                  DropdownMenuItem(value: '16x10', child: Text('16:10')),
-                  DropdownMenuItem(value: '4x3', child: Text('4:3')),
                   DropdownMenuItem(value: '1x1', child: Text('1:1')),
                 ],
                 onChanged: (v) {
@@ -352,28 +384,43 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildPurityChip(
-      String label, String value, Key key, bool enabled) {
+  Widget _buildPurityChip(String label, String value, Key key, bool enabled, IconData icon) {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final isSelected = _purity == value;
+
     return GestureDetector(
-      onTap: enabled ? () => _setPurity(value) : null,
-      child: ChoiceChip(
-        key: key,
-        label: Text(label),
-        selected: isSelected,
-        selectedColor: cs.onSurface,
-        backgroundColor: enabled ? vk.surfaceContainer : vk.surfaceContainerHigh,
-        labelStyle: TextStyle(
-          color: isSelected
-              ? cs.surface
-              : enabled
-                  ? cs.onSurface
-                  : vk.onSurfaceDim,
-          fontWeight: FontWeight.w600,
+      onTap: enabled ? () => _setPurity(value) : () => showAuthBottomSheet(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? cs.primary : (enabled ? vk.surfaceContainer : vk.surfaceContainerHigh),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? cs.primary : vk.glassBorder.withValues(alpha: 0.12),
+            width: 1,
+          ),
         ),
-        onSelected: enabled ? (_) => _setPurity(value) : (_) {},
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? cs.onPrimary : (enabled ? vk.onSurfaceSubtle : vk.onSurfaceDim),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? cs.onPrimary : (enabled ? cs.onSurface : vk.onSurfaceDim),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -387,20 +434,22 @@ class _SearchScreenState extends State<SearchScreen> {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: vk.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: vk.glassBorder.withValues(alpha: 0.12), width: 1),
       ),
-      child: DropdownButton<T>(
-        value: value,
-        items: items,
-        onChanged: onChanged,
-        underline: const SizedBox.shrink(),
-        isDense: true,
-        dropdownColor: vk.surfaceContainer,
-        style: GoogleFonts.inter(color: cs.onSurface, fontSize: 13),
-        hint: Text(label, style: TextStyle(color: vk.onSurfaceSubtle)),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          items: items,
+          onChanged: onChanged,
+          isDense: true,
+          dropdownColor: vk.surfaceContainer,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: vk.onSurfaceSubtle, size: 18),
+          style: GoogleFonts.inter(color: cs.onSurface, fontSize: 12, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
@@ -408,13 +457,57 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildBody() {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
+
     if (!_hasSearched) {
-      return Center(
-        child: Text(
-          'Search millions of wallpapers',
-          style: TextStyle(color: vk.onSurfaceFaint, fontSize: 16),
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'POPULAR SEARCHES',
+              style: GoogleFonts.oswald(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                color: vk.onSurfaceSubtle,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: _trendingTags.map((tag) {
+                return GestureDetector(
+                  onTap: () {
+                    _controller.text = tag;
+                    _onSearch();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: vk.surfaceContainer,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                  color: vk.glassBorder.withValues(alpha: 0.15),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '#$tag',
+                      style: GoogleFonts.inter(
+                        color: cs.onSurface,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ),
-      );
+      ).animate().fade(duration: 400.ms);
     }
 
     if (_results.isEmpty && _isLoading) {
@@ -429,61 +522,42 @@ class _SearchScreenState extends State<SearchScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
-                  color: vk.surfaceContainer,
-                  borderRadius: BorderRadius.circular(50),
+                  color: _errorMessage != null ? cs.errorContainer : vk.surfaceContainer,
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.search_off_rounded,
-                  size: 48,
-                  color: vk.onSurfaceDim,
+                  _errorMessage != null ? Icons.error_outline_rounded : Icons.search_off_rounded,
+                  size: 38,
+                  color: _errorMessage != null ? cs.error : vk.onSurfaceDim,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Text(
-                'No wallpapers found',
+                _errorMessage != null ? 'SEARCH FAILED' : 'NO RESULTS FOUND',
                 style: GoogleFonts.oswald(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: cs.onSurface,
-                  letterSpacing: 1,
+                  letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Try a different search term, adjust your filters, or explore our curated categories.',
+                _errorMessage ?? 'Try adjusting your search terms or filters to find what you are looking for.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: vk.onSurfaceSubtle,
                   height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () {
-                  _controller.clear();
-                  setState(() {
-                    _results.clear();
-                    _hasSearched = false;
-                  });
-                },
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Clear filters'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: cs.primary,
-                  side: BorderSide(color: vk.glassBorder),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
               ),
             ],
           ),
         ),
-      ).animate().fade(duration: 400.ms).slideY(begin: 0.2, end: 0);
+      ).animate().fade(duration: 400.ms);
     }
 
     return LayoutBuilder(
@@ -496,17 +570,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
         return MasonryGridView.count(
           crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          padding: const EdgeInsets.all(8),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           controller: _scrollController,
           itemCount: _results.length + (_isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == _results.length) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: CircularProgressIndicator(color: cs.primary),
+                  padding: const EdgeInsets.all(24),
+                  child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2),
                 ),
               );
             }
@@ -515,8 +589,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) =>
-                        DetailScreen(wallpaper: _results[index]),
+                    builder: (_) => DetailScreen(wallpaper: _results[index]),
                   ),
                 );
               },
@@ -540,13 +613,13 @@ class _SearchScreenState extends State<SearchScreen> {
             : constraints.maxWidth > 600
                 ? 3
                 : 2;
-        final heights = [200.0, 280.0, 240.0, 320.0, 180.0, 260.0];
+        final heights = [220.0, 280.0, 240.0, 310.0, 190.0, 260.0];
 
         return MasonryGridView.count(
           crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          padding: const EdgeInsets.all(8),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          padding: const EdgeInsets.all(12),
           physics: const NeverScrollableScrollPhysics(),
           itemCount: crossAxisCount * 3,
           itemBuilder: (context, index) {
@@ -554,10 +627,10 @@ class _SearchScreenState extends State<SearchScreen> {
               height: heights[index % heights.length],
               decoration: BoxDecoration(
                 color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
             )
-                .animate(onPlay: (controller) => controller.repeat())
+                .animate(onPlay: (c) => c.repeat())
                 .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
           },
         );

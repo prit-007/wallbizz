@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../config/backend_config.dart';
 import '../config/theme_config.dart';
 
@@ -25,6 +26,14 @@ class NetworkImageWidget extends StatelessWidget {
     final vk = context.vivek;
     final url = _url;
 
+    Widget buildPlaceholder() {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(color: vk.surfaceContainer),
+      ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
+    }
+
     if (kIsWeb) {
       return SizedBox(
         width: width,
@@ -33,23 +42,15 @@ class NetworkImageWidget extends StatelessWidget {
           url,
           fit: fit,
           loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: vk.surfaceContainer,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: vk.onSurfaceDim,
-                  strokeWidth: 2,
-                ),
-              ),
-            );
+            if (loadingProgress == null) {
+              return child.animate().fade(duration: 400.ms, curve: Curves.easeOut);
+            }
+            return buildPlaceholder();
           },
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: vk.surfaceContainer,
-              child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
-            );
-          },
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: vk.surfaceContainer,
+            child: Icon(Icons.broken_image_rounded, color: vk.onSurfaceDim),
+          ),
         ),
       );
     }
@@ -59,18 +60,13 @@ class NetworkImageWidget extends StatelessWidget {
       fit: fit,
       width: width,
       height: height,
-      placeholder: (context, url) => Container(
-        color: vk.surfaceContainer,
-        child: Center(
-          child: CircularProgressIndicator(
-            color: vk.onSurfaceDim,
-            strokeWidth: 2,
-          ),
-        ),
-      ),
+      fadeInDuration: const Duration(milliseconds: 400),
+      fadeOutDuration: const Duration(milliseconds: 200),
+      fadeInCurve: Curves.easeOutCubic,
+      placeholder: (context, url) => buildPlaceholder(),
       errorWidget: (context, url, error) => Container(
         color: vk.surfaceContainer,
-        child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
+        child: Icon(Icons.broken_image_rounded, color: vk.onSurfaceDim),
       ),
     );
   }

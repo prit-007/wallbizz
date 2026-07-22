@@ -8,15 +8,18 @@ class SearchResult {
   final int currentPage;
   final int lastPage;
   final int total;
+  final String? error;
 
   SearchResult({
     required this.wallpapers,
     required this.currentPage,
     required this.lastPage,
     required this.total,
+    this.error,
   });
 
   bool get hasMore => currentPage < lastPage;
+  bool get hasError => error != null;
 }
 
 class WallhavenSearch {
@@ -133,9 +136,12 @@ class WallhavenSearch {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }
-    } catch (_) {}
-
-    return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0);
+      final body = response.body;
+      final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
+      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+    } catch (e) {
+      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+    }
   }
 
   Future<SearchResult> searchAuthenticated({
@@ -171,8 +177,11 @@ class WallhavenSearch {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }
-    } catch (_) {}
-
-    return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0);
+      final body = response.body;
+      final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
+      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+    } catch (e) {
+      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+    }
   }
 }

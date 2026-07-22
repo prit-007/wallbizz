@@ -1,9 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/wallpaper.dart';
 import 'network_image.dart';
 
-class WallpaperCard extends StatelessWidget {
+class WallpaperCard extends StatefulWidget {
   final Wallpaper wallpaper;
   final VoidCallback? onTap;
   final VoidCallback? onHeartTap;
@@ -18,89 +20,105 @@ class WallpaperCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  State<WallpaperCard> createState() => _WallpaperCardState();
+}
 
+class _WallpaperCardState extends State<WallpaperCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(
-          aspectRatio: wallpaper.aspectRatio,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              NetworkImageWidget(
-                imageUrl: wallpaper.urlThumb,
-                fit: BoxFit.cover,
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.7),
-                      ],
-                    ),
-                  ),
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.decelerate,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: AspectRatio(
+            aspectRatio: widget.wallpaper.aspectRatio,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                NetworkImageWidget(
+                  imageUrl: widget.wallpaper.urlThumb,
+                  fit: BoxFit.cover,
                 ),
-              ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    wallpaper.resolution,
-                    style: TextStyle(
-                      color: cs.onSurface,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              if (onHeartTap != null)
+
                 Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: onHeartTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isWishlisted ? Icons.favorite : Icons.favorite_border,
-                        color: isWishlisted ? Colors.red : cs.onSurface,
-                        size: 18,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 70,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.75),
+                        ],
                       ),
                     ),
                   ),
                 ),
-            ],
+
+                Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            color: Colors.black.withValues(alpha: 0.35),
+                        child: Text(
+                          widget.wallpaper.resolution,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                if (widget.onHeartTap != null)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: widget.onHeartTap,
+                      child: ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                          child: Container(
+                            padding: const EdgeInsets.all(7),
+                        color: Colors.black.withValues(alpha: 0.35),
+                            child: Icon(
+                              widget.isWishlisted ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                              color: widget.isWishlisted ? Colors.redAccent : Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
-    )
-        .animate()
-        .fade(duration: 400.ms)
-        .slideY(begin: 0.15, end: 0);
+    ).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0);
   }
 }

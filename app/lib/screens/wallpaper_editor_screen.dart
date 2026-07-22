@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../config/theme_config.dart';
 import '../utils/color_utils.dart';
 
 class WallpaperEditorScreen extends StatefulWidget {
@@ -31,8 +32,7 @@ class WallpaperEditorScreen extends StatefulWidget {
 class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
   double _rotation = 0;
   bool _isApplying = false;
-  final TransformationController _transformationController =
-      TransformationController();
+  final TransformationController _transformationController = TransformationController();
 
   @override
   void dispose() {
@@ -40,14 +40,8 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
     super.dispose();
   }
 
-  void _rotateLeft() {
-    setState(() => _rotation -= math.pi / 2);
-  }
-
-  void _rotateRight() {
-    setState(() => _rotation += math.pi / 2);
-  }
-
+  void _rotateLeft() => setState(() => _rotation -= math.pi / 2);
+  void _rotateRight() => setState(() => _rotation += math.pi / 2);
   void _resetView() {
     _transformationController.value = Matrix4.identity();
     setState(() => _rotation = 0);
@@ -55,12 +49,11 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
     final file = File(widget.localPath);
     final hasLocalFile = file.existsSync();
 
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -74,94 +67,41 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
               child: Transform.rotate(
                 angle: _rotation,
                 child: hasLocalFile
-                    ? Image.file(
-                        file,
-                        fit: BoxFit.contain,
-                      )
+                    ? Image.file(file, fit: BoxFit.contain)
                     : Image.network(
                         widget.urlFull,
                         fit: BoxFit.contain,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(color: vk.onSurfaceDim),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Center(
-                            child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
-                          );
-                        },
+                        loadingBuilder: (context, child, p) => p == null ? child : const Center(child: CircularProgressIndicator(color: Colors.white)),
                       ),
               ),
             ),
           ),
+
           Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
+            top: MediaQuery.of(context).padding.top + 12,
             left: 16,
-            child: GestureDetector(
+            child: _buildFrostedButton(
+              icon: Icons.arrow_back_ios_new_rounded,
               onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: cs.onSurface,
-                  size: 24,
-                ),
-              ),
             ),
           ),
+
           Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            right: 16,
-            child: GestureDetector(
-              onTap: _resetView,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.center_focus_strong,
-                  color: cs.onSurface,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
+            bottom: 0, left: 0, right: 0,
             child: Container(
-              padding: EdgeInsets.fromLTRB(
-                24,
-                24,
-                24,
-                MediaQuery.of(context).padding.bottom + 24,
-              ),
+              padding: EdgeInsets.fromLTRB(24, 40, 24, MediaQuery.of(context).padding.bottom + 24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.9),
-                  ],
+                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.9)],
                 ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildRotationPreview(),
-                  const SizedBox(height: 16),
-                  _buildRotationButtons(),
-                  const SizedBox(height: 16),
+                  _buildFloatingControlDock(),
+                  const SizedBox(height: 24),
                   _buildApplyButton(),
                 ],
               ),
@@ -172,124 +112,107 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
     );
   }
 
-  Widget _buildRotationPreview() {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
-    final degrees = (_rotation * 180 / math.pi).round() % 360;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: vk.glassBackground,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.screen_rotation,
-            color: cs.onSurface.withValues(alpha: 0.7),
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '$degrees°',
-            style: GoogleFonts.inter(
-              color: cs.onSurface,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            '${widget.width} × ${widget.height}',
-            style: GoogleFonts.inter(
-              color: vk.onSurfaceSubtle,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRotationButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildCircleButton(
-          icon: Icons.rotate_left,
-          onTap: _rotateLeft,
-        ),
-        const SizedBox(width: 24),
-        _buildCircleButton(
-          icon: Icons.rotate_right,
-          onTap: _rotateRight,
-        ),
-        const SizedBox(width: 24),
-        _buildCircleButton(
-          icon: Icons.restart_alt,
-          onTap: _resetView,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCircleButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
+  Widget _buildFrostedButton({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: vk.glassBackground,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: vk.glassBorder,
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.4),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
         ),
-        child: Icon(icon, color: cs.onSurface, size: 24),
       ),
+    );
+  }
+
+  Widget _buildFloatingControlDock() {
+    final degrees = (_rotation * 180 / math.pi).round() % 360;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildCircleButton(icon: Icons.rotate_left_rounded, onTap: _rotateLeft),
+              const SizedBox(width: 16),
+              Column(
+                children: [
+                  Text('$degrees\u00B0', style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text('ROTATION', style: GoogleFonts.oswald(color: Colors.white.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1)),
+                ],
+              ),
+              const SizedBox(width: 16),
+              _buildCircleButton(icon: Icons.rotate_right_rounded, onTap: _rotateRight),
+              Container(height: 30, width: 1, color: Colors.white.withValues(alpha: 0.2), margin: const EdgeInsets.symmetric(horizontal: 16)),
+              _buildCircleButton(icon: Icons.filter_center_focus_rounded, onTap: _resetView),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircleButton({required IconData icon, required VoidCallback onTap}) {
+    final notifier = ValueNotifier(false);
+    return ValueListenableBuilder<bool>(
+      valueListenable: notifier,
+      builder: (context, isPressed, _) {
+        return GestureDetector(
+          onTapDown: (_) => notifier.value = true,
+          onTapUp: (_) => notifier.value = false,
+          onTapCancel: () => notifier.value = false,
+          onTap: () {
+            notifier.value = false;
+            onTap();
+          },
+          child: AnimatedScale(
+            scale: isPressed ? 0.85 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            child: Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              ),
+              child: Icon(icon, color: Colors.white, size: 22),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildApplyButton() {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: ElevatedButton.icon(
         onPressed: _isApplying ? null : _showTargetDialog,
-        icon: _isApplying
-            ? SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onSurface,
-                ),
-              )
-            : const Icon(Icons.wallpaper),
+        icon: _isApplying ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)) : const Icon(Icons.wallpaper_rounded, color: Colors.black),
         label: Text(
-          _isApplying ? 'Applying...' : 'Apply Wallpaper',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          _isApplying ? 'APPLYING...' : 'APPLY WALLPAPER',
+          style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.black),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorUtils.hexToColor(widget.primaryColor),
-          foregroundColor: cs.onSurface,
-          disabledBackgroundColor: vk.surfaceOverlay,
-          disabledForegroundColor: vk.onSurfaceSubtle,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
     );
@@ -300,163 +223,144 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        final cs = Theme.of(context).colorScheme;
-        final vk = context.vivek;
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(
-              color: vk.glassBorder,
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.8),
+                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.5)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 48, height: 5,
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(3)),
+                  ).animate().fade(duration: 400.ms).slideY(begin: 0.5, end: 0),
+                  const SizedBox(height: 32),
+                  Text('SET WALLPAPER', style: GoogleFonts.oswald(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2.5, color: Colors.white))
+                    .animate().fade(duration: 400.ms, delay: 80.ms).slideY(begin: 0.3, end: 0),
+                  const SizedBox(height: 32),
+                  _buildTargetOption('HOME SCREEN', Icons.home_rounded, WallpaperTarget.home, 100),
+                  const SizedBox(height: 12),
+                  _buildTargetOption('LOCK SCREEN', Icons.lock_rounded, WallpaperTarget.lock, 200),
+                  const SizedBox(height: 12),
+                  _buildTargetOption('BOTH SCREENS', Icons.phone_android_rounded, WallpaperTarget.both, 300),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom),
+                ],
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: vk.glassBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'SET WALLPAPER',
-                style: GoogleFonts.oswald(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                  color: cs.onSurface,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildTargetOption('Home Screen', Icons.home_outlined, WallpaperTarget.home),
-              const SizedBox(height: 8),
-              _buildTargetOption('Lock Screen', Icons.lock_outline, WallpaperTarget.lock),
-              const SizedBox(height: 8),
-              _buildTargetOption('Both Screens', Icons.phone_android, WallpaperTarget.both),
-              const SizedBox(height: 16),
-            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildTargetOption(String title, IconData icon, WallpaperTarget target) {
-    final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Navigator.pop(context);
-          _applyWallpaper(target);
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            color: vk.glassBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: vk.glassBackground,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: cs.onSurface.withValues(alpha: 0.7), size: 22),
-              const SizedBox(width: 16),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: cs.onSurface,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: vk.glassBorder,
-                size: 14,
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget _buildTargetOption(String title, IconData icon, WallpaperTarget target, int delay) {
+    return _TargetOption(
+      title: title,
+      icon: icon,
+      target: target,
+      delay: delay,
+      onApply: () {
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (mounted) _applyWallpaper(target);
+        });
+      },
     );
   }
 
   Future<void> _applyWallpaper(WallpaperTarget target) async {
     if (_isApplying) return;
-
     setState(() => _isApplying = true);
-
-    if (mounted) {
-      final cs = Theme.of(context).colorScheme;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onSurface,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text('Applying wallpaper...'),
-            ],
-          ),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-    }
 
     try {
       final hasLocalFile = File(widget.localPath).existsSync();
       final WallpaperResult result = await AsyncWallpaper.setWallpaper(
         WallpaperRequest(
           target: target,
-          sourceType: hasLocalFile
-              ? WallpaperSourceType.file
-              : WallpaperSourceType.url,
+          sourceType: hasLocalFile ? WallpaperSourceType.file : WallpaperSourceType.url,
           source: hasLocalFile ? widget.localPath : widget.urlFull,
           goToHome: true,
         ),
       );
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).clearSnackBars();
 
       if (result.isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Wallpaper set successfully!')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wallpaper set successfully!')));
         Navigator.of(context).pop();
       } else {
         setState(() => _isApplying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: ${result.error?.message ?? "Unknown error"}'),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: ${result.error?.message ?? "Unknown error"}')));
       }
     } catch (e) {
       if (!mounted) return;
-
       setState(() => _isApplying = false);
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
+  }
+}
+
+class _TargetOption extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final WallpaperTarget target;
+  final int delay;
+  final VoidCallback onApply;
+
+  const _TargetOption({
+    required this.title,
+    required this.icon,
+    required this.target,
+    required this.delay,
+    required this.onApply,
+  });
+
+  @override
+  State<_TargetOption> createState() => _TargetOptionState();
+}
+
+class _TargetOptionState extends State<_TargetOption> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onApply,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            boxShadow: _isPressed
+                ? []
+                : [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))],
+          ),
+          child: Row(
+            children: [
+              Icon(widget.icon, color: Colors.white, size: 24),
+              const SizedBox(width: 16),
+              Text(widget.title, style: GoogleFonts.inter(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              const Spacer(),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.4), size: 16),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fade(duration: 400.ms, delay: widget.delay.ms).slideX(begin: 0.1, end: 0);
   }
 }

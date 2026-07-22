@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../utils/color_utils.dart';
 
@@ -14,23 +13,32 @@ class DynamicTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = ColorUtils.hexToColor(primaryColor);
+    final targetColor = ColorUtils.hexToColor(primaryColor);
 
-    return AnimatedContainer(
+    return TweenAnimationBuilder<Color?>(
       duration: const Duration(milliseconds: 600),
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.center,
-          radius: 1.5,
-          colors: [
-            color.withValues(alpha: 0.0),
-            color.withValues(alpha: 0.0),
-            color.withValues(alpha: 0.15),
-            color.withValues(alpha: 0.35),
-          ],
-          stops: const [0.0, 0.5, 0.8, 1.0],
-        ),
-      ),
+      curve: Curves.easeOutCubic,
+      tween: ColorTween(begin: Colors.black, end: targetColor),
+      builder: (context, color, child) {
+        final activeColor = color ?? Colors.transparent;
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 600),
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0, -0.4),
+              radius: 1.4,
+              colors: [
+                activeColor.withValues(alpha: 0.25),
+                activeColor.withValues(alpha: 0.08),
+                Colors.black,
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
+          child: child,
+        );
+      },
       child: child,
     );
   }
