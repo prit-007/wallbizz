@@ -42,8 +42,7 @@ func searchProxyHandler(cfg config.Config, wallhavenBase string) func(*fiber.Ctx
 		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
 			token := strings.TrimPrefix(authHeader, "Bearer ")
 			if err := verifySupabaseToken(cfg, token); err != nil {
-				log.Warn().Err(err).Msg("Invalid JWT token")
-				return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token"})
+				log.Warn().Err(err).Msg("Invalid JWT token — continuing without auth")
 			}
 		} else {
 			log.Debug().Str("path", c.Path()).Msg("Search request without authorization (SFW proxy)")

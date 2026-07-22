@@ -122,9 +122,15 @@ func TestSearchProxy_InvalidJWT(t *testing.T) {
 		t.Fatalf("Request failed: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusUnauthorized {
+	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		t.Errorf("Expected 401, got %d: %s", resp.StatusCode, string(body))
+		t.Errorf("Expected 200 (proxy continues despite invalid JWT), got %d: %s", resp.StatusCode, string(body))
+	}
+
+	var wallData models.WallhavenResponse
+	json.NewDecoder(resp.Body).Decode(&wallData)
+	if len(wallData.Data) == 0 {
+		t.Error("Expected wallpapers despite invalid JWT")
 	}
 }
 
@@ -263,7 +269,13 @@ func TestSearchProxy_WallhavenError(t *testing.T) {
 
 func TestSearchProxy_SupabaseDown(t *testing.T) {
 	wallhaven := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Error("Wallhaven should not be called if Supabase auth fails")
+		resp := models.WallhavenResponse{Data: []models.WallhavenImage{}}
+		resp.Meta.CurrentPage = 1
+		resp.Meta.LastPage = 0
+		resp.Meta.PerPage = 24
+		resp.Meta.Total = 0
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
 	}))
 	defer wallhaven.Close()
 
@@ -280,9 +292,10 @@ func TestSearchProxy_SupabaseDown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
 	}
-	if resp.StatusCode != http.StatusUnauthorized {
+
+	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		t.Errorf("Expected 401 when Supabase is down, got %d: %s", resp.StatusCode, string(body))
+		t.Errorf("Expected 200 (proxy continues despite Supabase down), got %d: %s", resp.StatusCode, string(body))
 	}
 }
 
