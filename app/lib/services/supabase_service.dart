@@ -131,7 +131,7 @@ class SupabaseService {
 
   Future<List<Moodboard>> fetchMoodboards(String userId) async {
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/moodboards?select=id,name,created_at,item_count:items(count)&user_id=eq.$userId&order=created_at.desc',
+      '$_baseUrl/rest/v1/moodboards?select=id,name,created_at,item_count:moodboard_items(count)&user_id=eq.$userId&order=created_at.desc',
     );
     final response = await http.get(url, headers: _authHeaders);
 

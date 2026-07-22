@@ -1,5 +1,7 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,10 +13,21 @@ import '../widgets/specs_card.dart';
 import '../models/wallpaper.dart';
 import 'wallpaper_editor_screen.dart';
 
-class DownloadedDetailScreen extends StatelessWidget {
+class DownloadedDetailScreen extends StatefulWidget {
   final DownloadedWallpaper downloadedWallpaper;
 
   const DownloadedDetailScreen({super.key, required this.downloadedWallpaper});
+
+  @override
+  State<DownloadedDetailScreen> createState() => _DownloadedDetailScreenState();
+}
+
+class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with SingleTickerProviderStateMixin {
+  final TransformationController _transformController = TransformationController();
+  late AnimationController _animationController;
+  Animation<Matrix4>? _zoomAnimation;
+
+  DownloadedWallpaper get downloadedWallpaper => widget.downloadedWallpaper;
 
   Wallpaper get _wallpaper => Wallpaper(
         id: 'wh-${downloadedWallpaper.wallhavenId}',
@@ -32,6 +45,57 @@ class DownloadedDetailScreen extends StatelessWidget {
       );
 
   @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(() {
+        if (_zoomAnimation != null) {
+          _transformController.value = _zoomAnimation!.value;
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _transformController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTap(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    final currentMatrix = _transformController.value;
+    if (_animationController.isAnimating) return;
+
+    final isZoomed = currentMatrix.getMaxScaleOnAxis() > 1.1;
+
+    if (isZoomed) {
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: Matrix4.identity(),
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    } else {
+      final position = details.localPosition;
+      final targetMatrix = Matrix4.identity()
+        ..translate(-position.dx * 1.5, -position.dy * 1.5)
+        ..scale(2.5);
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: targetMatrix,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    }
+    _animationController.forward(from: 0);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
@@ -45,45 +109,62 @@ class DownloadedDetailScreen extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            hasLocalFile
-                ? Image.file(file, fit: BoxFit.contain)
-                : Image.network(
-                    downloadedWallpaper.urlFull,
-                    fit: BoxFit.contain,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: vk.surfaceContainer,
-                        child: Center(
-                          child: CircularProgressIndicator(color: vk.onSurfaceDim),
+            GestureDetector(
+              onDoubleTapDown: _handleDoubleTap,
+              child: InteractiveViewer(
+                transformationController: _transformController,
+                minScale: 1.0,
+                maxScale: 5.0,
+                panEnabled: true,
+                scaleEnabled: true,
+                child: Center(
+                  child: hasLocalFile
+                      ? Image.file(file, fit: BoxFit.contain)
+                      : Image.network(
+                          downloadedWallpaper.urlFull,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: vk.surfaceContainer,
+                              child: Center(
+                                child: CircularProgressIndicator(color: vk.onSurfaceDim),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: vk.surfaceContainer,
+                              child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
+                            );
+                          },
                         ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: vk.surfaceContainer,
-                        child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
-                      );
-                    },
-                  ),
+                ),
+              ),
+            ),
+
+            // Bottom Gradient Overlay (Wrapped in IgnorePointer to fix pinch-to-zoom block)
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
-                height: 300,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.8),
-                    ],
+              child: IgnorePointer(
+                child: Container(
+                  height: 300,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.8),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
+
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               left: 16,
@@ -215,18 +296,45 @@ class DownloadedDetailScreen extends StatelessWidget {
     );
   }
 
-  void _shareWallpaper(BuildContext context) {
+  Future<void> _shareWallpaper(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(color: Colors.white),
+                const SizedBox(height: 20),
+                Text('Preparing share...',
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
     final file = File(downloadedWallpaper.localPath);
     if (file.existsSync()) {
-      Share.shareXFiles(
+      await Share.shareXFiles(
         [XFile(downloadedWallpaper.localPath)],
         text: 'Check out this wallpaper from Vivek Wallpapers!',
       );
     } else {
-      Share.share(
+      await Share.share(
         'Check out this wallpaper from Vivek Wallpapers!\n${downloadedWallpaper.urlFull}',
         subject: 'Vivek Wallpapers',
       );
     }
+    if (context.mounted) Navigator.of(context).pop();
   }
 }

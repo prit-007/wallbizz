@@ -12,12 +12,18 @@ class Moodboard {
   });
 
   factory Moodboard.fromJson(Map<String, dynamic> json) {
+    int itemCount = 0;
+    final raw = json['item_count'];
+    if (raw is List && raw.isNotEmpty) {
+      final first = raw.first;
+      if (first is Map) itemCount = (first['count'] as int?) ?? 0;
+    } else if (raw is int) {
+      itemCount = raw;
+    }
     return Moodboard(
       id: json['id'] as String,
       name: json['name'] as String,
-      itemCount: json['item_count'] is Map
-          ? ((json['item_count'] as Map?)?.values.first as int? ?? 0)
-          : (json['item_count'] as int? ?? 0),
+      itemCount: itemCount,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

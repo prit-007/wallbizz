@@ -20,11 +20,13 @@ const (
 )
 
 var categoryQueryMap = map[string]string{
-	"trending": "",
-	"anime":    "q=anime&categories=010",
-	"dark":     "q=dark&categories=111&purity=100",
-	"desktop":  "ratios=16x9,16x10",
-	"mobile":   "ratios=9x16,10x16",
+	"trending":  "",
+	"anime":     "q=anime&categories=010",
+	"nature":    "q=nature&categories=111&purity=100",
+	"cyberpunk": "q=cyberpunk&categories=111&purity=100",
+	"space":     "q=space&categories=111&purity=100",
+	"desktop":   "ratios=16x9,16x10",
+	"mobile":    "ratios=9x16,10x16",
 }
 
 var httpClient = &http.Client{Timeout: httpTimeout}

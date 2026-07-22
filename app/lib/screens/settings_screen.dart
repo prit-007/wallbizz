@@ -284,28 +284,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               width: 1,
             ),
           ),
-          child: SwitchListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            title: Text(
-              'Dark Mode',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            child: SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              title: Text(
+                'Dark Mode',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
               ),
-            ),
-            subtitle: Text(
-              'Use dark theme throughout the app',
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: vk.onSurfaceSubtle,
+              subtitle: Text(
+                'Use dark theme throughout the app',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: vk.onSurfaceSubtle,
+                ),
               ),
+              value: _isDarkMode,
+              onChanged: _toggleTheme,
+              activeTrackColor: cs.primary.withValues(alpha: 0.3),
+              inactiveThumbColor: vk.onSurfaceSubtle,
+              inactiveTrackColor: vk.surfaceContainerLow,
             ),
-            value: _isDarkMode,
-            onChanged: _toggleTheme,
-            activeTrackColor: cs.primary.withValues(alpha: 0.3),
-            inactiveThumbColor: vk.onSurfaceSubtle,
-            inactiveTrackColor: vk.surfaceContainerLow,
           ),
         ),
 

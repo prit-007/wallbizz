@@ -12,7 +12,7 @@ import (
 )
 
 func TestCategoryQueryMap_ContainsAllCategories(t *testing.T) {
-	expected := []string{"trending", "anime", "dark", "desktop", "mobile"}
+	expected := []string{"trending", "anime", "nature", "cyberpunk", "space", "desktop", "mobile"}
 
 	for _, cat := range expected {
 		if _, ok := categoryQueryMap[cat]; !ok {
@@ -33,7 +33,9 @@ func TestCategoryQueryMap_QueryParams(t *testing.T) {
 	}{
 		{"trending", nil, []string{"q=", "ratios="}},
 		{"anime", []string{"q=anime", "categories=010"}, nil},
-		{"dark", []string{"q=dark", "categories=111", "purity=100"}, nil},
+		{"nature", []string{"q=nature", "categories=111", "purity=100"}, nil},
+		{"cyberpunk", []string{"q=cyberpunk", "categories=111", "purity=100"}, nil},
+		{"space", []string{"q=space", "categories=111", "purity=100"}, nil},
 		{"desktop", []string{"ratios=16x9"}, nil},
 		{"mobile", []string{"ratios=9x16"}, nil},
 	}

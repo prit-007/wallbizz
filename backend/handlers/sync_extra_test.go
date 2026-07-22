@@ -182,7 +182,7 @@ func TestFetchCategory_AllCategoriesHaveQueries(t *testing.T) {
 }
 
 func TestCategoryQueryMap_KeyCount(t *testing.T) {
-	expectedCount := 5
+	expectedCount := 7
 	if len(categoryQueryMap) != expectedCount {
 		t.Errorf("Expected %d categories, got %d", expectedCount, len(categoryQueryMap))
 	}
@@ -201,10 +201,24 @@ func TestCategoryQueryMap_AnimeHasAnimeQuery(t *testing.T) {
 	}
 }
 
-func TestCategoryQueryMap_DarkHasQuery(t *testing.T) {
-	params := categoryQueryMap["dark"]
-	if !strings.Contains(params, "q=dark") {
-		t.Errorf("Expected 'q=dark' in dark params, got: '%s'", params)
+func TestCategoryQueryMap_NatureHasQuery(t *testing.T) {
+	params := categoryQueryMap["nature"]
+	if !strings.Contains(params, "q=nature") {
+		t.Errorf("Expected 'q=nature' in nature params, got: '%s'", params)
+	}
+}
+
+func TestCategoryQueryMap_CyberpunkHasQuery(t *testing.T) {
+	params := categoryQueryMap["cyberpunk"]
+	if !strings.Contains(params, "q=cyberpunk") {
+		t.Errorf("Expected 'q=cyberpunk' in cyberpunk params, got: '%s'", params)
+	}
+}
+
+func TestCategoryQueryMap_SpaceHasQuery(t *testing.T) {
+	params := categoryQueryMap["space"]
+	if !strings.Contains(params, "q=space") {
+		t.Errorf("Expected 'q=space' in space params, got: '%s'", params)
 	}
 }
 

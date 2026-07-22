@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/backend_config.dart';
 import 'config/supabase_config.dart';
 import 'config/theme_config.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +71,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: _lightTheme(),
           darkTheme: _darkTheme(),
-          home: const HomeScreen(),
+          home: const SplashScreen(),
         );
       },
     );

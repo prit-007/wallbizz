@@ -20,7 +20,9 @@ class _CategoryTabsState extends State<CategoryTabs> {
   final List<Map<String, String>> _categories = [
     {'label': 'Trending', 'value': 'trending', 'icon': '\u{1F525}'},
     {'label': 'Anime', 'value': 'anime', 'icon': '\u{1F338}'},
-    {'label': 'Dark', 'value': 'dark', 'icon': '\u{1F31A}'},
+    {'label': 'Nature', 'value': 'nature', 'icon': '\u{1F331}'},
+    {'label': 'Cyberpunk', 'value': 'cyberpunk', 'icon': '\u{1F916}'},
+    {'label': 'Space', 'value': 'space', 'icon': '\u{1F680}'},
     {'label': 'Desktop', 'value': 'desktop', 'icon': '\u{1F5A5}'},
     {'label': 'Mobile', 'value': 'mobile', 'icon': '\u{1F4F1}'},
   ];

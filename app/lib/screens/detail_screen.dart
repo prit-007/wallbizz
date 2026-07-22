@@ -33,6 +33,7 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
   bool _isDownloading = false;
   bool _isDownloaded = false;
   bool _isWishlisted = false;
+  bool _isUiVisible = true;
 
   final TransformationController _transformController = TransformationController();
   late AnimationController _animationController;
@@ -122,168 +123,208 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final ambientColor = ColorUtils.hexToColor(wallpaper.primaryColor);
 
-    return GestureHintOverlay(
-      child: Scaffold(
+    return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.5), BlendMode.srcOver),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 1.5,
-                height: MediaQuery.of(context).size.height * 1.5,
-                child: Transform.translate(
-                  offset: Offset(-MediaQuery.of(context).size.width * 0.25, -MediaQuery.of(context).size.height * 0.25),
-                  child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.cover),
-                ),
-              ),
-            ),
-          ).animate().fade(duration: 600.ms),
-
-          Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.0,
-                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
-                stops: const [0.2, 1.0],
-              ),
-            ),
-          ),
-
-          GestureDetector(
-            onDoubleTapDown: _handleDoubleTap,
-            onVerticalDragUpdate: (details) {
-              final scale = _transformController.value.getMaxScaleOnAxis();
-              if (scale <= 1.1 && details.primaryDelta! > 10) {
-                HapticFeedback.mediumImpact();
-                Navigator.of(context).pop();
-              }
-            },
-            child: InteractiveViewer(
-              transformationController: _transformController,
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Center(
-                child: Hero(
-                  tag: wallpaper.id,
-                  child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.contain),
-                ),
-              ),
-            ),
-          ),
-
-          Positioned(
-            bottom: 0, left: 0, right: 0,
-            child: Container(
-              height: 450,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    ambientColor.withValues(alpha: 0.2),
-                    Colors.black.withValues(alpha: 0.95),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 16,
-            child: _FrostedCircleButton(
-              icon: Icons.arrow_back_ios_new_rounded,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
-              },
-            ),
-          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: -0.2, end: 0),
-
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            right: 16,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _FrostedCircleButton(
-                  icon: _isWishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  iconColor: _isWishlisted ? Colors.redAccent : Colors.white,
-                  onTap: _onHeartTap,
-                ),
-                const SizedBox(width: 12),
-                _FrostedCircleButton(
-                  icon: Icons.dashboard_customize_rounded,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _showMoodboardSheet(context);
-                  },
-                ),
-                const SizedBox(width: 12),
-                _FrostedCircleButton(
-                  icon: Icons.ios_share_rounded,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _shareWallpaper(context);
-                  },
-                ),
-              ],
-            ),
-          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: 0.2, end: 0),
-
-          Positioned(
-            bottom: 0, left: 0, right: 0,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SpecsCard(wallpaper: wallpaper),
-                  const SizedBox(height: 24),
-
-                  _GlassActionButton(
-                    onPressed: _isDownloading ? null : () {
-                      HapticFeedback.mediumImpact();
-                      _downloadWallpaper(context);
-                    },
-                    isDownloading: _isDownloading,
-                    isDownloaded: _isDownloaded,
-                    label: _isDownloading ? 'DOWNLOADING...' : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD WALLPAPER'),
-                    icon: _isDownloaded ? Icons.check_circle_rounded : Icons.download_rounded,
-                    backgroundColor: _isDownloaded ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.2),
-                    textColor: Colors.white,
+      body: GestureHintOverlay(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Ambient Blur Background Layer
+            Positioned.fill(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.5), BlendMode.srcOver),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 1.5,
+                    height: MediaQuery.of(context).size.height * 1.5,
+                    child: Transform.translate(
+                      offset: Offset(-MediaQuery.of(context).size.width * 0.25, -MediaQuery.of(context).size.height * 0.25),
+                      child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.cover),
+                    ),
                   ),
+                ),
+              ).animate().fade(duration: 600.ms),
+            ),
 
-                  if (!kIsWeb) ...[
-                    const SizedBox(height: 12),
-                    _GlassActionButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        _setWallpaper(context);
-                      },
-                      isDownloading: false,
-                      isDownloaded: false,
-                      label: 'SET AS WALLPAPER',
-                      icon: Icons.wallpaper_rounded,
-                      backgroundColor: ambientColor,
-                      textColor: ambientColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+            // 2. Base Radial Darkening Gradient
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment.center,
+                      radius: 1.0,
+                      colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
+                      stops: const [0.2, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 3. Core Interactive Viewer Layer + Single Tap to Toggle UI
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _isUiVisible = !_isUiVisible);
+                  HapticFeedback.selectionClick();
+                },
+                onDoubleTapDown: _handleDoubleTap,
+                child: InteractiveViewer(
+                  transformationController: _transformController,
+                  minScale: 1.0,
+                  maxScale: 5.0,
+                  panEnabled: true,
+                  scaleEnabled: true,
+                  child: Center(
+                    child: Hero(
+                      tag: wallpaper.id,
+                      child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.contain),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 4. Bottom Gradient Overlay (Fades out when UI is hidden)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: _isUiVisible ? 1.0 : 0.0,
+              child: Positioned(
+                bottom: 0, left: 0, right: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    height: 450,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          ambientColor.withValues(alpha: 0.2),
+                          Colors.black.withValues(alpha: 0.95),
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 5. Top Action Buttons (Slides up and fades out)
+            AnimatedSlide(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOutCubic,
+              offset: _isUiVisible ? Offset.zero : const Offset(0, -1.5),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 250),
+                opacity: _isUiVisible ? 1.0 : 0.0,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 12,
+                      left: 16,
+                      child: _FrostedCircleButton(
+                        icon: Icons.arrow_back_ios_new_rounded,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 12,
+                      right: 16,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _FrostedCircleButton(
+                            icon: _isWishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                            iconColor: _isWishlisted ? Colors.redAccent : Colors.white,
+                            onTap: _onHeartTap,
+                          ),
+                          const SizedBox(width: 12),
+                          _FrostedCircleButton(
+                            icon: Icons.dashboard_customize_rounded,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              _showMoodboardSheet(context);
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          _FrostedCircleButton(
+                            icon: Icons.ios_share_rounded,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              _shareWallpaper(context);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ],
+                ),
               ),
-            ).animate().slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic).fade(duration: 500.ms),
-          ),
-        ],
+            ),
+
+            // 6. Bottom Action Panel & Specs (Slides down and fades out)
+            AnimatedSlide(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOutCubic,
+              offset: _isUiVisible ? Offset.zero : const Offset(0, 1.5),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 250),
+                opacity: _isUiVisible ? 1.0 : 0.0,
+                child: Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SpecsCard(wallpaper: wallpaper),
+                        const SizedBox(height: 24),
+
+                        _GlassActionButton(
+                          onPressed: _isDownloading ? null : () {
+                            HapticFeedback.mediumImpact();
+                            _downloadWallpaper(context);
+                          },
+                          isDownloading: _isDownloading,
+                          isDownloaded: _isDownloaded,
+                          label: _isDownloading ? 'DOWNLOADING...' : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD WALLPAPER'),
+                          icon: _isDownloaded ? Icons.check_circle_rounded : Icons.download_rounded,
+                          backgroundColor: _isDownloaded ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.2),
+                          textColor: Colors.white,
+                        ),
+
+                        if (!kIsWeb) ...[
+                          const SizedBox(height: 12),
+                          _GlassActionButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              _setWallpaper(context);
+                            },
+                            isDownloading: false,
+                            isDownloaded: false,
+                            label: 'SET AS WALLPAPER',
+                            icon: Icons.wallpaper_rounded,
+                            backgroundColor: ambientColor,
+                            textColor: ambientColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -322,46 +363,71 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              margin: const EdgeInsets.symmetric(horizontal: 40),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.75),
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ValueListenableBuilder<double>(
-                    valueListenable: progress,
-                    builder: (_, value, _) => SizedBox(
-                      width: 80, height: 80,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          CircularProgressIndicator(
-                            value: value > 0 ? value : null,
-                            strokeWidth: 4,
-                            backgroundColor: Colors.white.withValues(alpha: 0.1),
-                            valueColor: AlwaysStoppedAnimation<Color>(ColorUtils.hexToColor(wallpaper.primaryColor)),
-                          ),
-                          Center(
-                            child: value > 0
-                                ? Text('${(value * 100).toInt()}%', style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))
-                                : Icon(Icons.cloud_download_rounded, color: Colors.white.withValues(alpha: 0.8), size: 32),
-                          ),
-                        ],
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                margin: const EdgeInsets.symmetric(horizontal: 40),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ValueListenableBuilder<double>(
+                      valueListenable: progress,
+                      builder: (_, value, _) => SizedBox(
+                        width: 80, height: 80,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            CircularProgressIndicator(
+                              value: value > 0 ? value : null,
+                              strokeWidth: 4,
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                              valueColor: AlwaysStoppedAnimation<Color>(ColorUtils.hexToColor(wallpaper.primaryColor)),
+                            ),
+                            Center(
+                              child: value > 0
+                                  ? Text(
+                                      '${(value * 100).toInt()}%',
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    )
+                                  : Icon(Icons.cloud_download_rounded, color: Colors.white.withValues(alpha: 0.8), size: 32),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ).animate().fade(duration: 500.ms).scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), curve: Curves.easeOutCubic),
-                  const SizedBox(height: 24),
-                  Text('DOWNLOADING', style: GoogleFonts.oswald(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.white))
-                    .animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
-                  const SizedBox(height: 4),
-                  Text(wallpaper.resolution.replaceAll('x', ' \u00d7 '), style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withValues(alpha: 0.6)))
-                    .animate().fade(duration: 400.ms, delay: 180.ms),
-                ],
+                    ).animate().fade(duration: 500.ms).scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), curve: Curves.easeOutCubic),
+                    const SizedBox(height: 24),
+                    Text(
+                      'DOWNLOADING',
+                      style: GoogleFonts.oswald(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                        color: Colors.white,
+                        decoration: TextDecoration.none,
+                      ),
+                    ).animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
+                    const SizedBox(height: 4),
+                    Text(
+                      wallpaper.resolution.replaceAll('x', ' \u00d7 '),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        decoration: TextDecoration.none,
+                      ),
+                    ).animate().fade(duration: 400.ms, delay: 180.ms),
+                  ],
+                ),
               ),
             ).animate().fade(duration: 300.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic),
           ),
@@ -376,11 +442,38 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
     ));
   }
 
-  void _shareWallpaper(BuildContext context) {
-    ShareUtils.shareWithWatermark(
+  Future<void> _shareWallpaper(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(color: Colors.white),
+                const SizedBox(height: 20),
+                Text('Preparing share...',
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await ShareUtils.shareWithWatermark(
       imageUrl: wallpaper.urlFull,
       context: context,
     );
+    if (context.mounted) Navigator.of(context).pop();
   }
 
   void _showMoodboardSheet(BuildContext context) {
