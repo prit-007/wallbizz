@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
@@ -7,6 +8,8 @@ import '../models/wallpaper.dart';
 class SupabaseService {
   static final SupabaseService instance = SupabaseService._();
   SupabaseService._();
+
+  static final wishlistNotifier = ValueNotifier<int>(0);
 
   final String _baseUrl = SupabaseConfig.url;
   final String _anonKey = SupabaseConfig.anonKey;

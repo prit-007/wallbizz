@@ -30,12 +30,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
       (_) => _checkAuthAndLoad(),
     );
+    SupabaseService.wishlistNotifier.addListener(_onWishlistChanged);
   }
 
   @override
   void dispose() {
     _authSubscription?.cancel();
+    SupabaseService.wishlistNotifier.removeListener(_onWishlistChanged);
     super.dispose();
+  }
+
+  void _onWishlistChanged() {
+    _checkAuthAndLoad();
   }
 
   Future<void> _checkAuthAndLoad() async {

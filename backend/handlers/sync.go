@@ -22,7 +22,7 @@ const (
 var categoryQueryMap = map[string]string{
 	"trending": "",
 	"anime":    "q=anime&categories=010",
-	"amoled":   "q=amoled&categories=100&atleast=1920x1080",
+	"dark":     "q=dark&categories=111&purity=100",
 	"desktop":  "ratios=16x9,16x10",
 	"mobile":   "ratios=9x16,10x16",
 }

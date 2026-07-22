@@ -201,10 +201,10 @@ func TestCategoryQueryMap_AnimeHasAnimeQuery(t *testing.T) {
 	}
 }
 
-func TestCategoryQueryMap_AmoledHasBlackQuery(t *testing.T) {
-	params := categoryQueryMap["amoled"]
-	if !strings.Contains(params, "amoled") {
-		t.Errorf("Expected 'amoled' in amoled params, got: '%s'", params)
+func TestCategoryQueryMap_DarkHasQuery(t *testing.T) {
+	params := categoryQueryMap["dark"]
+	if !strings.Contains(params, "q=dark") {
+		t.Errorf("Expected 'q=dark' in dark params, got: '%s'", params)
 	}
 }
 

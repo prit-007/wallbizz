@@ -72,6 +72,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             _wishlistedIds.add(wallpaper.id);
           }
         });
+        SupabaseService.wishlistNotifier.value++;
       },
     );
   }
