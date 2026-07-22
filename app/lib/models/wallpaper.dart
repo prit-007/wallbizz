@@ -29,6 +29,9 @@ class Wallpaper {
 
   double get aspectRatio => width / height;
 
+  String get urlLargeThumb =>
+      urlFull.replaceFirst('w.wallhaven.cc/full/', 'th.wallhaven.cc/large/');
+
   String get formattedFileSize {
     if (fileSize < 1024 * 1024) {
       return '${(fileSize / 1024).toStringAsFixed(1)} KB';

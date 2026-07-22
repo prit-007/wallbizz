@@ -9,18 +9,37 @@ import 'package:share_plus/share_plus.dart';
 class ShareUtils {
   ShareUtils._();
 
+  static Future<void> cleanOldShareFiles() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final files = tempDir.list();
+      await for (final entity in files) {
+        if (entity is File && entity.path.contains('wallbizz_share_')) {
+          try {
+            final stat = await entity.stat();
+            if (DateTime.now().difference(stat.modified).inHours >= 1) {
+              await entity.delete();
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+  }
+
   static Future<void> shareWithWatermark({
     required String imageUrl,
     required BuildContext context,
+    Uint8List? imageBytes,
   }) async {
     try {
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode != 200) {
+      await cleanOldShareFiles();
+      final bytes = imageBytes ?? await _fetchImageBytes(imageUrl);
+      if (bytes == null) {
         _fallbackShare(imageUrl);
         return;
       }
 
-      final codec = await ui.instantiateImageCodec(response.bodyBytes);
+      final codec = await ui.instantiateImageCodec(bytes);
       final frame = await codec.getNextFrame();
       final originalImage = frame.image;
 
@@ -90,6 +109,12 @@ class ShareUtils {
     } catch (_) {
       _fallbackShare(imageUrl);
     }
+  }
+
+  static Future<Uint8List?> _fetchImageBytes(String imageUrl) async {
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode != 200) return null;
+    return response.bodyBytes;
   }
 
   static void _fallbackShare(String imageUrl) {

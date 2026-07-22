@@ -23,6 +23,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'trending';
   int _currentNavIndex = 0;
+  final List<bool> _tabBuilt = [true, false, false, false];
+  final List<ScrollController> _scrollControllers = [
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+  ];
 
   static const _navItems = [
     _DockItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'DISCOVER'),
@@ -32,6 +39,21 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void dispose() {
+    for (final c in _scrollControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _scrollToTop(int index) {
+    final c = _scrollControllers[index];
+    if (c.hasClients) {
+      c.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
@@ -39,13 +61,28 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       body: SafeArea(
         bottom: false,
-        child: IndexedStack(
-          index: _currentNavIndex,
+        child: Stack(
           children: [
-            _buildHomeTab(bottomInset + 90),
-            const WishlistScreen(),
-            const DownloadsScreen(),
-            const SettingsScreen(),
+            if (_tabBuilt[0])
+              Offstage(
+                offstage: _currentNavIndex != 0,
+                child: _buildHomeTab(bottomInset + 90),
+              ),
+            if (_tabBuilt[1])
+              Offstage(
+                offstage: _currentNavIndex != 1,
+                child: _LazyTab(builder: () => const WishlistScreen()),
+              ),
+            if (_tabBuilt[2])
+              Offstage(
+                offstage: _currentNavIndex != 2,
+                child: _LazyTab(builder: () => const DownloadsScreen()),
+              ),
+            if (_tabBuilt[3])
+              Offstage(
+                offstage: _currentNavIndex != 3,
+                child: _LazyTab(builder: () => const SettingsScreen()),
+              ),
           ],
         ),
       ),
@@ -54,7 +91,14 @@ class _HomeScreenState extends State<HomeScreen> {
         navItems: _navItems,
         onTap: (index) {
           HapticFeedback.lightImpact();
-          setState(() => _currentNavIndex = index);
+          if (index == _currentNavIndex) {
+            _scrollToTop(index);
+          } else {
+            setState(() {
+              _tabBuilt[index] = true;
+              _currentNavIndex = index;
+            });
+          }
         },
       ),
     );
@@ -159,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: StaggeredGrid(
                   key: ValueKey(_selectedCategory),
                   category: _selectedCategory,
+                  scrollController: _scrollControllers[0],
                   onWallpaperTap: (wallpaper) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -173,6 +218,24 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+}
+
+class _LazyTab extends StatefulWidget {
+  final Widget Function() builder;
+  const _LazyTab({required this.builder});
+
+  @override
+  State<_LazyTab> createState() => _LazyTabState();
+}
+
+class _LazyTabState extends State<_LazyTab> {
+  Widget? _child;
+
+  @override
+  Widget build(BuildContext context) {
+    _child ??= widget.builder();
+    return _child!;
   }
 }
 

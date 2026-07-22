@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -60,10 +59,7 @@ class _GestureHintOverlayState extends State<GestureHintOverlay> {
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Container(color: Colors.black.withValues(alpha: 0.65)),
-                  ),
+                  child: Container(color: Colors.black.withValues(alpha: 0.75)),
                 ),
                 Center(
                   child: Padding(
@@ -79,17 +75,24 @@ class _GestureHintOverlayState extends State<GestureHintOverlay> {
                         ),
                         const SizedBox(height: 20),
                         const _HintTile(
+                          icon: Icons.tap_and_play_rounded,
+                          title: 'TAP IMAGE TO HIDE UI',
+                          subtitle: 'Toggle controls for an unobstructed view',
+                          delay: 250,
+                        ),
+                        const SizedBox(height: 20),
+                        const _HintTile(
                           icon: Icons.touch_app_rounded,
                           title: 'DOUBLE-TAP TO ZOOM',
                           subtitle: 'Seamless 2.5x physics zoom',
-                          delay: 350,
+                          delay: 450,
                         ),
                         const SizedBox(height: 20),
                         const _HintTile(
                           icon: Icons.favorite_rounded,
                           title: 'HEART TO SAVE',
                           subtitle: 'Sync across all your devices',
-                          delay: 550,
+                          delay: 650,
                         ),
                         const SizedBox(height: 40),
                         Container(

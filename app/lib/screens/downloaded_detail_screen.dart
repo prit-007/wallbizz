@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import '../config/theme_config.dart';
 import '../models/downloaded_wallpaper.dart';
 import '../utils/color_utils.dart';
+import '../utils/share_utils.dart';
 import '../widgets/dynamic_theme.dart';
 import '../widgets/specs_card.dart';
 import '../models/wallpaper.dart';
@@ -303,38 +303,43 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
       builder: (_) => PopScope(
         canPop: false,
         child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.75),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(color: Colors.white),
-                const SizedBox(height: 20),
-                Text('Preparing share...',
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
-                ),
-              ],
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.75),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(color: Colors.white),
+                  const SizedBox(height: 20),
+                  Text('Preparing share...',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 14,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
     final file = File(downloadedWallpaper.localPath);
+    Uint8List? bytes;
     if (file.existsSync()) {
-      await Share.shareXFiles(
-        [XFile(downloadedWallpaper.localPath)],
-        text: 'Check out this wallpaper from Vivek Wallpapers!',
-      );
-    } else {
-      await Share.share(
-        'Check out this wallpaper from Vivek Wallpapers!\n${downloadedWallpaper.urlFull}',
-        subject: 'Vivek Wallpapers',
-      );
+      bytes = await file.readAsBytes();
     }
+    await ShareUtils.shareWithWatermark(
+      imageUrl: downloadedWallpaper.urlFull,
+      context: context,
+      imageBytes: bytes,
+    );
     if (context.mounted) Navigator.of(context).pop();
   }
 }

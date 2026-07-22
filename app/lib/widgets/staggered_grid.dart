@@ -11,11 +11,13 @@ import '../services/wallpaper_actions.dart';
 class StaggeredGrid extends StatefulWidget {
   final String? category;
   final Function(Wallpaper)? onWallpaperTap;
+  final ScrollController? scrollController;
 
   const StaggeredGrid({
     super.key,
     this.category,
     this.onWallpaperTap,
+    this.scrollController,
   });
 
   @override
@@ -28,11 +30,12 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   int _page = 0;
   bool _isLoading = false;
   bool _hasMore = true;
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = widget.scrollController ?? ScrollController();
     _loadWallpapers();
     _loadWishlist();
     _scrollController.addListener(_onScroll);
@@ -79,7 +82,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    if (widget.scrollController == null) _scrollController.dispose();
     super.dispose();
   }
 

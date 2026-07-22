@@ -39,6 +39,10 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
   late AnimationController _animationController;
   Animation<Matrix4>? _zoomAnimation;
 
+  double _dragOffset = 0;
+  double _dragStartY = 0;
+  bool _isSwiping = false;
+
   Wallpaper get wallpaper => widget.wallpaper;
 
   @override
@@ -88,6 +92,36 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
     );
   }
 
+  void _onPointerDown(PointerDownEvent event) {
+    if (_transformController.value.getMaxScaleOnAxis() > 1.1) return;
+    _dragStartY = event.position.dy;
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    if (_transformController.value.getMaxScaleOnAxis() > 1.1) {
+      _dragOffset = 0;
+      _isSwiping = false;
+      return;
+    }
+    final dy = event.position.dy - _dragStartY;
+    if (dy > 10) _isSwiping = true;
+    if (!_isSwiping) return;
+    setState(() {
+      _dragOffset = dy.clamp(0, MediaQuery.of(context).size.height * 0.4);
+    });
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    if (!_isSwiping) return;
+    _isSwiping = false;
+    final threshold = MediaQuery.of(context).size.height * 0.25;
+    if (_dragOffset > threshold) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _dragOffset = 0);
+    }
+  }
+
   void _handleDoubleTap(TapDownDetails details) {
     HapticFeedback.lightImpact();
     final currentMatrix = _transformController.value;
@@ -125,15 +159,22 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureHintOverlay(
-        child: Stack(
+      body: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerUp,
+        child: GestureHintOverlay(
+          child: Transform.translate(
+            offset: Offset(0, _dragOffset),
+            child: Stack(
           fit: StackFit.expand,
           children: [
             // 1. Ambient Blur Background Layer
             Positioned.fill(
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-                child: ColorFiltered(
+              child: ClipRect(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: ColorFiltered(
                   colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.5), BlendMode.srcOver),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 1.5,
@@ -142,6 +183,7 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
                       offset: Offset(-MediaQuery.of(context).size.width * 0.25, -MediaQuery.of(context).size.height * 0.25),
                       child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.cover),
                     ),
+                  ),
                   ),
                 ),
               ).animate().fade(duration: 600.ms),
@@ -188,11 +230,11 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
             ),
 
             // 4. Bottom Gradient Overlay (Fades out when UI is hidden)
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: _isUiVisible ? 1.0 : 0.0,
-              child: Positioned(
-                bottom: 0, left: 0, right: 0,
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _isUiVisible ? 1.0 : 0.0,
                 child: IgnorePointer(
                   child: Container(
                     height: 450,
@@ -270,15 +312,15 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
             ),
 
             // 6. Bottom Action Panel & Specs (Slides down and fades out)
-            AnimatedSlide(
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeInOutCubic,
-              offset: _isUiVisible ? Offset.zero : const Offset(0, 1.5),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 250),
-                opacity: _isUiVisible ? 1.0 : 0.0,
-                child: Positioned(
-                  bottom: 0, left: 0, right: 0,
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeInOutCubic,
+                offset: _isUiVisible ? Offset.zero : const Offset(0, 1.5),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 250),
+                  opacity: _isUiVisible ? 1.0 : 0.0,
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
                     child: Column(
@@ -325,6 +367,8 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
           ],
         ),
       ),
+      ),
+    ),
     );
   }
 
@@ -357,80 +401,76 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black87,
       builder: (ctx) => PopScope(
         canPop: false,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Center(
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                margin: const EdgeInsets.symmetric(horizontal: 40),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ValueListenableBuilder<double>(
-                      valueListenable: progress,
-                      builder: (_, value, _) => SizedBox(
-                        width: 80, height: 80,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CircularProgressIndicator(
-                              value: value > 0 ? value : null,
-                              strokeWidth: 4,
-                              backgroundColor: Colors.white.withValues(alpha: 0.1),
-                              valueColor: AlwaysStoppedAnimation<Color>(ColorUtils.hexToColor(wallpaper.primaryColor)),
-                            ),
-                            Center(
-                              child: value > 0
-                                  ? Text(
-                                      '${(value * 100).toInt()}%',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.none,
-                                      ),
-                                    )
-                                  : Icon(Icons.cloud_download_rounded, color: Colors.white.withValues(alpha: 0.8), size: 32),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ).animate().fade(duration: 500.ms).scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), curve: Curves.easeOutCubic),
-                    const SizedBox(height: 24),
-                    Text(
-                      'DOWNLOADING',
-                      style: GoogleFonts.oswald(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                        color: Colors.white,
-                        decoration: TextDecoration.none,
-                      ),
-                    ).animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
-                    const SizedBox(height: 4),
-                    Text(
-                      wallpaper.resolution.replaceAll('x', ' \u00d7 '),
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.6),
-                        decoration: TextDecoration.none,
-                      ),
-                    ).animate().fade(duration: 400.ms, delay: 180.ms),
-                  ],
-                ),
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              margin: const EdgeInsets.symmetric(horizontal: 40),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.75),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
               ),
-            ).animate().fade(duration: 300.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic),
-          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ValueListenableBuilder<double>(
+                    valueListenable: progress,
+                    builder: (_, value, _) => SizedBox(
+                      width: 80, height: 80,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CircularProgressIndicator(
+                            value: value > 0 ? value : null,
+                            strokeWidth: 4,
+                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            valueColor: AlwaysStoppedAnimation<Color>(ColorUtils.hexToColor(wallpaper.primaryColor)),
+                          ),
+                          Center(
+                            child: value > 0
+                                ? Text(
+                                    '${(value * 100).toInt()}%',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  )
+                                : Icon(Icons.cloud_download_rounded, color: Colors.white.withValues(alpha: 0.8), size: 32),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ).animate().fade(duration: 500.ms).scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), curve: Curves.easeOutCubic),
+                  const SizedBox(height: 24),
+                  Text(
+                    'DOWNLOADING',
+                    style: GoogleFonts.oswald(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                    ),
+                  ).animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
+                  const SizedBox(height: 4),
+                  Text(
+                    wallpaper.resolution.replaceAll('x', ' \u00d7 '),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.6),
+                      decoration: TextDecoration.none,
+                    ),
+                  ).animate().fade(duration: 400.ms, delay: 180.ms),
+                ],
+              ),
+            ),
+          ).animate().fade(duration: 300.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic),
         ),
       ),
     );
@@ -449,28 +489,35 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
       builder: (_) => PopScope(
         canPop: false,
         child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.75),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(color: Colors.white),
-                const SizedBox(height: 20),
-                Text('Preparing share...',
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
-                ),
-              ],
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.75),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(color: Colors.white),
+                  const SizedBox(height: 20),
+                  Text('Preparing share...',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 14,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
     await ShareUtils.shareWithWatermark(
-      imageUrl: wallpaper.urlFull,
+      imageUrl: wallpaper.urlLargeThumb,
       context: context,
     );
     if (context.mounted) Navigator.of(context).pop();
