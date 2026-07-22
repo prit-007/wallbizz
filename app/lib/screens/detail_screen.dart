@@ -516,8 +516,9 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
         ),
       ),
     );
+    final shareUrl = kIsWeb ? BackendConfig.proxyImageUrl(wallpaper.urlFull) : wallpaper.urlFull;
     await ShareUtils.shareWithWatermark(
-      imageUrl: wallpaper.urlLargeThumb,
+      imageUrl: shareUrl,
       context: context,
     );
     if (context.mounted) Navigator.of(context).pop();
