@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
+import '../models/moodboard.dart';
 import '../models/wallpaper.dart';
 
 class SupabaseService {
@@ -10,6 +11,7 @@ class SupabaseService {
   SupabaseService._();
 
   static final wishlistNotifier = ValueNotifier<int>(0);
+  static final moodboardNotifier = ValueNotifier<int>(0);
 
   final String _baseUrl = SupabaseConfig.url;
   final String _anonKey = SupabaseConfig.anonKey;
@@ -31,6 +33,10 @@ class SupabaseService {
       'Content-Type': 'application/json',
     };
   }
+
+  // ----------------------------------------------------------
+  // Wallpapers
+  // ----------------------------------------------------------
 
   Future<List<Wallpaper>> fetchWallpapers({
     String? category,
@@ -61,6 +67,10 @@ class SupabaseService {
 
     return [];
   }
+
+  // ----------------------------------------------------------
+  // Wishlist
+  // ----------------------------------------------------------
 
   Future<List<Wallpaper>> fetchWishlist(String userId) async {
     final url = Uri.parse(
@@ -113,5 +123,115 @@ class SupabaseService {
     }
 
     return false;
+  }
+
+  // ----------------------------------------------------------
+  // Moodboards
+  // ----------------------------------------------------------
+
+  Future<List<Moodboard>> fetchMoodboards(String userId) async {
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/moodboards?select=id,name,created_at,item_count:items(count)&user_id=eq.$userId&order=created_at.desc',
+    );
+    final response = await http.get(url, headers: _authHeaders);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((map) => Moodboard.fromJson(map)).toList();
+    }
+
+    return [];
+  }
+
+  Future<Moodboard?> createMoodboard(String userId, String name) async {
+    final url = Uri.parse('$_baseUrl/rest/v1/moodboards');
+    final response = await http.post(
+      url,
+      headers: _authHeaders,
+      body: json.encode({
+        'user_id': userId,
+        'name': name,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      moodboardNotifier.value++;
+      return Moodboard.fromJson(json.decode(response.body));
+    }
+
+    return null;
+  }
+
+  Future<bool> deleteMoodboard(String moodboardId) async {
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId',
+    );
+    final response = await http.delete(url, headers: _authHeaders);
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      moodboardNotifier.value++;
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<bool> addToMoodboard(String moodboardId, String wallpaperId) async {
+    final url = Uri.parse('$_baseUrl/rest/v1/moodboard_items');
+    final response = await http.post(
+      url,
+      headers: _authHeaders,
+      body: json.encode({
+        'moodboard_id': moodboardId,
+        'wallpaper_id': wallpaperId,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      moodboardNotifier.value++;
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> removeFromMoodboard(String moodboardId, String wallpaperId) async {
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$wallpaperId',
+    );
+    final response = await http.delete(url, headers: _authHeaders);
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      moodboardNotifier.value++;
+      return true;
+    }
+    return false;
+  }
+
+  Future<List<Wallpaper>> fetchMoodboardItems(String moodboardId) async {
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/moodboard_items?select=wallpapers(*)&moodboard_id=eq.$moodboardId&order=added_at.desc',
+    );
+    final response = await http.get(url, headers: _authHeaders);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
+    }
+
+    return [];
+  }
+
+  Future<Set<String>> fetchMoodboardItemIds(String wallpaperId) async {
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/moodboard_items?select=moodboard_id&wallpaper_id=eq.$wallpaperId',
+    );
+    final response = await http.get(url, headers: _authHeaders);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((item) => item['moodboard_id'] as String).toSet();
+    }
+
+    return {};
   }
 }

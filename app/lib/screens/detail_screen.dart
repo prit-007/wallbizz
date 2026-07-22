@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../models/wallpaper.dart';
@@ -14,8 +13,11 @@ import '../services/downloads_service.dart';
 import '../services/supabase_service.dart';
 import '../services/wallpaper_actions.dart';
 import '../utils/color_utils.dart';
+import '../utils/share_utils.dart';
 import '../widgets/specs_card.dart';
 import '../widgets/network_image.dart';
+import '../widgets/gesture_hint_overlay.dart';
+import '../widgets/add_to_moodboard_sheet.dart';
 import 'wallpaper_editor_screen.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -120,7 +122,8 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final ambientColor = ColorUtils.hexToColor(wallpaper.primaryColor);
 
-    return Scaffold(
+    return GestureHintOverlay(
+      child: Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
@@ -217,6 +220,14 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
                 ),
                 const SizedBox(width: 12),
                 _FrostedCircleButton(
+                  icon: Icons.dashboard_customize_rounded,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _showMoodboardSheet(context);
+                  },
+                ),
+                const SizedBox(width: 12),
+                _FrostedCircleButton(
                   icon: Icons.ios_share_rounded,
                   onTap: () {
                     HapticFeedback.lightImpact();
@@ -272,6 +283,7 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -365,7 +377,24 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
   }
 
   void _shareWallpaper(BuildContext context) {
-    Share.share('Check out this wallpaper from Wallbizz!\n${wallpaper.urlFull}', subject: 'Wallbizz Wallpapers');
+    ShareUtils.shareWithWatermark(
+      imageUrl: wallpaper.urlFull,
+      context: context,
+    );
+  }
+
+  void _showMoodboardSheet(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      WallpaperActions.handleHeartTap(context, wallpaper);
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => AddToMoodboardSheet(wallpaperId: wallpaper.id),
+    );
   }
 }
 

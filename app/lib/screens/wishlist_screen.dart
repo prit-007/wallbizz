@@ -7,10 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
+import '../models/moodboard.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import '../widgets/network_image.dart';
 import 'detail_screen.dart';
+import 'moodboard_screen.dart';
+import '../widgets/create_moodboard_dialog.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -135,6 +138,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
     }
   }
 
+  Future<void> _openMoodboards(BuildContext context) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _MoodboardListSheet(
+        userId: user.id,
+        onSelect: (board) {
+          Navigator.pop(ctx);
+          Navigator.push(context, MaterialPageRoute(
+            builder: (_) => MoodboardScreen(moodboard: board),
+          ));
+        },
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -188,6 +212,33 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     fontWeight: FontWeight.bold,
                     color: cs.onSurface.withValues(alpha: 0.8),
                     letterSpacing: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _openMoodboards(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: cs.primary.withValues(alpha: 0.25), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.dashboard_customize_rounded, size: 12, color: cs.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'BOARDS',
+                        style: GoogleFonts.oswald(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: cs.primary,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -391,5 +442,145 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ),
       ),
     );
+  }
+}
+
+class _MoodboardListSheet extends StatefulWidget {
+  final String userId;
+  final ValueChanged<Moodboard> onSelect;
+
+  const _MoodboardListSheet({required this.userId, required this.onSelect});
+
+  @override
+  State<_MoodboardListSheet> createState() => _MoodboardListSheetState();
+}
+
+class _MoodboardListSheetState extends State<_MoodboardListSheet> {
+  List<Moodboard> _boards = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final boards = await SupabaseService.instance.fetchMoodboards(widget.userId);
+    if (mounted) setState(() { _boards = boards; _loading = false; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final v = context.vivek;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          decoration: BoxDecoration(
+            color: v.surfaceContainer.withValues(alpha: 0.85),
+            border: Border(top: BorderSide(color: v.glassBorder.withValues(alpha: 0.3), width: 1.5)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48, height: 5,
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(3)),
+              ).animate().fade(duration: 400.ms).slideY(begin: 0.5, end: 0),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Text('MOODBOARDS', style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2, color: cs.onSurface)),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => CreateMoodboardDialog(onCreate: _create),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add_rounded, size: 16, color: cs.primary),
+                          const SizedBox(width: 4),
+                          Text('NEW', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1, color: cs.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (_loading)
+                const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(strokeWidth: 2))
+              else if (_boards.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text('No moodboards yet. Create your first one!', style: GoogleFonts.inter(color: v.onSurfaceSubtle, fontSize: 14)),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: _boards.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final board = _boards[index];
+                      return GestureDetector(
+                        onTap: () => widget.onSelect(board),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: v.glassBorder.withValues(alpha: 0.15)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.dashboard_customize_rounded, color: cs.primary, size: 22),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(board.name, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                                    Text('${board.itemCount} items', style: GoogleFonts.inter(fontSize: 12, color: v.onSurfaceSubtle)),
+                                  ],
+                                ),
+                              ),
+                              Icon(Icons.arrow_forward_ios_rounded, color: v.onSurfaceSubtle, size: 14),
+                            ],
+                          ),
+                        ),
+                      ).animate().fade(duration: 300.ms, delay: (index * 60).ms).slideX(begin: 0.1, end: 0);
+                    },
+                  ),
+                ),
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _create(String name) async {
+    Navigator.pop(context); // close dialog
+    final board = await SupabaseService.instance.createMoodboard(widget.userId, name);
+    if (board != null) {
+      if (mounted) widget.onSelect(board);
+    }
   }
 }
