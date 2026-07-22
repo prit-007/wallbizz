@@ -42,10 +42,11 @@
 ### 1. Home Screen (`home_screen.dart`)
 - **Route:** `/` (initial route)
 - **State:** `_selectedCategory` (default `'trending'`), `_currentNavIndex` (default `0`)
-- **Layout:** Custom dock-style bottom navigation pill + `IndexedStack` (4 tabs: Home, Wishlist, Downloads, Settings)
-- **Home Tab:** `CategoryTabs` horizontal pill bar (Trending, Anime, Dark, Desktop, Mobile) above a `StaggeredGrid` that loads wallpapers filtered by `source_query = selected_category` from Supabase REST API
+- **Layout:** Custom dock-style bottom navigation pill + lazy `Offstage` tabs (4 tabs: DISCOVER, ARCHIVE, VAULT, SYSTEM)
+- **Home Tab:** `CategoryTabs` horizontal pill bar (Trending, Anime, Nature, Cyberpunk, Space, Desktop, Mobile) above a `StaggeredGrid` that loads wallpapers filtered by `source_query = selected_category` from Supabase REST API
 - **Category change:** Triggers `setState` on `_selectedCategory`, rebuilds `StaggeredGrid` with a new `ValueKey`, causing a fresh fetch from page 1
-- **Tab switch uses `IndexedStack`** — no API re-fetch when switching tabs (all tabs stay alive)
+- **Lazy tab loading:** Tabs are created on first visit via `_tabWidgets[index] ??= _buildTabContent(index)` and kept alive via `Offstage` — no `IndexedStack` cost
+- **Scroll-to-top on re-tap:** Tapping the already-active nav item scrolls that tab's content to top via `ScrollController.animateTo(0)`
 - **Loading:** Shimmer skeleton animation while fetching
 - **Empty state:** Oswald "NO WALLPAPERS FOUND" with subtitle
 
@@ -62,12 +63,17 @@
 - **Route:** Pushed with wallpaper data object
 - **Image display:** `InteractiveViewer` with pinch-to-zoom and double-tap zoom toggle (2.5x)
 - **Background:** Radial vignette gradient + blurred wallpaper copy with ambient color overlay
-- **Top bar:** Frosted glass back button, heart/favourite toggle, share button
+- **Swipe-down-to-go-back:** Dragging the image down past 25% of screen height pops the screen; otherwise snaps back. Disabled when zoomed in.
+- **Tap-to-toggle-UI:** Single tap hides/shows the top bars and bottom action panel for immersive viewing. Uses `AnimatedSlide` + `AnimatedOpacity`.
+- **Gesture hint overlay:** First visit shows a subtle hint ("swipe down to go back, tap to toggle UI") that fades after a few seconds. Dismissed permanently via `SharedPreferences`.
+- **Top bar:** Frosted glass back button, heart/favourite toggle, moodboard button, share button
 - **Bottom area (frosted glass action strip):**
   - `SpecsCard` — resolution, file size, aspect ratio, color swatches, wallpaper ID
   - "DOWNLOAD WALLPAPER" / "DOWNLOADING..." / "DOWNLOADED" button
   - "SET AS WALLPAPER" button (non-web only) — navigates to `WallpaperEditorScreen`
 - **Heart tap:** Calls `WallpaperActions.handleHeartTap()` which either toggles wishlist directly or prompts auth
+- **Moodboard tap:** Shows `AddToMoodboardSheet` bottom sheet (auth-gated)
+- **Share tap:** Calls `ShareUtils.shareWithWatermark()` — fetches image, overlays "WALLBIZZ" branding, shares via share sheet, cleans up temp files
 - **Download:** Calls `DownloadService.downloadImage()` with progress callback shown in a glassmorphic dialog
 
 ### 4. Wishlist Screen (`wishlist_screen.dart`)
@@ -136,7 +142,7 @@
 - **Auth:** Service key only (not exposed to Flutter)
 - **Behavior:** Returns `{"status": "sync triggered"}` immediately (202), runs sync in a background goroutine
 - **Sync process:**
-  1. Iterates over 5 categories: `trending`, `anime`, `dark`, `desktop`, `mobile`
+  1. Iterates over 7 categories: `trending`, `anime`, `nature`, `cyberpunk`, `space`, `desktop`, `mobile`
   2. For each, calls Wallhaven API with base params (`apikey`, `purity=100`, `sorting=toplist`, `topRange=3M`) + category-specific extras
   3. Fetches 3 pages per category
   4. Upserts to Supabase `wallpapers` table via `POST /rest/v1/wallpapers` with `Prefer: resolution=merge-duplicates` header
@@ -169,7 +175,8 @@
 3. Initializes Hive (local storage for downloads + preferences)
 4. Initializes Supabase with `AuthFlowType.pkce` and redirect URL `vivekapp://callback` (Android deep link)
 5. Wraps the app in `DynamicTheme` → `VivekTheme` → `MaterialApp`
-6. MaterialApp's `home` is `HomeScreen` (the main screen with bottom nav)
+6. MaterialApp's `home` is `SplashScreen` — shows "WALLBIZZ" with animated letter spacing, then navigates to `HomeScreen`
+7. Android native splash is configured pure black via `launch_background.xml` and `values/styles.xml`
 
 ### Data Flow
 
@@ -185,8 +192,8 @@ User opens app → HomeScreen loads → StaggeredGrid fetches
 **Wallpaper Sync (write path — backend only):**
 ```
 Cron triggers at 2 AM / 2 PM UTC (or POST /api/v1/sync)
-→ FetchAndSyncWallpapers() iterates categories
-→ For each category: GET https://wallhaven.cc/api/v1/search?apikey=...&q=dark&categories=111...
+→ FetchAndSyncWallpapers() iterates 7 categories
+→ For each category: GET https://wallhaven.cc/api/v1/search?apikey=...&q=nature&categories=111...
 → Maps WallhavenImage → WallpaperInsert
 → POST /rest/v1/wallpapers (Prefer: resolution=merge-duplicates, upsert by wallhaven_id)
 ```

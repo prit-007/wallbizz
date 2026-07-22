@@ -49,18 +49,20 @@
 
 The backend is a background data pipeline, not a real-time API. Flutter never calls the Golang server.
 
-A `robfig/cron` scheduler fires at **2 AM and 2 PM UTC** daily. Each trigger calls `FetchAndSyncWallpapers()` which loops through 5 categories:
+A `robfig/cron` scheduler fires at **2 AM and 2 PM UTC** daily. Each trigger calls `FetchAndSyncWallpapers()` which loops through 7 categories:
 
 | # | Category | Wallhaven Query Params |
 |---|----------|----------------------|
 | 1 | trending | `?apikey=...&purity=100&sorting=toplist&topRange=3M` |
 | 2 | anime | `?apikey=...&purity=100&sorting=toplist&topRange=3M&q=anime&categories=010` |
-| 3 | amoled | `?apikey=...&purity=100&sorting=toplist&topRange=3M&q=amoled+black` |
-| 4 | desktop | `?apikey=...&purity=100&sorting=toplist&topRange=3M&ratios=16x9,16x10` |
-| 5 | mobile | `?apikey=...&purity=100&sorting=toplist&topRange=3M&ratios=9x16,10x16` |
+| 3 | nature | `?apikey=...&purity=100&sorting=toplist&topRange=3M&q=nature&categories=111` |
+| 4 | cyberpunk | `?apikey=...&purity=100&sorting=toplist&topRange=3M&q=cyberpunk&categories=111` |
+| 5 | space | `?apikey=...&purity=100&sorting=toplist&topRange=3M&q=space&categories=111` |
+| 6 | desktop | `?apikey=...&purity=100&sorting=toplist&topRange=3M&ratios=16x9,16x10` |
+| 7 | mobile | `?apikey=...&purity=100&sorting=toplist&topRange=3M&ratios=9x16,10x16` |
 
-- 5 queries × 24 results = **120 wallpapers per sync run**
-- 2 runs/day = 240 wallpapers/day (with overlap deduplication via upsert)
+- 7 queries × 24 results = **168 wallpapers per sync run**
+- 2 runs/day = 336 wallpapers/day (with overlap deduplication via upsert)
 
 Per category flow (`handlers/sync.go:43-101`):
 1. Build URL: `https://wallhaven.cc/api/v1/search?apikey=...&purity=100&sorting=toplist&topRange=3M&{category_params}`
@@ -94,7 +96,8 @@ Layout:
 |  🔍 Search wallpapers...             |
 +---------------------------------------+
 |  [CategoryTabs — horizontal scroll]   |
-|  🔥 Trending | 🌸 Anime | ⬛ AMOLED  |
+|  🔥 Trending | 🌸 Anime | 🌿 Nature  |
+|  🤖 Cyberpunk | 🚀 Space | 🖥️ Desktop | 📱 Mobile |
 +---------------------------------------+
 |  [StaggeredGrid — responsive columns] |
 |  +------+------+------+------+        |
@@ -425,7 +428,9 @@ Wallhaven's search endpoint returns `category` (anime/general) but not detailed 
 |----------|----------------|-------------------|----------------|
 | Trending | `sorting=toplist` | `trending` | Broad SFW toplist |
 | Anime | `q=anime&categories=010` | `anime` | Anime-specific |
-| AMOLED | `q=amoled+black` | `amoled` | True black wallpapers |
+| Nature | `q=nature&categories=111&purity=100` | `nature` | Nature/landscape |
+| Cyberpunk | `q=cyberpunk&categories=111&purity=100` | `cyberpunk` | Cyberpunk aesthetic |
+| Space | `q=space&categories=111&purity=100` | `space` | Space/astronomy |
 | Desktop | `ratios=16x9,16x10` | `desktop` | Landscape ratios |
 | Mobile | `ratios=9x16,10x16` | `mobile` | Portrait ratios |
 
@@ -444,7 +449,7 @@ Wallhaven's search endpoint returns `category` (anime/general) but not detailed 
 
 | Operation | Frequency | Calls/day | Limit | Utilization |
 |-----------|-----------|-----------|-------|-------------|
-| Backend → Wallhaven (sync) | 2× daily × 5 queries | 10 | 45/min | 0.37% |
+| Backend → Wallhaven (sync) | 2× daily × 7 queries | 14 | 45/min | 0.52% |
 | Backend → Wallhaven (search proxy) | Per user search | Variable | 45/min | Depends on usage |
 | Flutter → Wallhaven (SFW search) | Per user search | Variable | 45/min | Depends on usage |
 | Flutter → Supabase | Per user session | Unlimited | None | N/A |

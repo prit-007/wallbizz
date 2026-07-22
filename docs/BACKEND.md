@@ -39,7 +39,9 @@ backend/
 |----------|-----------------|----------------|
 | Trending | `sorting=toplist&topRange=3M` | `trending` |
 | Anime | `q=anime&categories=010` | `anime` |
-| AMOLED | `q=amoled+black` | `amoled` |
+| Nature | `q=nature&categories=111&purity=100` | `nature` |
+| Cyberpunk | `q=cyberpunk&categories=111&purity=100` | `cyberpunk` |
+| Space | `q=space&categories=111&purity=100` | `space` |
 | Desktop | `ratios=16x9,16x10` | `desktop` |
 | Mobile | `ratios=9x16,10x16` | `mobile` |
 
@@ -66,20 +68,22 @@ Shared `httpClient` with 30s timeout. All outbound calls (Wallhaven + Supabase) 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/sync` | Trigger immediate sync (returns immediately, sync runs in goroutine) |
-| `POST` | `/api/search` | Proxy NSFW/Sketchy search to Wallhaven (requires valid Supabase JWT) |
-| `GET` | `/api/health` | Health check |
+| `GET` | `/api/v1/health` | Health check |
+| `POST` | `/api/v1/sync` | Trigger immediate sync (returns immediately, sync runs in goroutine) |
+| `GET` | `/api/v1/search` | Proxy NSFW/Sketchy search to Wallhaven (requires valid Supabase JWT) |
+| `GET` | `/api/v1/proxy-image` | Bypass CORS for Flutter web image loading (whitelisted hosts only) |
+| `GET` | `/swagger/*` | Swagger UI |
 
-### Search Endpoint (`/api/search`)
+### Search Endpoint (`/api/v1/search`)
 
 Proxies NSFW and Sketchy purity searches from Flutter to Wallhaven API. Required because NSFW content requires the API key, which must not be embedded in the Flutter client.
 
 **Request:**
 ```
-POST /api/search
+GET /api/v1/search
 Headers:
-  Authorization: Bearer {supabase_access_token}
-Body (JSON):
+  Authorization: Bearer {supabase_access_token} (optional)
+Query Params:
   q: search query
   purity: "010" (sketchy) or "110" (nsfw+sketchy)
   sorting: relevance | toplist | date_added | views | favorites
@@ -109,10 +113,10 @@ FROM gcr.io/distroless/static-debian12  # Runtime
 
 ## Rate Limit Safety
 
-- 5 queries per sync run
-- 2 sync runs per day = 10 API calls/day
+- 7 queries per sync run
+- 2 sync runs per day = 14 API calls/day
 - Wallhaven limit: 45/minute
-- **Utilization: 0.37%**
+- **Utilization: 0.52%**
 
 ## Tests (38 total)
 

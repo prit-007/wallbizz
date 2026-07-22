@@ -114,6 +114,7 @@ WALLHAVEN_API_KEY=your_wallhaven_api_key
 ```env
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_anon_key
+BACKEND_URL=https://wallbizz.onrender.com  # Only used on web for image proxy
 ```
 
 **Never expose the Service Role Key to the Flutter app.**
@@ -122,19 +123,25 @@ SUPABASE_ANON_KEY=your_anon_key
 - Get yours at: https://wallhaven.cc/settings#api
 - API docs: https://wallhaven.cc/help/api
 - Rate limit: 45 requests/minute
-- Our usage: 5 queries per sync × 2 syncs/day = 10 calls/day (0.37% utilization)
+- Our usage: 7 queries per sync × 2 syncs/day = 14 calls/day (0.52% utilization)
 
 ## 5. Post-Deployment Checklist
 
 | # | Task | Verify |
 |---|------|--------|
-| 1 | Backend health | `curl POST /api/sync` returns success |
-| 2 | Cron running | Check Render logs at 2 AM/2 PM UTC |
-| 3 | Supabase has data | Query `wallpapers` table in dashboard |
-| 4 | Flutter loads | Open web URL, see category tabs + grid |
-| 5 | Images render | Thumbnails load via CachedNetworkImage |
-| 6 | Detail works | Tap card, see full image + specs card |
-| 7 | Dynamic theme | Detail background tints to wallpaper's color |
-| 8 | Auth works | Tap heart -> bottom sheet -> sign in -> heart fills |
-| 9 | Wishlist persists | Sign out -> sign in -> wishlist still there |
-| 10 | PWA installs | Mobile browser "Add to Home Screen" works |
+| 1 | Backend health | `curl GET /api/v1/health` returns 200 |
+| 2 | Sync works | `curl POST /api/v1/sync` returns `{"status":"sync triggered"}` |
+| 3 | Cron running | Check Render logs at 2 AM/2 PM UTC |
+| 4 | Supabase has data | Query `wallpapers` table in dashboard (expect 168+/sync) |
+| 5 | Flutter loads | Open web URL, see WALLBIZZ splash → category tabs + grid |
+| 6 | Images render | Thumbnails load via CachedNetworkImage |
+| 7 | Category switch | Tap Nature, Cyberpunk, Space — each loads different wallpapers |
+| 8 | Detail works | Tap card, see full image + swipe-down-back + tap-toggle-UI |
+| 9 | Gesture hint | First detail visit shows hint overlay (auto-fades) |
+| 10 | Share | Share button shows watermark "WALLBIZZ" on shared image |
+| 11 | Auth works | Tap heart → bottom sheet → sign in → heart fills |
+| 12 | Wishlist persists | Sign out → sign in → wishlist still there |
+| 13 | Moodboard | Sign in → tap moodboard icon → create named collection → add wallpaper |
+| 14 | Download | Tap download → progress dialog → file saved → shows in VAULT tab |
+| 15 | VAULT tab | 3rd nav tab shows downloaded wallpapers from Hive |
+| 16 | PWA installs | Mobile browser "Add to Home Screen" works, black splash |

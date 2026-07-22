@@ -37,6 +37,33 @@ CREATE TABLE wishlists (
 );
 ```
 
+### moodboards (Named Collections)
+
+Authenticated user creates named moodboard collections.
+
+```sql
+CREATE TABLE moodboards (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+```
+
+### moodboard_items (Wallpaper References)
+
+Moodboard contents — wallpaper references within a moodboard.
+
+```sql
+CREATE TABLE moodboard_items (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    moodboard_id UUID REFERENCES moodboards(id) ON DELETE CASCADE NOT NULL,
+    wallpaper_id UUID REFERENCES wallpapers(id) ON DELETE CASCADE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(moodboard_id, wallpaper_id)
+);
+```
+
 ## Row Level Security
 
 | Table | Policy | Who |
@@ -46,14 +73,18 @@ CREATE TABLE wishlists (
 | wishlists | SELECT WHERE auth.uid() = user_id | Users see own data only |
 | wishlists | INSERT WHERE auth.uid() = user_id | Users add to own wishlist |
 | wishlists | DELETE WHERE auth.uid() = user_id | Users remove from own wishlist |
+| moodboards | All operations WHERE auth.uid() = user_id | Users manage own moodboards |
+| moodboard_items | All operations via moodboard user_id check | Users manage own moodboard items |
 
 ## Performance Indexes
 
 ```sql
-CREATE INDEX idx_wallpapers_created_at ON wallpapers(created_at DESC);  -- Home feed
-CREATE INDEX idx_wallpapers_category ON wallpapers(source_query);       -- Category filter
-CREATE INDEX idx_wishlists_user_id ON wishlists(user_id);              -- User wishlist
-CREATE INDEX idx_wishlists_wallpaper_id ON wishlists(wallpaper_id);    -- JOIN speedup
+CREATE INDEX idx_wallpapers_created_at ON wallpapers(created_at DESC);     -- Home feed
+CREATE INDEX idx_wallpapers_category ON wallpapers(source_query);          -- Category filter
+CREATE INDEX idx_wishlists_user_id ON wishlists(user_id);                  -- User wishlist
+CREATE INDEX idx_wishlists_wallpaper_id ON wishlists(wallpaper_id);        -- JOIN speedup
+CREATE INDEX idx_moodboards_user_id ON moodboards(user_id);               -- User moodboards
+CREATE INDEX idx_moodboard_items_moodboard ON moodboard_items(moodboard_id); -- Moodboard content
 ```
 
 ## Common Queries

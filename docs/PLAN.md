@@ -1,8 +1,10 @@
-# Master Plan
+# Master Plan — COMPLETE ✅
+
+**Wallbizz v1.0 (tag v1.3)** — production release. All phases complete.
 
 ## Goal
 
-Build a premium wallpaper app (Flutter + Golang backend) powered exclusively by Wallhaven API, with Supabase as the database/auth layer, featuring a staggered grid, dynamic color theming, glassmorphism detail view, and wishlist with gated auth.
+Build a premium wallpaper app (Flutter + Golang backend) powered exclusively by Wallhaven API, with Supabase as the database/auth layer, featuring a staggered grid, dynamic color theming, glassmorphism detail view, wishlist, moodboards, downloads, and gated auth.
 
 ## Tech Stack
 
@@ -16,45 +18,23 @@ Build a premium wallpaper app (Flutter + Golang backend) powered exclusively by 
 
 ## Execution Phases
 
-### Phase A: SQL Schemas
-Create 3 tables + RLS + indexes in Supabase SQL Editor.
-
-**Files:** `sql/001_schema.sql`, `sql/002_rls.sql`, `sql/003_indexes.sql`
-
-### Phase B: Golang Backend
-Fiber HTTP server with cron scheduler. Fetches from Wallhaven 5 category queries, upserts to Supabase via REST API. Runs twice daily.
-
-**Files:** `backend/main.go`, `backend/config/config.go`, `backend/handlers/sync.go`, `backend/models/wallpaper.go`, `backend/Dockerfile`, `backend/.env.example`
-
-### Phase C: Flutter Skeleton + Home + Grid
-Flutter app with Supabase init, responsive GridView, category tabs, wallpaper cards with cached thumbnails.
-
-**Files:** `app/lib/main.dart`, `app/lib/config/supabase_config.dart`, `app/lib/models/wallpaper.dart`, `app/lib/services/supabase_service.dart`, `app/lib/screens/home_screen.dart`, `app/lib/widgets/staggered_grid.dart`, `app/lib/widgets/wallpaper_card.dart`, `app/lib/widgets/category_tabs.dart`
-
-### Phase D: Detail Screen + Dynamic Theming
-Full-screen detail view with dynamic background tinting, glassmorphism specs card, download button.
-
-**Files:** `app/lib/screens/detail_screen.dart`, `app/lib/widgets/specs_card.dart`, `app/lib/widgets/dynamic_theme.dart`, `app/lib/utils/color_utils.dart`
-
-### Phase E: Wishlist + Gated Auth
-Heart icon on every card. Tapping as guest opens auth bottom sheet. After auth, wallpaper saved to wishlist.
-
-**Files:** `app/lib/screens/wishlist_screen.dart`, `app/lib/widgets/auth_bottom_sheet.dart`, `app/lib/services/wallpaper_actions.dart`
-
-### Phase F: Platform Config
-Android manifest permissions. Web PWA manifest.
-
-**Files:** `app/android/app/src/main/AndroidManifest.xml`, `app/web/manifest.json`
-
-### Phase G: Documentation
-README + 7 detailed docs.
-
-**Files:** `README.md`, `docs/PLAN.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/BACKEND.md`, `docs/FRONTEND.md`, `docs/AUTH.md`, `docs/DEPLOYMENT.md`
-
-### Phase H: Search Feature + Responsive Layout
-Full-stack search with hybrid SFW-direct/NSFW-proxy architecture. Responsive layout improvements for search bar, category tabs, and loading skeleton.
-
-**Files:** `backend/handlers/search.go`, `app/lib/services/wallhaven_search.dart`, `app/lib/screens/search_screen.dart`, `app/lib/screens/home_screen.dart`, `app/lib/widgets/category_tabs.dart`, `app/lib/widgets/staggered_grid.dart`
+| Phase | Description | Status |
+|-------|-------------|--------|
+| A | SQL schemas (3 migrations) | ✅ Complete |
+| B | Golang backend (sync, cron, Docker) | ✅ Complete |
+| C | Flutter skeleton + home + grid | ✅ Complete |
+| D | Detail screen + dynamic theming | ✅ Complete |
+| E | Wishlist + gated auth | ✅ Complete |
+| F | Platform config (Android + PWA) | ✅ Complete |
+| G | Documentation (8 docs) | ✅ Complete |
+| H | Hybrid search (SFW direct / NSFW proxy) | ✅ Complete |
+| I | Downloads + VAULT tab (Hive) | ✅ Complete |
+| J | Moodboard (named collections) | ✅ Complete |
+| K | Performance (lazy tabs, scroll-to-top) | ✅ Complete |
+| L | Immersive detail (swipe-back, tap-toggle-UI, gesture hint) | ✅ Complete |
+| M | Share with watermark | ✅ Complete |
+| N | Animated splash + pure black native splash | ✅ Complete |
+| O | 7 categories (Nature, Cyberpunk, Space) | ✅ Complete |
 
 ## Test Suites
 
@@ -99,17 +79,25 @@ Full-stack search with hybrid SFW-direct/NSFW-proxy architecture. Responsive lay
 | 14 | `anonKey` deprecated in Supabase.initialize | `main.dart` | Changed to `publishableKey` |
 | 15 | `categories=100` (general only) for anime query | `sync.go` | Fixed to `categories=010` (anime only) per API spec |
 | 16 | Missing `topRange` param for toplist sorting | `sync.go` | Added `topRange=3M` for better variety |
+| 17 | `IndexedStack` kept all 4 tabs alive on startup (wasteful) | `home_screen.dart` | Replaced with lazy `Offstage` + `_tabWidgets[index] ??= _buildTabContent(index)` |
+| 18 | No scroll-to-top on re-tap | `home_screen.dart` | Added `_scrollControllers` per tab + `_scrollToTop()` |
+| 19 | No swipe-down-to-go-back on detail | `detail_screen.dart` | Added `Listener` with pointer events, 25% threshold |
+| 20 | No tap-to-toggle-UI on detail | `detail_screen.dart` | Added `GestureDetector.onTap` with `_isUiVisible` state + `AnimatedSlide`/`AnimatedOpacity` |
+| 21 | No share functionality | `detail_screen.dart` | Added watermarked share via `ShareUtils.shareWithWatermark()` |
+| 22 | No gesture hint for detail gestures | `detail_screen.dart` | Added `GestureHintOverlay` with SharedPreferences dismissal |
+| 23 | Native splash was white | `main.dart` + Android XML | Set pure black via `launch_background.xml` + `values/styles.xml` + native splash init |
+| 24 | No animated splash | `splash_screen.dart` | Added "WALLBIZZ" with animated letter spacing via `AnimatedBuilder` |
 
-## Pre-Deployment Checklist
+## Deployment Checklist
 
-- [ ] Create Supabase project
-- [ ] Enable Email/Password auth
-- [ ] Enable Google OAuth auth
-- [ ] Get Wallhaven API key ([wallhaven.cc/settings#api](https://wallhaven.cc/settings#api))
-- [ ] Run SQL migration scripts
-- [ ] Fill backend `.env` with keys
-- [ ] Fill app `.env` with Supabase URL + Anon Key
-- [ ] Trigger `POST /api/sync` to populate database
-- [ ] Verify Flutter app loads wallpapers
-- [ ] Test search: SFW queries go direct to Wallhaven (check network tab)
-- [ ] Test search: NSFW/Sketchy queries go through `/api/search` proxy (requires auth)
+- ✅ Supabase project created
+- ✅ Email/Password auth enabled
+- ✅ Google OAuth auth enabled
+- ✅ Wallhaven API key configured
+- ✅ SQL migrations run (3 files)
+- ✅ Backend `.env` configured
+- ✅ App `.env` configured
+- ✅ Backend deployed to Render (Docker)
+- ✅ Flutter web build ready for static hosting
+- ✅ Swagger UI at `/swagger/*`
+- ✅ CORS wide open on backend

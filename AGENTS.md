@@ -1,4 +1,4 @@
-# AGENTS.md — Vivek Wallpapers
+# AGENTS.md — Wallbizz v1.0
 
 ## Structure
 
@@ -18,15 +18,15 @@ vivek_app/
 │   └── .env.example    # Tracked template
 ├── app/                # Flutter client (Web PWA + Android)
 │   ├── lib/
-│   │   ├── main.dart           # Entry: dotenv.load → Hive init → Supabase.initialize
+│   │   ├── main.dart           # Entry: dotenv.load → Hive init → Supabase.initialize + pure black native splash
 │   │   ├── config/
 │   │   │   ├── backend_config.dart  # Backend URL init (only on web)
 │   │   │   ├── supabase_config.dart # Reads .env
 │   │   │   └── theme_config.dart
-│   │   ├── services/           # supabase_service, wallpaper_actions, wallhaven_search
-│   │   ├── screens/            # home, search, detail, wishlist, settings
-│   │   ├── widgets/            # grid, cards, tabs, auth sheet
-│   │   └── models/             # Wallpaper data class
+│   │   ├── services/           # supabase_service, wallpaper_actions, wallhaven_search, download_service, downloads_service, moodboard_service
+│   │   ├── screens/            # home, search, detail, wishlist, downloads, settings, splash, wallpaper_editor
+│   │   ├── widgets/            # grid, cards, tabs, auth sheet, moodboard sheets, gesture_hint_overlay, network_image
+│   │   └── models/             # Wallpaper, DownloadedWallpaper, Moodboard data classes
 │   ├── test/                   # 160+ test declarations (test + testWidgets)
 │   ├── .env.example            # Tracked template
 │   └── pubspec.yaml            # Lists .env in assets
@@ -34,21 +34,30 @@ vivek_app/
 └── docs/               # Detailed docs
 ```
 
-## Key Architecture
+## Key Architecture (v1.0)
 
-- Flutter never calls Wallhaven directly for sync — reads from Supabase REST via `http` package (not `supabase-flutter` for DB queries).
-- Search is hybrid: SFW queries go direct Flutter → Wallhaven (`wallhaven_search`); NSFW/Sketchy queries go through backend proxy (`GET /api/v1/search`). The proxy is auth-optional — unauthenticated requests pass through as SFW; requests with a valid Supabase JWT enable NSFW/Sketchy purity filters.
-- Images are proxied on web: `Image.network` on Flutter web uses XHR, so Wallhaven's CDN triggers CORS errors. `NetworkImageWidget` routes through `BackendConfig.proxyImageUrl()` → `GET /api/v1/proxy-image?url=...` on the Go backend. The backend restricts proxied hosts to `w.wallhaven.cc` and `th.wallhaven.cc` and returns responses with CORS headers.
-- Download: `DownloadService.downloadImage()` uses platform-specific paths — `dart:html` Blob (web) or `http` streaming to File (mobile). Progress is reported via callback. Download path is configurable in Settings, stored as SharedPreferences key `download_path`, defaulting to `getApplicationDocumentsDirectory()/VivekWallpapers/`.
-- Backend cron schedule: `0 2,14 * * *` UTC (2 AM + 2 PM daily). Manual trigger: `POST /api/v1/sync` (returns immediately, runs in goroutine).
-- Backend env vars: `PORT` (default 3000), `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL` (default info).
-- Flutter env vars (`app/.env`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `BACKEND_URL` (used only on web to override `BackendConfig._baseUrl`).
-- `BackendConfig._baseUrl` hardcodes the Render production URL (`https://wallbizz.onrender.com`) and is only overridden on web. Mobile/desktop do not call `BackendConfig.init()`.
-- Auth: gated on heart-tap and NSFW search; browsing is anonymous. Supabase Auth (Email + Google OAuth with PKCE on Flutter web).
-- Wishlist: RLS-enforced `wishlists` table; Flutter CRUDs via Supabase REST with anon key.
-- DB: 2 tables — `wallpapers` (cache, UPSERT by `wallhaven_id`) and `wishlists` (user data).
-- Categories: Trending, Anime, AMOLED, Desktop, Mobile — stored as `source_query` column. Category query params in `handlers/sync.go:22-28` are the source of truth.
-- Swagger UI served at `/swagger/*` on the backend.
+- **Version:** v1.0 (tag v1.3) — production release.
+- **Flutter never calls Wallhaven directly for sync** — reads from Supabase REST via `http` package (not `supabase-flutter` for DB queries).
+- **Search is hybrid:** SFW queries go direct Flutter → Wallhaven (`wallhaven_search`); NSFW/Sketchy queries go through backend proxy (`GET /api/v1/search`). The proxy is auth-optional — unauthenticated requests pass through as SFW; requests with a valid Supabase JWT enable NSFW/Sketchy purity filters.
+- **Images are proxied on web:** `Image.network` on Flutter web uses XHR, so Wallhaven's CDN triggers CORS errors. `NetworkImageWidget` routes through `BackendConfig.proxyImageUrl()` → `GET /api/v1/proxy-image?url=...` on the Go backend. The backend restricts proxied hosts to `w.wallhaven.cc` and `th.wallhaven.cc` and returns responses with CORS headers.
+- **Lazy tab loading:** Replaced `IndexedStack` with lazy-initialized `Offstage` widgets — tabs are created on first visit and kept alive without paying the cost upfront.
+- **Scroll-to-top on re-tap:** Tapping an already-active bottom nav item scrolls that tab's content to top.
+- **Swipe-down-to-go-back on detail screen:** Dragging the image down past 25% of screen height pops the screen; otherwise snaps back.
+- **Tap-to-toggle-UI on detail screen:** Single tap hides/shows the top bars and bottom action panel for immersive viewing.
+- **Watermarked share:** `ShareUtils.shareWithWatermark()` fetches the image, overlays "WALLBIZZ" branding, and shares via the share sheet. Temp files are cleaned up after sharing.
+- **Download:** `DownloadService.downloadImage()` uses platform-specific paths — `dart:html` Blob (web) or `http` streaming to File (mobile). Progress is reported via callback. Downloads are tracked locally in a Hive box and shown in the VAULT (Downloads) tab.
+- **Moodboard:** Authenticated users can create named moodboards via `MoodboardService`. Each moodboard is stored in the `moodboards` and `moodboard_items` Supabase tables.
+- **Gesture hint overlay** (`GestureHintOverlay`): First visit to detail screen shows a subtle hint ("swipe down to go back, tap to toggle UI") that fades after a few seconds. Dismissed permanently via SharedPreferences.
+- **Animated splash screen with pure black native splash:** `splash_screen.dart` shows "WALLBIZZ" with animated letter spacing. Native splash (Android) is configured pure black via `launch_background.xml` and `values/styles.xml`.
+- **Backend cron schedule:** `0 2,14 * * *` UTC (2 AM + 2 PM daily). Manual trigger: `POST /api/v1/sync` (returns immediately, runs in goroutine).
+- **Backend env vars:** `PORT` (default 3000), `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL` (default info).
+- **Flutter env vars (`app/.env`):** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `BACKEND_URL` (used only on web to override `BackendConfig._baseUrl`).
+- **`BackendConfig._baseUrl`** hardcodes the Render production URL (`https://wallbizz.onrender.com`) and is only overridden on web. Mobile/desktop do not call `BackendConfig.init()`.
+- **Auth:** Gated on heart-tap, moodboard access, and NSFW search; browsing is anonymous. Supabase Auth (Email + Google OAuth with PKCE on Flutter web).
+- **Wishlist:** RLS-enforced `wishlists` table; Flutter CRUDs via Supabase REST with anon key.
+- **DB:** 4 tables — `wallpapers` (cache, UPSERT by `wallhaven_id`), `wishlists` (user data), `moodboards` (named collections), `moodboard_items` (wallpaper references).
+- **Categories:** Trending, Anime, Nature, Cyberpunk, Space, Desktop, Mobile — stored as `source_query` column. Category query params in `handlers/sync.go:22-30` are the source of truth.
+- **Swagger UI** served at `/swagger/*` on the backend.
 
 > Full workflow walkthrough with exact API calls, pagination math, auth flow, and file-line references → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
