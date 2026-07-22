@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,6 +46,7 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
   }
 
   Future<void> _toggle(Moodboard board) async {
+    HapticFeedback.lightImpact();
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
@@ -65,11 +67,11 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
         child: Container(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           decoration: BoxDecoration(
-            color: v.surfaceContainer.withValues(alpha: 0.85),
+            color: v.surfaceContainer.withValues(alpha: 0.88),
             border: Border(top: BorderSide(color: v.glassBorder.withValues(alpha: 0.3), width: 1.5)),
           ),
           child: Column(
@@ -82,18 +84,20 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Text('ADD TO MOODBOARD', style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2, color: cs.onSurface)),
+                  Text('ADD TO MOODBOARD', style: GoogleFonts.oswald(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2, color: cs.onSurface)),
                   const Spacer(),
                   GestureDetector(
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
                       showCreateDialog();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: cs.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -107,20 +111,21 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               if (_loading)
-                const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(strokeWidth: 2))
+                Padding(padding: const EdgeInsets.all(32), child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2))
               else if (_moodboards.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text('No moodboards yet. Create one!', style: GoogleFonts.inter(color: v.onSurfaceSubtle, fontSize: 14)),
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Text('No moodboards found. Tap NEW to create one!', style: GoogleFonts.inter(color: v.onSurfaceSubtle, fontSize: 14)),
                 )
               else
                 Flexible(
                   child: ListView.separated(
                     shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
                     itemCount: _moodboards.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final board = _moodboards[index];
                       final isAdded = _alreadyAdded.contains(board.id);
@@ -128,16 +133,16 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                         onTap: () => _toggle(board),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                           decoration: BoxDecoration(
-                            color: isAdded ? cs.primary.withValues(alpha: 0.12) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: isAdded ? cs.primary.withValues(alpha: 0.3) : v.glassBorder.withValues(alpha: 0.15)),
+                            color: isAdded ? cs.primary.withValues(alpha: 0.15) : v.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: isAdded ? cs.primary : v.glassBorder.withValues(alpha: 0.15), width: isAdded ? 1.5 : 1),
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                isAdded ? Icons.check_circle_rounded : Icons.circle_outlined,
+                                isAdded ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
                                 color: isAdded ? cs.primary : v.onSurfaceSubtle,
                                 size: 22,
                               ),
@@ -146,16 +151,16 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(board.name, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
-                                    Text('${board.itemCount} items', style: GoogleFonts.inter(fontSize: 12, color: v.onSurfaceSubtle)),
+                                    Text(board.name, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: cs.onSurface)),
+                                    Text('${board.itemCount} item${board.itemCount == 1 ? '' : 's'}', style: GoogleFonts.inter(fontSize: 12, color: v.onSurfaceSubtle)),
                                   ],
                                 ),
                               ),
-                              Icon(isAdded ? Icons.remove_rounded : Icons.add_rounded, color: v.onSurfaceSubtle, size: 20),
+                              Icon(isAdded ? Icons.remove_rounded : Icons.add_rounded, color: isAdded ? cs.primary : v.onSurfaceSubtle, size: 20),
                             ],
                           ),
                         ),
-                      ).animate().fade(duration: 300.ms, delay: (index * 60).ms).slideX(begin: 0.1, end: 0);
+                      ).animate().fade(duration: 300.ms, delay: (index * 40).ms).slideX(begin: 0.1, end: 0);
                     },
                   ),
                 ),

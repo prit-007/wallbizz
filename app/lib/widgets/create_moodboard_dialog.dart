@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../config/theme_config.dart';
@@ -28,6 +29,15 @@ class _CreateMoodboardDialogState extends State<CreateMoodboardDialog> {
     super.dispose();
   }
 
+  void _submit() {
+    final name = _controller.text.trim();
+    if (name.isNotEmpty) {
+      HapticFeedback.lightImpact();
+      widget.onCreate(name);
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -39,45 +49,42 @@ class _CreateMoodboardDialogState extends State<CreateMoodboardDialog> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
           child: Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: v.surfaceContainer.withValues(alpha: 0.85),
+              color: v.surfaceContainer.withValues(alpha: 0.88),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: v.glassBorder.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.dashboard_customize_rounded, size: 40, color: cs.primary)
+                Icon(Icons.dashboard_customize_rounded, size: 44, color: cs.primary)
                   .animate().fade(duration: 400.ms).scale(begin: const Offset(0.6, 0.6), end: const Offset(1, 1), curve: Curves.elasticOut),
                 const SizedBox(height: 16),
-                Text('NEW MOODBOARD', style: GoogleFonts.oswald(fontSize: 22, color: cs.onSurface, fontWeight: FontWeight.bold, letterSpacing: 1.5))
+                Text('NEW MOODBOARD', style: GoogleFonts.oswald(fontSize: 22, color: cs.onSurface, fontWeight: FontWeight.bold, letterSpacing: 2))
                   .animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _controller,
                   autofocus: true,
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  onSubmitted: (_) => _submit(),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15, fontWeight: FontWeight.w500),
                   decoration: InputDecoration(
-                    hintText: 'e.g. Minimal, Dark, Abstract...',
+                    hintText: 'e.g. Minimal, Dark, Cyberpunk...',
                     hintStyle: GoogleFonts.inter(color: v.onSurfaceFaint, fontSize: 14),
                     filled: true,
                     fillColor: v.surfaceContainerLow,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: v.glassBorder),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(color: v.glassBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(color: cs.primary, width: 1.5),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                   ),
                 ).animate().fade(duration: 400.ms, delay: 180.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
@@ -85,11 +92,14 @@ class _CreateMoodboardDialogState extends State<CreateMoodboardDialog> {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: v.glassBorder.withValues(alpha: 0.3)),
                           ),
                           child: Center(
@@ -101,17 +111,12 @@ class _CreateMoodboardDialogState extends State<CreateMoodboardDialog> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          final name = _controller.text.trim();
-                          if (name.isNotEmpty) {
-                            widget.onCreate(name);
-                          }
-                        },
+                        onTap: _submit,
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: cs.primary,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: Center(
                             child: Text('CREATE', style: GoogleFonts.inter(color: cs.onPrimary, fontWeight: FontWeight.bold, letterSpacing: 1)),
