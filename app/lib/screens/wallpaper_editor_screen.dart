@@ -1,7 +1,9 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,26 +31,83 @@ class WallpaperEditorScreen extends StatefulWidget {
   State<WallpaperEditorScreen> createState() => _WallpaperEditorScreenState();
 }
 
-class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
+class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with SingleTickerProviderStateMixin {
   double _rotation = 0;
   bool _isApplying = false;
   final TransformationController _transformationController = TransformationController();
+  late AnimationController _animationController;
+  Animation<Matrix4>? _zoomAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(() {
+        if (_zoomAnimation != null) {
+          _transformationController.value = _zoomAnimation!.value;
+        }
+      });
+  }
 
   @override
   void dispose() {
     _transformationController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  void _rotateLeft() => setState(() => _rotation -= math.pi / 2);
-  void _rotateRight() => setState(() => _rotation += math.pi / 2);
+  void _rotateLeft() {
+    HapticFeedback.lightImpact();
+    setState(() => _rotation -= math.pi / 2);
+  }
+
+  void _rotateRight() {
+    HapticFeedback.lightImpact();
+    setState(() => _rotation += math.pi / 2);
+  }
+
   void _resetView() {
+    HapticFeedback.lightImpact();
     _transformationController.value = Matrix4.identity();
     setState(() => _rotation = 0);
   }
 
+  void _handleDoubleTap(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    final currentMatrix = _transformationController.value;
+    if (_animationController.isAnimating) return;
+
+    final isZoomed = currentMatrix.getMaxScaleOnAxis() > 1.1;
+
+    if (isZoomed) {
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: Matrix4.identity(),
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    } else {
+      final position = details.localPosition;
+      final targetMatrix = Matrix4.identity()
+        ..translate(-position.dx * 1.5, -position.dy * 1.5)
+        ..scale(2.5);
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: targetMatrix,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    }
+    _animationController.forward(from: 0);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ambientColor = ColorUtils.hexToColor(widget.primaryColor);
     final file = File(widget.localPath);
     final hasLocalFile = file.existsSync();
 
@@ -57,22 +116,79 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          InteractiveViewer(
-            transformationController: _transformationController,
-            minScale: 0.5,
-            maxScale: 5.0,
-            panEnabled: true,
-            scaleEnabled: true,
-            child: Center(
-              child: Transform.rotate(
-                angle: _rotation,
-                child: hasLocalFile
-                    ? Image.file(file, fit: BoxFit.contain)
-                    : Image.network(
-                        widget.urlFull,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (context, child, p) => p == null ? child : const Center(child: CircularProgressIndicator(color: Colors.white)),
-                      ),
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.3), BlendMode.srcOver),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 1.5,
+                height: MediaQuery.of(context).size.height * 1.5,
+                child: Transform.translate(
+                  offset: Offset(-MediaQuery.of(context).size.width * 0.25, -MediaQuery.of(context).size.height * 0.25),
+                  child: hasLocalFile
+                      ? Image.file(file, fit: BoxFit.cover)
+                      : Image.network(widget.urlFull, fit: BoxFit.cover),
+                ),
+              ),
+            ),
+          ).animate().fade(duration: 600.ms),
+
+          Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 1.0,
+                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
+                stops: const [0.2, 1.0],
+              ),
+            ),
+          ),
+
+          GestureDetector(
+            onDoubleTapDown: _handleDoubleTap,
+            onVerticalDragUpdate: (details) {
+              final scale = _transformationController.value.getMaxScaleOnAxis();
+              if (scale <= 1.1 && details.primaryDelta! > 10) {
+                HapticFeedback.mediumImpact();
+                Navigator.of(context).pop();
+              }
+            },
+            child: InteractiveViewer(
+              transformationController: _transformationController,
+              minScale: 0.5,
+              maxScale: 5.0,
+              panEnabled: true,
+              scaleEnabled: true,
+              child: Center(
+                child: Transform.rotate(
+                  angle: _rotation,
+                  child: hasLocalFile
+                      ? Image.file(file, fit: BoxFit.contain)
+                      : Image.network(
+                          widget.urlFull,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, p) => p == null ? child : const Center(child: CircularProgressIndicator(color: Colors.white)),
+                        ),
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            bottom: 0, left: 0, right: 0,
+            child: Container(
+              height: 350,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    ambientColor.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.95),
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
               ),
             ),
           ),
@@ -80,23 +196,19 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
-            child: _buildFrostedButton(
+            child: _EditorFrostedButton(
               icon: Icons.arrow_back_ios_new_rounded,
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
             ),
-          ),
+          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: -0.2, end: 0),
 
           Positioned(
             bottom: 0, left: 0, right: 0,
-            child: Container(
+            child: Padding(
               padding: EdgeInsets.fromLTRB(24, 40, 24, MediaQuery.of(context).padding.bottom + 24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.9)],
-                ),
-              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -108,25 +220,6 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFrostedButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.4),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-        ),
       ),
     );
   }
@@ -148,7 +241,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCircleButton(icon: Icons.rotate_left_rounded, onTap: _rotateLeft),
+              _EditorCircleButton(icon: Icons.rotate_left_rounded, onTap: _rotateLeft),
               const SizedBox(width: 16),
               Column(
                 children: [
@@ -157,44 +250,13 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
                 ],
               ),
               const SizedBox(width: 16),
-              _buildCircleButton(icon: Icons.rotate_right_rounded, onTap: _rotateRight),
+              _EditorCircleButton(icon: Icons.rotate_right_rounded, onTap: _rotateRight),
               Container(height: 30, width: 1, color: Colors.white.withValues(alpha: 0.2), margin: const EdgeInsets.symmetric(horizontal: 16)),
-              _buildCircleButton(icon: Icons.filter_center_focus_rounded, onTap: _resetView),
+              _EditorCircleButton(icon: Icons.filter_center_focus_rounded, onTap: _resetView),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCircleButton({required IconData icon, required VoidCallback onTap}) {
-    final notifier = ValueNotifier(false);
-    return ValueListenableBuilder<bool>(
-      valueListenable: notifier,
-      builder: (context, isPressed, _) {
-        return GestureDetector(
-          onTapDown: (_) => notifier.value = true,
-          onTapUp: (_) => notifier.value = false,
-          onTapCancel: () => notifier.value = false,
-          onTap: () {
-            notifier.value = false;
-            onTap();
-          },
-          child: AnimatedScale(
-            scale: isPressed ? 0.85 : 1.0,
-            duration: const Duration(milliseconds: 100),
-            child: Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-              ),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -203,7 +265,10 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: _isApplying ? null : _showTargetDialog,
+        onPressed: _isApplying ? null : () {
+          HapticFeedback.mediumImpact();
+          _showTargetDialog();
+        },
         icon: _isApplying ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)) : const Icon(Icons.wallpaper_rounded, color: Colors.black),
         label: Text(
           _isApplying ? 'APPLYING...' : 'APPLY WALLPAPER',
@@ -266,6 +331,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
       target: target,
       delay: delay,
       onApply: () {
+        HapticFeedback.mediumImpact();
         Navigator.pop(context);
         Future.delayed(const Duration(milliseconds: 150), () {
           if (mounted) _applyWallpaper(target);
@@ -304,6 +370,84 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> {
       setState(() => _isApplying = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
+  }
+}
+
+class _EditorFrostedButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _EditorFrostedButton({required this.icon, required this.onTap});
+
+  @override
+  State<_EditorFrostedButton> createState() => _EditorFrostedButtonState();
+}
+
+class _EditorFrostedButtonState extends State<_EditorFrostedButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.85 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+              ),
+              child: Icon(widget.icon, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EditorCircleButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _EditorCircleButton({required this.icon, required this.onTap});
+
+  @override
+  State<_EditorCircleButton> createState() => _EditorCircleButtonState();
+}
+
+class _EditorCircleButtonState extends State<_EditorCircleButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.85 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          width: 44, height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Icon(widget.icon, color: Colors.white, size: 22),
+        ),
+      ),
+    );
   }
 }
 
@@ -361,6 +505,6 @@ class _TargetOptionState extends State<_TargetOption> {
           ),
         ),
       ),
-    ).animate().fade(duration: 400.ms, delay: widget.delay.ms).slideX(begin: 0.1, end: 0);
+    );
   }
 }

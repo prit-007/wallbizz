@@ -138,7 +138,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 85;
 
     if (!_isLoggedIn) return _buildGuestView();
@@ -151,45 +150,42 @@ class _WishlistScreenState extends State<WishlistScreen> {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'COLLECTION',
+                    'ARCHIVE',
                     style: GoogleFonts.oswald(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: cs.primary,
-                      letterSpacing: 3,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 4,
                       height: 1.0,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'SAVED WALLPAPERS',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: vk.onSurfaceSubtle,
-                      letterSpacing: 2,
-                    ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 40,
+                    height: 3,
+                    color: Colors.white,
                   ),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: vk.surfaceContainer,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15)),
+                  color: Colors.black.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
                 ),
                 child: Text(
                   '${_wishlist.length} ITEMS',
                   style: GoogleFonts.oswald(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: cs.onSurface,
+                    color: Colors.white.withValues(alpha: 0.8),
                     letterSpacing: 1,
                   ),
                 ),

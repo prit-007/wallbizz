@@ -1,6 +1,8 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
@@ -25,11 +27,14 @@ class DetailScreen extends StatefulWidget {
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderStateMixin {
   bool _isDownloading = false;
   bool _isDownloaded = false;
   bool _isWishlisted = false;
+
   final TransformationController _transformController = TransformationController();
+  late AnimationController _animationController;
+  Animation<Matrix4>? _zoomAnimation;
 
   Wallpaper get wallpaper => widget.wallpaper;
 
@@ -38,11 +43,20 @@ class _DetailScreenState extends State<DetailScreen> {
     super.initState();
     _checkDownloadState();
     _checkWishlist();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(() {
+        if (_zoomAnimation != null) {
+          _transformController.value = _zoomAnimation!.value;
+        }
+      });
   }
 
   @override
   void dispose() {
     _transformController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -60,6 +74,7 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void _onHeartTap() {
+    HapticFeedback.mediumImpact();
     WallpaperActions.handleHeartTap(
       context,
       wallpaper,
@@ -70,7 +85,36 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  void _resetZoom() => _transformController.value = Matrix4.identity();
+  void _handleDoubleTap(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    final currentMatrix = _transformController.value;
+    if (_animationController.isAnimating) return;
+
+    final isZoomed = currentMatrix.getMaxScaleOnAxis() > 1.1;
+
+    if (isZoomed) {
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: Matrix4.identity(),
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    } else {
+      final position = details.localPosition;
+      final targetMatrix = Matrix4.identity()
+        ..translate(-position.dx * 1.5, -position.dy * 1.5)
+        ..scale(2.5);
+      _zoomAnimation = Matrix4Tween(
+        begin: currentMatrix,
+        end: targetMatrix,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ));
+    }
+    _animationController.forward(from: 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +126,9 @@ class _DetailScreenState extends State<DetailScreen> {
         fit: StackFit.expand,
         children: [
           ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+            imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
             child: ColorFiltered(
-              colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.6), BlendMode.srcOver),
+              colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.5), BlendMode.srcOver),
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 1.5,
                 height: MediaQuery.of(context).size.height * 1.5,
@@ -94,7 +138,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 ),
               ),
             ),
-          ),
+          ).animate().fade(duration: 600.ms),
 
           Container(
             decoration: BoxDecoration(
@@ -108,30 +152,41 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
 
           GestureDetector(
-            onDoubleTap: () {
-              if (_transformController.value != Matrix4.identity()) {
-                _resetZoom();
-              } else {
-                _transformController.value = Matrix4.diagonal3Values(2.5, 2.5, 1.0);
+            onDoubleTapDown: _handleDoubleTap,
+            onVerticalDragUpdate: (details) {
+              final scale = _transformController.value.getMaxScaleOnAxis();
+              if (scale <= 1.1 && details.primaryDelta! > 10) {
+                HapticFeedback.mediumImpact();
+                Navigator.of(context).pop();
               }
             },
             child: InteractiveViewer(
               transformationController: _transformController,
               minScale: 1.0,
               maxScale: 5.0,
-              child: Center(child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.contain)),
+              child: Center(
+                child: Hero(
+                  tag: wallpaper.id,
+                  child: NetworkImageWidget(imageUrl: wallpaper.urlFull, fit: BoxFit.contain),
+                ),
+              ),
             ),
           ),
 
           Positioned(
             bottom: 0, left: 0, right: 0,
             child: Container(
-              height: 400,
+              height: 450,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withValues(alpha: 0.95)],
+                  colors: [
+                    Colors.transparent,
+                    ambientColor.withValues(alpha: 0.2),
+                    Colors.black.withValues(alpha: 0.95),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
@@ -140,30 +195,37 @@ class _DetailScreenState extends State<DetailScreen> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
-            child: _buildFrostedButton(
+            child: _FrostedCircleButton(
               icon: Icons.arrow_back_ios_new_rounded,
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
             ),
-          ),
+          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: -0.2, end: 0),
+
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             right: 16,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildFrostedButton(
+                _FrostedCircleButton(
                   icon: _isWishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                   iconColor: _isWishlisted ? Colors.redAccent : Colors.white,
                   onTap: _onHeartTap,
                 ),
                 const SizedBox(width: 12),
-                _buildFrostedButton(
+                _FrostedCircleButton(
                   icon: Icons.ios_share_rounded,
-                  onTap: () => _shareWallpaper(context),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _shareWallpaper(context);
+                  },
                 ),
               ],
             ),
-          ),
+          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: 0.2, end: 0),
 
           Positioned(
             bottom: 0, left: 0, right: 0,
@@ -176,72 +238,39 @@ class _DetailScreenState extends State<DetailScreen> {
                   SpecsCard(wallpaper: wallpaper),
                   const SizedBox(height: 24),
 
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: _isDownloading ? null : () => _downloadWallpaper(context),
-                      icon: _isDownloading
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : Icon(_isDownloaded ? Icons.check_circle_rounded : Icons.download_rounded),
-                      label: Text(
-                        _isDownloading ? 'DOWNLOADING...' : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD WALLPAPER'),
-                        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isDownloaded ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.2),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        side: BorderSide(color: Colors.white.withValues(alpha: _isDownloaded ? 0.1 : 0.3)),
-                      ),
-                    ),
+                  _GlassActionButton(
+                    onPressed: _isDownloading ? null : () {
+                      HapticFeedback.mediumImpact();
+                      _downloadWallpaper(context);
+                    },
+                    isDownloading: _isDownloading,
+                    isDownloaded: _isDownloaded,
+                    label: _isDownloading ? 'DOWNLOADING...' : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD WALLPAPER'),
+                    icon: _isDownloaded ? Icons.check_circle_rounded : Icons.download_rounded,
+                    backgroundColor: _isDownloaded ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.2),
+                    textColor: Colors.white,
                   ),
 
                   if (!kIsWeb) ...[
                     const SizedBox(height: 12),
-                    SizedBox(
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _setWallpaper(context),
-                        icon: const Icon(Icons.wallpaper_rounded, color: Colors.white),
-                        label: Text(
-                          'SET AS WALLPAPER',
-                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ambientColor,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
+                    _GlassActionButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        _setWallpaper(context);
+                      },
+                      isDownloading: false,
+                      isDownloaded: false,
+                      label: 'SET AS WALLPAPER',
+                      icon: Icons.wallpaper_rounded,
+                      backgroundColor: ambientColor,
+                      textColor: ambientColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                     ),
                   ],
                 ],
               ),
-            ).animate().slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic).fade(),
+            ).animate().slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic).fade(duration: 500.ms),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFrostedButton({required IconData icon, required VoidCallback onTap, Color iconColor = Colors.white}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
-          ),
-        ),
       ),
     );
   }
@@ -337,5 +366,119 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _shareWallpaper(BuildContext context) {
     Share.share('Check out this wallpaper from Wallbizz!\n${wallpaper.urlFull}', subject: 'Wallbizz Wallpapers');
+  }
+}
+
+class _FrostedCircleButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color iconColor;
+
+  const _FrostedCircleButton({
+    required this.icon,
+    required this.onTap,
+    this.iconColor = Colors.white,
+  });
+
+  @override
+  State<_FrostedCircleButton> createState() => _FrostedCircleButtonState();
+}
+
+class _FrostedCircleButtonState extends State<_FrostedCircleButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.85 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+              ),
+              child: Icon(widget.icon, color: widget.iconColor, size: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassActionButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final bool isDownloading;
+  final bool isDownloaded;
+  final String label;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color textColor;
+
+  const _GlassActionButton({
+    required this.onPressed,
+    required this.isDownloading,
+    required this.isDownloaded,
+    required this.label,
+    required this.icon,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  @override
+  State<_GlassActionButton> createState() => _GlassActionButtonState();
+}
+
+class _GlassActionButtonState extends State<_GlassActionButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onPressed,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 56,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: widget.isDownloaded ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.isDownloading)
+                SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: widget.textColor))
+              else
+                Icon(widget.icon, color: widget.textColor, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                widget.label,
+                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1, color: widget.textColor),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
