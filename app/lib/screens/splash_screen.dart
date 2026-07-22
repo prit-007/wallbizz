@@ -92,9 +92,10 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: 1.1,
                   ),
                 ).animate()
-                 .fade(delay: 400.ms, duration: 1200.ms)
-                 .scale(begin: const Offset(1.05, 1.05), end: const Offset(1.0, 1.0), curve: Curves.easeOutCubic)
-                 .shimmer(delay: 1500.ms, duration: 2000.ms, color: Colors.cyanAccent.withValues(alpha: 0.2)),
+                 .fadeIn(delay: 400.ms, duration: 800.ms, curve: Curves.easeOut)
+                 .blur(delay: 400.ms, duration: 1000.ms, begin: const Offset(12, 0), end: Offset.zero, curve: Curves.easeOutCubic)
+                 .scale(delay: 400.ms, begin: const Offset(1.3, 1.3), end: const Offset(1.0, 1.0), duration: 1200.ms, curve: Curves.easeOutBack)
+                 .shimmer(delay: 1200.ms, duration: 3000.ms, color: Colors.white.withValues(alpha: 0.15)),
               ],
             ),
           ),
