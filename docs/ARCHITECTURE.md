@@ -29,7 +29,7 @@
        │ UPSERT wallpapers (twice daily)
        ▼
 ┌─────────────────────────────────────────────────────┐
-│              GOLANG BACKEND (Railway)                │
+│              GOLANG BACKEND (Render)                 │
 │  Fiber Server + robfig/cron + net/http Client        │
 │  POST /api/sync (manual trigger)                    │
 │  POST /api/search (NSFW/Sketchy proxy, JWT-gated)   │

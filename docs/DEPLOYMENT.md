@@ -4,7 +4,7 @@
 
 | Component | Platform | Method |
 |-----------|----------|--------|
-| Golang Backend | Railway.app | Dockerfile auto-build |
+| Golang Backend | Render.com | Dockerfile auto-build |
 | Flutter Web | Static hosting | `flutter build web` |
 | Supabase | Supabase Cloud | Dashboard (managed) |
 
@@ -39,37 +39,37 @@ In SQL Editor, run in order:
 2. `sql/002_rls.sql`
 3. `sql/003_indexes.sql`
 
-## 2. Backend (Railway)
+## 2. Backend (Render)
 
 ### Steps
 1. Push repo to GitHub
-2. Railway -> New Project -> Deploy from GitHub Repo
+2. [Render Dashboard](https://dashboard.render.com) -> New + -> Web Service -> Connect GitHub repo
 3. Set **Root Directory**: `backend`
-4. Add env vars:
+4. Set **Runtime**: `Docker`
+5. **Plan**: Free
+6. Add env vars:
 
 ```
 PORT=3000
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=eyJhbG...your_service_role_key
 WALLHAVEN_API_KEY=your_wallhaven_api_key  # https://wallhaven.cc/settings#api
+LOG_LEVEL=info
 ```
 
-5. Railway auto-deploys on push to `main`
-6. Note the public URL
+7. Render auto-deploys on push to `main`
+8. Note the public URL (e.g., `https://wallbizz.onrender.com`)
 
 ### Verify
 ```bash
-curl -X POST https://your-backend.up.railway.app/api/sync
+curl -X POST https://wallbizz.onrender.com/api/v1/sync
 # Should return: {"status":"sync triggered"}
 ```
 
-### Rate Limits
-
-| Resource | Railway Free | Our Usage |
-|----------|-------------|-----------|
-| Hours/month | 500 | ~720 (may need Hobby $5/mo) |
-| Memory | 512 MB | ~50 MB |
-| Bandwidth | 100 GB | ~10 MB/day |
+### Health Check
+```bash
+curl https://wallbizz.onrender.com/api/v1/health
+```
 
 ## 3. Flutter Web
 
@@ -129,7 +129,7 @@ SUPABASE_ANON_KEY=your_anon_key
 | # | Task | Verify |
 |---|------|--------|
 | 1 | Backend health | `curl POST /api/sync` returns success |
-| 2 | Cron running | Check Railway logs at 2 AM/2 PM UTC |
+| 2 | Cron running | Check Render logs at 2 AM/2 PM UTC |
 | 3 | Supabase has data | Query `wallpapers` table in dashboard |
 | 4 | Flutter loads | Open web URL, see category tabs + grid |
 | 5 | Images render | Thumbnails load via CachedNetworkImage |

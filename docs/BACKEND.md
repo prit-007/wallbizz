@@ -2,7 +2,7 @@
 
 ## Overview
 
-Golang backend that syncs wallpapers from Wallhaven to Supabase twice daily. Lightweight Fiber HTTP server with robfig/cron scheduler. Runs on Railway.
+Golang backend that syncs wallpapers from Wallhaven to Supabase twice daily. Lightweight Fiber HTTP server with robfig/cron scheduler. Runs on Render.
 
 ## Environment Variables
 

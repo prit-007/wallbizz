@@ -28,7 +28,7 @@ Wallhaven API  -->  Golang Backend (cron, 2x/day)  -->  Supabase (PostgreSQL)
 | Backend | Golang + Fiber + robfig/cron | Cron sync server |
 | Database | Supabase (PostgreSQL) | Data + Auth + REST API |
 | Images | Wallhaven API v1 | Source wallpapers |
-| Hosting | Railway (backend) + Static (web) | Deployment |
+| Hosting | Render (backend) + Static (web) | Deployment |
 
 ## Project Structure
 
@@ -120,14 +120,15 @@ cd backend && go test ./...
 
 ## Deployment
 
-### Backend (Railway)
+### Backend (Render)
 
 ```bash
-# Push to GitHub, then on Railway:
-# 1. Create service from repo
+# Push to GitHub, then on Render:
+# 1. Create Web Service from repo
 # 2. Set root directory to backend/
-# 3. Add env vars: PORT, SUPABASE_URL, SUPABASE_SERVICE_KEY, WALLHAVEN_API_KEY
-# 4. Deploy
+# 3. Set runtime to Docker
+# 4. Add env vars: PORT, SUPABASE_URL, SUPABASE_SERVICE_KEY, WALLHAVEN_API_KEY, LOG_LEVEL
+# 5. Deploy
 ```
 
 ### Flutter Web

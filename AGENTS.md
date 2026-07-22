@@ -43,7 +43,7 @@ vivek_app/
 - Backend cron schedule: `0 2,14 * * *` UTC (2 AM + 2 PM daily). Manual trigger: `POST /api/v1/sync` (returns immediately, runs in goroutine).
 - Backend env vars: `PORT` (default 3000), `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL` (default info).
 - Flutter env vars (`app/.env`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `BACKEND_URL` (used only on web to override `BackendConfig._baseUrl`).
-- `BackendConfig._baseUrl` hardcodes the Railway production URL (`https://wallbizz-production.up.railway.app`) and is only overridden on web. Mobile/desktop do not call `BackendConfig.init()`.
+- `BackendConfig._baseUrl` hardcodes the Render production URL (`https://wallbizz.onrender.com`) and is only overridden on web. Mobile/desktop do not call `BackendConfig.init()`.
 - Auth: gated on heart-tap and NSFW search; browsing is anonymous. Supabase Auth (Email + Google OAuth with PKCE on Flutter web).
 - Wishlist: RLS-enforced `wishlists` table; Flutter CRUDs via Supabase REST with anon key.
 - DB: 2 tables — `wallpapers` (cache, UPSERT by `wallhaven_id`) and `wishlists` (user data).
@@ -72,9 +72,9 @@ Backend and Flutter tests are independent — run in any order or in parallel in
 - Backend uses `SUPABASE_SERVICE_KEY` (bypasses RLS for writes). Flutter uses `SUPABASE_ANON_KEY` (RLS-enforced reads/writes).
 - Supabase upsert header: `Prefer: resolution=merge-duplicates` — driven by `wallhaven_id` UNIQUE constraint.
 - Category query mapping in `backend/handlers/sync.go:22-28` is the source of truth for Wallhaven query params.
-- CORS is wide open (`AllowOrigins: "*"`) on the backend — expected for Flutter web + Railway.
+- CORS is wide open (`AllowOrigins: "*"`) on the backend — expected for Flutter web + Render.
 - `pubspec.lock` is gitignored — `flutter pub get` re-resolves each time.
-- `BackendConfig._baseUrl` hardcodes the production Railway URL; override on web via `BACKEND_URL` in `app/.env`.
+- `BackendConfig._baseUrl` hardcodes the production Render URL (`https://wallbizz.onrender.com`); override on web via `BACKEND_URL` in `app/.env`.
 
 ## Migrations
 
@@ -82,5 +82,5 @@ Run `sql/001_schema.sql` → `002_rls.sql` → `003_indexes.sql` in Supabase SQL
 
 ## Deployment
 
-- **Backend**: Railway — set root dir to `backend/`, add env vars (`PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL`).
-- **Flutter Web**: `flutter build web --release` then deploy `build/web/` to static host. Ensure `BACKEND_URL` in `app/.env` is set to the deployed Railway URL before building.
+- **Backend**: Render — set root dir to `backend/`, runtime Docker, add env vars (`PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL`).
+- **Flutter Web**: `flutter build web --release` then deploy `build/web/` to static host. Ensure `BACKEND_URL` in `app/.env` is set to the deployed Render URL before building.

@@ -21,7 +21,7 @@ class SearchScreen extends StatefulWidget {
     super.key,
     this.httpClient,
     this.isAuthenticated = false,
-    this.backendBase = 'https://wallbizz-production.up.railway.app',
+    this.backendBase = 'https://wallbizz.onrender.com',
     this.accessToken,
   });
 

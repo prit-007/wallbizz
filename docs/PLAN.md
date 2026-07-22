@@ -12,7 +12,7 @@ Build a premium wallpaper app (Flutter + Golang backend) powered exclusively by 
 | Database | Supabase (PostgreSQL + PostgREST + Auth) |
 | Client | Flutter 3.x (Dart 3.12+) |
 | Image Source | Wallhaven API v1 |
-| Deployment | Railway (backend), Static hosting (Flutter web) |
+| Deployment | Render (backend), Static hosting (Flutter web) |
 
 ## Execution Phases
 

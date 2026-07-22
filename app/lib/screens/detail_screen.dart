@@ -200,13 +200,14 @@ class _DetailScreenState extends State<DetailScreen> {
                       height: 56,
                       child: ElevatedButton.icon(
                         onPressed: () => _setWallpaper(context),
-                        icon: const Icon(Icons.wallpaper_rounded, color: Colors.black),
+                        icon: const Icon(Icons.wallpaper_rounded, color: Colors.white),
                         label: Text(
                           'SET AS WALLPAPER',
-                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.black),
+                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ambientColor,
+                          foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),

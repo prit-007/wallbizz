@@ -80,14 +80,14 @@ void main() {
 
     test('builds authenticated search URL with backend base', () {
       final url = WallhavenSearch.buildAuthenticatedURL(
-        backendBase: 'https://my-backend.up.railway.app',
+        backendBase: 'https://wallbizz.onrender.com',
         query: 'nature',
         page: 2,
         purity: '111',
         sorting: 'relevance',
         topRange: '1M',
       );
-      expect(url, contains('my-backend.up.railway.app/api/v1/search'));
+      expect(url, contains('wallbizz.onrender.com/api/v1/search'));
       expect(url, contains('q=nature'));
       expect(url, contains('purity=111'));
       expect(url, contains('sorting=relevance'));
@@ -331,7 +331,7 @@ void main() {
         query: 'nsfw',
         page: 1,
         token: 'my-jwt-token',
-        backendBase: 'https://my-backend.up.railway.app',
+        backendBase: 'https://wallbizz.onrender.com',
       );
 
       expect(authHeader, 'Bearer my-jwt-token');
@@ -353,10 +353,10 @@ void main() {
         query: 'nsfw',
         page: 1,
         token: 'token',
-        backendBase: 'https://my-backend.up.railway.app',
+        backendBase: 'https://wallbizz.onrender.com',
       );
 
-      expect(requestedUrl, contains('my-backend.up.railway.app/api/v1/search'));
+      expect(requestedUrl, contains('wallbizz.onrender.com/api/v1/search'));
       expect(requestedUrl, isNot(contains('wallhaven.cc')));
     });
 

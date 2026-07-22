@@ -18,7 +18,7 @@ Future<void> main() async {
 
   if (kIsWeb) {
     BackendConfig.init(
-      dotenv.env['BACKEND_URL'] ?? 'https://wallbizz-production.up.railway.app',
+      dotenv.env['BACKEND_URL'] ?? 'https://wallbizz.onrender.com',
     );
   }
 
