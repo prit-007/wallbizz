@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../widgets/wallpaper_card.dart';
@@ -22,6 +24,7 @@ class StaggeredGrid extends StatefulWidget {
 
 class _StaggeredGridState extends State<StaggeredGrid> {
   final List<Wallpaper> _wallpapers = [];
+  final Set<String> _wishlistedIds = {};
   int _page = 0;
   bool _isLoading = false;
   bool _hasMore = true;
@@ -31,6 +34,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   void initState() {
     super.initState();
     _loadWallpapers();
+    _loadWishlist();
     _scrollController.addListener(_onScroll);
   }
 
@@ -40,6 +44,40 @@ class _StaggeredGridState extends State<StaggeredGrid> {
     if (oldWidget.category != widget.category) {
       _resetAndLoad();
     }
+  }
+
+  Future<void> _loadWishlist() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      _wishlistedIds.clear();
+      return;
+    }
+    try {
+      final list = await SupabaseService.instance.fetchWishlist(user.id);
+      if (mounted) {
+        setState(() {
+          _wishlistedIds.addAll(list.map((w) => w.id));
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _onHeartTap(Wallpaper wallpaper) {
+    WallpaperActions.handleHeartTap(
+      context,
+      wallpaper,
+      onComplete: () {
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) return;
+        setState(() {
+          if (_wishlistedIds.contains(wallpaper.id)) {
+            _wishlistedIds.remove(wallpaper.id);
+          } else {
+            _wishlistedIds.add(wallpaper.id);
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -128,13 +166,12 @@ class _StaggeredGridState extends State<StaggeredGrid> {
                 );
               }
 
+              final wp = _wallpapers[index];
               return WallpaperCard(
-                wallpaper: _wallpapers[index],
-                onTap: () => widget.onWallpaperTap?.call(_wallpapers[index]),
-                onHeartTap: () => WallpaperActions.handleHeartTap(
-                  context,
-                  _wallpapers[index],
-                ),
+                wallpaper: wp,
+                isWishlisted: _wishlistedIds.contains(wp.id),
+                onTap: () => widget.onWallpaperTap?.call(wp),
+                onHeartTap: () => _onHeartTap(wp),
               );
             },
           );
@@ -153,22 +190,25 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             : constraints.maxWidth > 600
                 ? 3
                 : 2;
+        final heights = [200.0, 280.0, 240.0, 320.0, 180.0, 260.0];
 
         return MasonryGridView.count(
           crossAxisCount: crossAxisCount,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           padding: const EdgeInsets.all(8),
-          itemCount: 10,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: crossAxisCount * 3,
           itemBuilder: (context, index) {
-            final heights = [200.0, 280.0, 240.0, 320.0, 180.0];
             return Container(
               height: heights[index % heights.length],
               decoration: BoxDecoration(
                 color: vk.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
-            );
+            )
+                .animate(onPlay: (controller) => controller.repeat())
+                .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
           },
         );
       },

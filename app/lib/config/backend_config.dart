@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class BackendConfig {
-  static String _baseUrl = 'http://localhost:3000';
+  static String _baseUrl = 'https://wallbizz-production.up.railway.app';
 
   static String get baseUrl => _baseUrl;
 

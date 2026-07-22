@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
 import '../services/downloads_service.dart';
+import '../services/supabase_service.dart';
+import '../services/wallpaper_actions.dart';
 import '../utils/color_utils.dart';
 import '../widgets/dynamic_theme.dart';
 import '../widgets/specs_card.dart';
@@ -27,6 +30,8 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   bool _isDownloading = false;
   bool _isDownloaded = false;
+  bool _isWishlisted = false;
+  final TransformationController _transformController = TransformationController();
 
   Wallpaper get wallpaper => widget.wallpaper;
 
@@ -34,6 +39,13 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
     _checkDownloadState();
+    _checkWishlist();
+  }
+
+  @override
+  void dispose() {
+    _transformController.dispose();
+    super.dispose();
   }
 
   void _checkDownloadState() {
@@ -42,6 +54,27 @@ class _DetailScreenState extends State<DetailScreen> {
         _isDownloaded = DownloadsService.isDownloaded(wallpaper.wallhavenId);
       });
     }
+  }
+
+  Future<void> _checkWishlist() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      final inList = await SupabaseService.instance.isInWishlist(user.id, wallpaper.id);
+      if (mounted) setState(() => _isWishlisted = inList);
+    } catch (_) {}
+  }
+
+  void _onHeartTap() {
+    WallpaperActions.handleHeartTap(
+      context,
+      wallpaper,
+      onComplete: () => setState(() => _isWishlisted = !_isWishlisted),
+    );
+  }
+
+  void _resetZoom() {
+    _transformController.value = Matrix4.identity();
   }
 
   @override
@@ -55,23 +88,38 @@ class _DetailScreenState extends State<DetailScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            NetworkImageWidget(
-              imageUrl: wallpaper.urlFull,
-              fit: BoxFit.contain,
+            GestureDetector(
+              onDoubleTap: () {
+                if (_transformController.value != Matrix4.identity()) {
+                  _resetZoom();
+                } else {
+                  _transformController.value = Matrix4.identity()..scale(2.5);
+                }
+              },
+              child: InteractiveViewer(
+                transformationController: _transformController,
+                minScale: 1.0,
+                maxScale: 5.0,
+                panEnabled: true,
+                child: NetworkImageWidget(
+                  imageUrl: wallpaper.urlFull,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                height: 300,
+                height: 360,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.8),
+                      Colors.black.withValues(alpha: 0.85),
                     ],
                   ),
                 ),
@@ -99,22 +147,63 @@ class _DetailScreenState extends State<DetailScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
               right: 16,
-              child: GestureDetector(
-                onTap: () => _shareWallpaper(context),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    shape: BoxShape.circle,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: _onHeartTap,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _isWishlisted ? Icons.favorite : Icons.favorite_border,
+                        color: _isWishlisted ? Colors.red : cs.onSurface,
+                        size: 22,
+                      ),
+                    ),
                   ),
-                  child: Icon(
-                    Icons.share,
-                    color: cs.onSurface,
-                    size: 24,
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => _shareWallpaper(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.share,
+                        color: cs.onSurface,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_transformController.value != Matrix4.identity())
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 72,
+                right: 16,
+                child: GestureDetector(
+                  onTap: _resetZoom,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.fit_screen,
+                      color: cs.onSurface,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
-            ),
             Positioned(
               bottom: 0,
               left: 0,
@@ -126,7 +215,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SpecsCard(wallpaper: wallpaper),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     SizedBox(
                       height: 52,
                       child: ElevatedButton.icon(
@@ -244,9 +333,7 @@ class _DetailScreenState extends State<DetailScreen> {
             action: SnackBarAction(
               label: 'VIEW',
               textColor: cs.onSurface,
-              onPressed: () {
-                // Navigate to downloads tab
-              },
+              onPressed: () {},
             ),
           ),
         );
@@ -375,8 +462,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _shareWallpaper(BuildContext context) {
     Share.share(
-      'Check out this wallpaper from Vivek Wallpapers!\n${wallpaper.urlFull}',
-      subject: 'Vivek Wallpapers',
+      'Check out this wallpaper from Wallbizz!\n${wallpaper.urlFull}',
+      subject: 'Wallbizz Wallpapers',
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -86,8 +87,10 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   Future<void> _signInWithGoogle() async {
     try {
       setState(() => _isLoading = true);
+      final redirectTo = kIsWeb ? null : 'vivekapp://callback';
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
+        redirectTo: redirectTo,
       );
       if (mounted) {
         WallpaperActions.onAuthSuccess();

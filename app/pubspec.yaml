@@ -1,7 +1,7 @@
 name: vivek_app
-description: "Premium wallpaper app powered by Wallhaven"
+description: "Wallbizz — Premium curated wallpapers powered by Wallhaven"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+2002
 
 environment:
   sdk: ^3.12.2

@@ -21,7 +21,7 @@ class SearchScreen extends StatefulWidget {
     super.key,
     this.httpClient,
     this.isAuthenticated = false,
-    this.backendBase = 'http://localhost:3000',
+    this.backendBase = 'https://wallbizz-production.up.railway.app',
     this.accessToken,
   });
 
@@ -423,11 +423,67 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (_results.isEmpty && !_isLoading) {
       return Center(
-        child: Text(
-          'No wallpapers found',
-          style: TextStyle(color: vk.onSurfaceFaint, fontSize: 16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: vk.surfaceContainer,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Icon(
+                  Icons.search_off_rounded,
+                  size: 48,
+                  color: vk.onSurfaceDim,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'No wallpapers found',
+                style: GoogleFonts.oswald(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: cs.onSurface,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Try a different search term, adjust your filters, or explore our curated categories.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: vk.onSurfaceSubtle,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _controller.clear();
+                  setState(() {
+                    _results.clear();
+                    _hasSearched = false;
+                  });
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Clear filters'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: cs.primary,
+                  side: BorderSide(color: vk.glassBorder),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      );
+      ).animate().fade(duration: 400.ms).slideY(begin: 0.2, end: 0);
     }
 
     return LayoutBuilder(

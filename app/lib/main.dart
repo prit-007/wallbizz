@@ -18,26 +18,29 @@ Future<void> main() async {
 
   if (kIsWeb) {
     BackendConfig.init(
-      dotenv.env['BACKEND_URL'] ?? 'http://localhost:3000',
+      dotenv.env['BACKEND_URL'] ?? 'https://wallbizz-production.up.railway.app',
     );
   }
 
   await Supabase.initialize(
     url: SupabaseConfig.url,
     publishableKey: SupabaseConfig.anonKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
 
-  runApp(const VivekApp());
+  runApp(const WallbizzApp());
 }
 
-class VivekApp extends StatefulWidget {
-  const VivekApp({super.key});
+class WallbizzApp extends StatefulWidget {
+  const WallbizzApp({super.key});
 
   @override
-  State<VivekApp> createState() => _VivekAppState();
+  State<WallbizzApp> createState() => _WallbizzAppState();
 }
 
-class _VivekAppState extends State<VivekApp> with WidgetsBindingObserver {
+class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -63,7 +66,7 @@ class _VivekAppState extends State<VivekApp> with WidgetsBindingObserver {
       valueListenable: ThemeConfig.isDarkMode,
       builder: (context, isDark, _) {
         return MaterialApp(
-          title: 'Vivek',
+          title: 'Wallbizz',
           debugShowCheckedModeBanner: false,
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: _lightTheme(),
