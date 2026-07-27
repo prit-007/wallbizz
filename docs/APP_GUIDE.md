@@ -173,7 +173,7 @@
 1. `main.dart` loads environment variables from `.env` via `flutter_dotenv`
 2. On web: `BackendConfig.init()` overrides the base URL with `BACKEND_URL` from `.env` (fallback: hardcoded `https://wallbizz.onrender.com`)
 3. Initializes Hive (local storage for downloads + preferences)
-4. Initializes Supabase with `AuthFlowType.pkce` and redirect URL `vivekapp://callback` (Android deep link)
+4. Initializes Supabase with `AuthFlowType.pkce` and redirect URL `wallbizz://callback` (Android deep link)
 5. Wraps the app in `DynamicTheme` → `VivekTheme` → `MaterialApp`
 6. MaterialApp's `home` is `SplashScreen` — shows "WALLBIZZ" with animated letter spacing, then navigates to `HomeScreen`
 7. Android native splash is configured pure black via `launch_background.xml` and `values/styles.xml`

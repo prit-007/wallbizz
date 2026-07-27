@@ -46,7 +46,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       await Supabase.instance.client.auth.resend(
         type: OtpType.signup,
         email: widget.email,
-        emailRedirectTo: 'vivekapp://callback',
+        emailRedirectTo: 'wallbizz://callback',
       );
       setState(() => _resent = true);
       if (mounted) {

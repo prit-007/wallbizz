@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GalleryService {
-  static const _channel = MethodChannel('com.vivek.vivek_app/gallery');
+  static const _channel = MethodChannel('com.wallbizz.app/gallery');
   static const _storagePrefKey = 'gallery_storage_choice';
 
   static const Map<String, String> storageOptions = {

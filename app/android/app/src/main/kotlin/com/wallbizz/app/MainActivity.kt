@@ -1,4 +1,4 @@
-package com.vivek.vivek_app
+package com.wallbizz.app
 
 import android.content.ContentValues
 import android.media.MediaScannerConnection
@@ -12,7 +12,7 @@ import java.io.File
 import java.io.FileInputStream
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.vivek.vivek_app/gallery"
+    private val CHANNEL = "com.wallbizz.app/gallery"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

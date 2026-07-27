@@ -35,7 +35,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'vivekapp://callback',
+        redirectTo: 'wallbizz://callback',
       );
       setState(() => _sent = true);
     } catch (e) {

@@ -96,7 +96,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   Future<void> _signInWithGoogle() async {
     try {
       setState(() => _isLoading = true);
-      final redirectTo = kIsWeb ? null : 'vivekapp://callback';
+      final redirectTo = kIsWeb ? null : 'wallbizz://callback';
       await Supabase.instance.client.auth.signInWithOAuth(OAuthProvider.google, redirectTo: redirectTo);
       if (mounted) {
         WallpaperActions.onAuthSuccess();

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.vivek.vivek_app"
+    namespace = "com.wallbizz.app"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.vivek.vivek_app"
+        applicationId = "com.wallbizz.app"
         minSdk = 24
         targetSdk = 35
         versionCode = flutter.versionCode
