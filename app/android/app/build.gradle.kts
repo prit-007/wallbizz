@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.wallbizz.app"
-    compileSdk = 36
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -16,37 +16,20 @@ android {
 
     defaultConfig {
         applicationId = "com.wallbizz.app"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    signingConfigs {
-        create("release") {
-            keyAlias = "vivek"
-            keyPassword = "vivek123"
-            storeFile = file("vivek.keystore")
-            storePassword = "vivek123"
-        }
-    }
-
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-
-    val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 3)
-
-    applicationVariants.configureEach {
-        val variant = this
-        variant.outputs.configureEach {
-            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            val abiVersionCode = abiCodes[filters.find { it.filterType == "ABI" }?.identifier]
-            if (abiVersionCode != null) {
-                output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
