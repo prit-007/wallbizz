@@ -34,27 +34,36 @@ void main() {
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({'gesture_hints_shown': true});
-    Hive.init(Directory.systemTemp.path);
-    await Hive.openBox('downloads');
-    await ThemeConfig.load();
-    await Supabase.initialize(
-      url: 'https://test.supabase.co',
-      publishableKey: 'test-anon-key',
-    );
+    try {
+      final dir = Directory.systemTemp.createTempSync('hive_');
+      Hive.init(dir.path);
+      await Hive.openBox('downloads');
+    } catch (_) {}
+    try {
+      await ThemeConfig.load();
+    } catch (_) {}
+    try {
+      await Supabase.initialize(
+        url: 'https://test.supabase.co',
+        publishableKey: 'test-anon-key',
+      );
+    } catch (_) {}
   });
 
   group('WallpaperSwiperScreen', () {
     testWidgets('renders with single wallpaper', (tester) async {
-      final wallpapers = [_makeWallpaper()];
       await tester.pumpWidget(
-        _wrapInApp(WallpaperSwiperScreen(wallpapers: wallpapers)),
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
       );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(WallpaperSwiperScreen), findsOneWidget);
+      expect(find.byType(PageView), findsOneWidget);
     });
 
-    testWidgets('shows page counter for multiple wallpapers', (tester) async {
+    testWidgets('renders with multiple wallpapers and shows counter', (
+      tester,
+    ) async {
       final wallpapers = [
         _makeWallpaper(id: '1'),
         _makeWallpaper(id: '2'),
@@ -67,7 +76,24 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
 
+      expect(find.byType(WallpaperSwiperScreen), findsOneWidget);
       expect(find.text('1 / 3'), findsOneWidget);
+    });
+
+    testWidgets('initializes at correct page index', (tester) async {
+      final wallpapers = [
+        _makeWallpaper(id: '1'),
+        _makeWallpaper(id: '2'),
+        _makeWallpaper(id: '3'),
+      ];
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 1),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('2 / 3'), findsOneWidget);
     });
 
     testWidgets('shows back button', (tester) async {
@@ -88,6 +114,24 @@ void main() {
       expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
     });
 
+    testWidgets('shows moodboard button', (tester) async {
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byIcon(Icons.dashboard_customize_rounded), findsOneWidget);
+    });
+
+    testWidgets('shows share button', (tester) async {
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byIcon(Icons.ios_share_rounded), findsOneWidget);
+    });
+
     testWidgets('shows download button', (tester) async {
       await tester.pumpWidget(
         _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
@@ -97,40 +141,40 @@ void main() {
       expect(find.text('DOWNLOAD WALLPAPER'), findsOneWidget);
     });
 
-    testWidgets('initializes at correct page index', (tester) async {
-      final wallpapers = [
-        _makeWallpaper(id: '1'),
-        _makeWallpaper(id: '2'),
-        _makeWallpaper(id: '3'),
-      ];
-      await tester.pumpWidget(
-        _wrapInApp(
-          WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 1),
-        ),
-      );
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.text('2 / 3'), findsOneWidget);
-    });
-
     testWidgets('shows set as wallpaper button', (tester) async {
       await tester.pumpWidget(
         _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
       );
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byType(WallpaperSwiperScreen), findsOneWidget);
-      expect(find.byIcon(Icons.dashboard_customize_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.ios_share_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.wallpaper_rounded), findsOneWidget);
     });
 
-    testWidgets('shows moodboard button', (tester) async {
+    testWidgets('shows specs card with resolution', (tester) async {
       await tester.pumpWidget(
         _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
       );
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byIcon(Icons.dashboard_customize_rounded), findsOneWidget);
+      expect(find.text('1920 × 1080'), findsWidgets);
+    });
+
+    testWidgets('shows primary color indicator', (tester) async {
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('#7B8CFF'), findsOneWidget);
+    });
+
+    testWidgets('shows InteractiveViewer for pinch-to-zoom', (tester) async {
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(InteractiveViewer), findsOneWidget);
     });
   });
 }

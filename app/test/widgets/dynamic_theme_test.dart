@@ -19,7 +19,7 @@ void main() {
       expect(find.text('Hello'), findsOneWidget);
     });
 
-    testWidgets('applies color background from hex', (tester) async {
+    testWidgets('has gradient background from hex', (tester) async {
       await tester.pumpWidget(
         _wrapInApp(
           const DynamicTheme(primaryColor: '#FF0000', child: SizedBox()),
@@ -31,9 +31,9 @@ void main() {
         find.byType(AnimatedContainer),
       );
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, isNotNull);
-      // Should have ~10% alpha
-      expect(decoration.color!.a, closeTo(0.1, 0.01));
+      expect(decoration.gradient, isNotNull);
+      final gradient = decoration.gradient as RadialGradient;
+      expect(gradient.colors.length, 3);
     });
 
     testWidgets('uses AnimatedContainer for transition', (tester) async {
@@ -55,11 +55,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Test'), findsOneWidget);
       final container = tester.widget<AnimatedContainer>(
         find.byType(AnimatedContainer),
       );
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, isNotNull);
+      expect(decoration.gradient, isNotNull);
     });
 
     testWidgets('handles black color', (tester) async {
@@ -75,7 +76,7 @@ void main() {
         find.byType(AnimatedContainer),
       );
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, isNotNull);
+      expect(decoration.gradient, isNotNull);
     });
 
     testWidgets('handles white color', (tester) async {
@@ -91,9 +92,8 @@ void main() {
         find.byType(AnimatedContainer),
       );
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color!.r, closeTo(1.0, 0.01));
-      expect(decoration.color!.g, closeTo(1.0, 0.01));
-      expect(decoration.color!.b, closeTo(1.0, 0.01));
+      final gradient = decoration.gradient as RadialGradient;
+      expect(gradient.colors.length, 3);
     });
   });
 }

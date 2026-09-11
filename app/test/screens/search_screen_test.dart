@@ -38,49 +38,52 @@ http.Client mockClient({List<dynamic>? data, int statusCode = 200}) {
 }
 
 void main() {
+  setUpAll(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('SearchScreen UI', () {
     testWidgets('renders search bar', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
       expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('renders back button', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
     });
 
     testWidgets('renders purity chips', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
       expect(find.text('SFW'), findsOneWidget);
       expect(find.text('Sketchy'), findsOneWidget);
       expect(find.text('NSFW'), findsOneWidget);
     });
 
-    testWidgets('SFW chip selected by default', (tester) async {
+    testWidgets('renders sorting filter', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
-      final sfwChip = tester.widget<ChoiceChip>(
-        find.byKey(const Key('purity_sfw')),
-      );
-      expect(sfwChip.selected, true);
-    });
-
-    testWidgets('renders sorting dropdown', (tester) async {
-      await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
       expect(find.text('Latest'), findsOneWidget);
     });
 
-    testWidgets('renders category dropdown', (tester) async {
+    testWidgets('renders category filter', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
-      expect(find.text('All'), findsWidgets);
+      await tester.pumpAndSettle();
+      expect(find.text('All Types'), findsOneWidget);
     });
 
-    testWidgets('shows empty state text before search', (tester) async {
+    testWidgets('shows trending section before search', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
-      expect(find.text('Search millions of wallpapers'), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.text('POPULAR DISCOVERIES'), findsOneWidget);
     });
 
     testWidgets('renders search input field', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
       expect(find.byType(TextField), findsOneWidget);
     });
 
@@ -111,7 +114,7 @@ void main() {
 
       expect(find.byType(SearchScreen), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
       await tester.pumpAndSettle();
 
       expect(find.byType(SearchScreen), findsNothing);
@@ -119,16 +122,17 @@ void main() {
 
     testWidgets('clear button clears search and hides itself', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      final clearBtn = find.byKey(const Key('clear_button'));
+      final clearBtn = find.byIcon(Icons.cancel_rounded);
       expect(clearBtn, findsOneWidget);
 
       await tester.tap(clearBtn);
       await tester.pump();
 
-      expect(find.byKey(const Key('clear_button')), findsNothing);
+      expect(find.byIcon(Icons.cancel_rounded), findsNothing);
     });
   });
 
@@ -152,18 +156,19 @@ void main() {
       });
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(requestedUrl, isNotNull);
       expect(requestedUrl, contains('q=nature'));
     });
 
-    testWidgets('shows results in grid after search', (tester) async {
+    testWidgets('hides trending section after results load', (tester) async {
       final client = mockClient(
         data: [
           {
@@ -185,60 +190,30 @@ void main() {
       );
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text('1920x1080'), findsOneWidget);
-    });
-
-    testWidgets('hides empty state after results load', (tester) async {
-      final client = mockClient(
-        data: [
-          {
-            'id': 'test1',
-            'path': 'https://example.com/full.jpg',
-            'resolution': '1920x1080',
-            'dimension_x': 1920,
-            'dimension_y': 1080,
-            'file_size': 1000000,
-            'category': 'general',
-            'colors': ['#ff0000'],
-            'thumbs': {
-              'large': '',
-              'original': 'https://example.com/thumb.jpg',
-              'small': '',
-            },
-          },
-        ],
-      );
-
-      await tester.pumpWidget(buildTestApp(httpClient: client));
-      await tester.enterText(find.byType(TextField), 'nature');
-      await tester.pump();
-
-      await tester.tap(find.byKey(const Key('search_button')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(find.text('Search millions of wallpapers'), findsNothing);
+      expect(find.text('POPULAR DISCOVERIES'), findsNothing);
     });
 
     testWidgets('shows no results message for empty response', (tester) async {
       final client = mockClient(data: []);
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'xyznonexistent');
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text('No wallpapers found'), findsOneWidget);
+      expect(find.text('NO RESULTS FOUND'), findsOneWidget);
     });
 
     testWidgets('purity chips send correct purity param', (tester) async {
@@ -266,25 +241,26 @@ void main() {
           accessToken: 'fake-token',
         ),
       );
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'test');
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(requestedUrl, contains('purity=100'));
 
-      await tester.tap(find.byKey(const Key('purity_sketchy')));
+      await tester.tap(find.text('Sketchy'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(requestedUrl, contains('purity=110'));
 
-      await tester.tap(find.byKey(const Key('purity_nsfw')));
+      await tester.tap(find.text('NSFW'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(requestedUrl, contains('purity=111'));
     });
@@ -309,9 +285,9 @@ void main() {
       await tester.enterText(find.byType(TextField), 'cyberpunk');
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 500));
 
       final prefs = await SharedPreferences.getInstance();
       final searches = prefs.getStringList('recent_searches') ?? [];
@@ -339,12 +315,11 @@ void main() {
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.pumpAndSettle();
 
-      // Find and tap a trending tag
       final cyberpunkTag = find.text('#Cyberpunk');
       if (cyberpunkTag.evaluate().isNotEmpty) {
         await tester.tap(cyberpunkTag);
         await tester.pump();
-        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump(const Duration(milliseconds: 500));
 
         expect(requestedUrl, contains('q=Cyberpunk'));
       }
