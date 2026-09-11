@@ -51,11 +51,23 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
     if (user == null) return;
 
     if (_alreadyAdded.contains(board.id)) {
-      await SupabaseService.instance.removeFromMoodboard(board.id, widget.wallpaperId);
-      setState(() => _alreadyAdded.remove(board.id));
+      final success = await SupabaseService.instance.removeFromMoodboard(board.id, widget.wallpaperId);
+      if (success) {
+        setState(() => _alreadyAdded.remove(board.id));
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to remove from moodboard'), behavior: SnackBarBehavior.floating),
+        );
+      }
     } else {
-      await SupabaseService.instance.addToMoodboard(board.id, widget.wallpaperId);
-      setState(() => _alreadyAdded.add(board.id));
+      final success = await SupabaseService.instance.addToMoodboard(board.id, widget.wallpaperId);
+      if (success) {
+        setState(() => _alreadyAdded.add(board.id));
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add to moodboard'), behavior: SnackBarBehavior.floating),
+        );
+      }
     }
   }
 

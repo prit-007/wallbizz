@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/wallpaper.dart';
+import 'api_cache.dart';
 
 class SearchResult {
   final List<Wallpaper> wallpapers;
@@ -93,6 +94,8 @@ class WallhavenSearch {
     );
   }
 
+  String _buildCacheKey(String url) => 'search:${url.hashCode}';
+
   Future<SearchResult> searchPublic({
     required String query,
     required int page,
@@ -130,9 +133,17 @@ class WallhavenSearch {
       );
     }
 
+    final cacheKey = _buildCacheKey(url);
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final json = jsonDecode(cached) as Map<String, dynamic>;
+      return parseResponse(json);
+    }
+
     try {
       final response = await _httpClient.get(Uri.parse(url));
       if (response.statusCode == 200) {
+        ApiCache.set(cacheKey, response.body, const Duration(minutes: 5));
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }
@@ -168,12 +179,20 @@ class WallhavenSearch {
       colors: colors,
     );
 
+    final cacheKey = _buildCacheKey(url);
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final json = jsonDecode(cached) as Map<String, dynamic>;
+      return parseResponse(json);
+    }
+
     try {
       final response = await _httpClient.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
+        ApiCache.set(cacheKey, response.body, const Duration(minutes: 5));
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }

@@ -9,7 +9,7 @@ import '../models/moodboard.dart';
 import '../models/wallpaper.dart';
 import '../services/supabase_service.dart';
 import '../widgets/network_image.dart';
-import 'detail_screen.dart';
+import 'wallpaper_swiper_screen.dart';
 
 class MoodboardScreen extends StatefulWidget {
   final Moodboard moodboard;
@@ -96,7 +96,11 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
 
     await Future.delayed(const Duration(seconds: 4));
     if (!undoClicked) {
-      await SupabaseService.instance.removeFromMoodboard(widget.moodboard.id, wallpaper.id);
+      if (!mounted) return;
+      final success = await SupabaseService.instance.removeFromMoodboard(widget.moodboard.id, wallpaper.id);
+      if (success && mounted) {
+        SupabaseService.moodboardNotifier.value++;
+      }
     }
   }
 
@@ -207,7 +211,13 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                                     wallpaper: wallpaper,
                                     onTap: () {
                                       HapticFeedback.lightImpact();
-                                      Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(wallpaper: wallpaper)));
+                                      final index = _items.indexWhere((w) => w.id == wallpaper.id);
+                                      Navigator.push(context, MaterialPageRoute(
+                                        builder: (_) => WallpaperSwiperScreen(
+                                          wallpapers: _items,
+                                          initialIndex: index >= 0 ? index : 0,
+                                        ),
+                                      ));
                                     },
                                     onLongPress: () => _removeItemOptimistically(index, wallpaper),
                                   ).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 40));

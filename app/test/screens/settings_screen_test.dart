@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vivek_app/config/theme_config.dart';
 import 'package:vivek_app/screens/settings_screen.dart';
 
@@ -15,17 +16,25 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    await Supabase.initialize(
+      url: 'https://test.supabase.co',
+      anonKey: 'test-anon-key',
+    );
+  });
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await ThemeConfig.load();
   });
 
   group('SettingsScreen', () {
-    testWidgets('renders Settings title', (tester) async {
+    testWidgets('renders PREFERENCES title', (tester) async {
       await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('PREFERENCES'), findsOneWidget);
     });
 
     testWidgets('renders Dark Mode toggle', (tester) async {
@@ -66,18 +75,11 @@ void main() {
       expect(prefs.getBool('dark_mode'), false);
     });
 
-    testWidgets('has SwitchListTile for Dark Mode', (tester) async {
+    testWidgets('renders DOWNLOAD LOCATION section', (tester) async {
       await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SwitchListTile), findsOneWidget);
-    });
-
-    testWidgets('renders STORAGE section', (tester) async {
-      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
-      await tester.pumpAndSettle();
-
-      expect(find.text('STORAGE'), findsOneWidget);
+      expect(find.text('DOWNLOAD LOCATION'), findsOneWidget);
     });
 
     testWidgets('renders storage options', (tester) async {
@@ -85,7 +87,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Pictures'), findsOneWidget);
-      expect(find.text('Download'), findsOneWidget);
+      expect(find.text('Downloads'), findsOneWidget);
       expect(find.text('App Storage'), findsOneWidget);
     });
 
@@ -93,19 +95,16 @@ void main() {
       await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
       await tester.pumpAndSettle();
 
-      // Toggle off
       await tester.tap(find.byType(SwitchListTile));
       await tester.pumpAndSettle();
       var sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
       expect(sw.value, false);
 
-      // Toggle on
       await tester.tap(find.byType(SwitchListTile));
       await tester.pumpAndSettle();
       sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
       expect(sw.value, true);
 
-      // Verify persistence
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('dark_mode'), true);
     });
@@ -126,6 +125,68 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Use dark theme throughout the app'), findsOneWidget);
+    });
+
+    testWidgets('renders App Logs tile', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(find.text('App Logs'), findsOneWidget);
+    });
+
+    testWidgets('renders Check for Updates tile', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(find.text('Check for Updates'), findsOneWidget);
+    });
+
+    testWidgets('renders About Wallbizz tile', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(find.text('About Wallbizz'), findsOneWidget);
+    });
+
+    testWidgets('renders ABOUT section', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(find.text('ABOUT'), findsOneWidget);
+    });
+
+    testWidgets('renders PREFERENCES section', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PREFERENCES'), findsOneWidget);
+    });
+
+    testWidgets('renders ACCOUNT section', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ACCOUNT'), findsOneWidget);
+    });
+
+    testWidgets('App Logs tile navigates to logs screen', (tester) async {
+      await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('App Logs'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('APP LOGS'), findsOneWidget);
     });
   });
 }

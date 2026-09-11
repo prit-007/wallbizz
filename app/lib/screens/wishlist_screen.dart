@@ -11,7 +11,7 @@ import '../models/moodboard.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import '../widgets/network_image.dart';
-import 'detail_screen.dart';
+import 'wallpaper_swiper_screen.dart';
 import 'moodboard_screen.dart';
 import '../widgets/create_moodboard_dialog.dart';
 
@@ -134,7 +134,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
     await Future.delayed(const Duration(seconds: 4));
     if (!undoClicked) {
-      await SupabaseService.instance.removeFromWishlist(user.id, wallpaper.id);
+      final success = await SupabaseService.instance.removeFromWishlist(user.id, wallpaper.id);
+      if (success && mounted) {
+        SupabaseService.wishlistNotifier.value++;
+      }
     }
   }
 
@@ -285,9 +288,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             onDismissed: (_) => _removeItemOptimistically(index, wallpaper),
                             child: GestureDetector(
                               onTap: () {
+                                final index = _wishlist.indexWhere((w) => w.id == wallpaper.id);
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) => DetailScreen(wallpaper: wallpaper),
+                                    builder: (_) => WallpaperSwiperScreen(
+                                      wallpapers: _wishlist,
+                                      initialIndex: index >= 0 ? index : 0,
+                                    ),
                                   ),
                                 );
                               },

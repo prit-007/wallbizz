@@ -9,18 +9,19 @@ import '../services/wallpaper_actions.dart';
 import '../screens/verify_email_screen.dart';
 import '../screens/forgot_password_screen.dart';
 
-void showAuthBottomSheet(BuildContext context) {
+void showAuthBottomSheet(BuildContext context, {VoidCallback? onDismissed}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     elevation: 0,
-    builder: (context) => const AuthBottomSheet(),
-  );
+    builder: (context) => AuthBottomSheet(onDismissed: onDismissed),
+  ).then((_) => onDismissed?.call());
 }
 
 class AuthBottomSheet extends StatefulWidget {
-  const AuthBottomSheet({super.key});
+  final VoidCallback? onDismissed;
+  const AuthBottomSheet({super.key, this.onDismissed});
 
   @override
   State<AuthBottomSheet> createState() => _AuthBottomSheetState();

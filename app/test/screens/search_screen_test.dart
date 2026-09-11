@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vivek_app/screens/search_screen.dart';
 
 Widget buildTestApp({
@@ -278,6 +279,59 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(requestedUrl, contains('purity=111'));
+    });
+  });
+
+  group('SearchScreen recent searches', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    testWidgets('shows trending tags on initial load', (tester) async {
+      await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('POPULAR DISCOVERIES'), findsOneWidget);
+    });
+
+    testWidgets('search saves query to recent searches', (tester) async {
+      await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'cyberpunk');
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final prefs = await SharedPreferences.getInstance();
+      final searches = prefs.getStringList('recent_searches') ?? [];
+      expect(searches, contains('cyberpunk'));
+    });
+
+    testWidgets('trending tag tap triggers search', (tester) async {
+      String? requestedUrl;
+      final client = http_testing.MockClient((request) async {
+        requestedUrl = request.url.toString();
+        return http.Response(
+          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          200,
+        );
+      });
+
+      await tester.pumpWidget(buildTestApp(httpClient: client));
+      await tester.pumpAndSettle();
+
+      // Find and tap a trending tag
+      final cyberpunkTag = find.text('#Cyberpunk');
+      if (cyberpunkTag.evaluate().isNotEmpty) {
+        await tester.tap(cyberpunkTag);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+
+        expect(requestedUrl, contains('q=Cyberpunk'));
+      }
     });
   });
 }

@@ -10,7 +10,7 @@ import '../services/wallpaper_actions.dart';
 
 class StaggeredGrid extends StatefulWidget {
   final String? category;
-  final Function(Wallpaper)? onWallpaperTap;
+  final Function(Wallpaper wallpaper, List<Wallpaper> allWallpapers)? onWallpaperTap;
   final ScrollController? scrollController;
 
   const StaggeredGrid({
@@ -156,11 +156,13 @@ class _StaggeredGridState extends State<StaggeredGrid> {
               }
 
               final wp = _wallpapers[index];
-              return WallpaperCard(
-                wallpaper: wp,
-                isWishlisted: _wishlistedIds.contains(wp.id),
-                onTap: () => widget.onWallpaperTap?.call(wp),
-                onHeartTap: () => _onHeartTap(wp),
+              return RepaintBoundary(
+                child: WallpaperCard(
+                  wallpaper: wp,
+                  isWishlisted: _wishlistedIds.contains(wp.id),
+                  onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
+                  onHeartTap: () => _onHeartTap(wp),
+                ),
               ).animate().fade(duration: 400.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 50));
             },
           );
@@ -189,13 +191,15 @@ class _StaggeredGridState extends State<StaggeredGrid> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: crossAxisCount * 3,
           itemBuilder: (context, index) {
-            return Container(
-              height: heights[index % heights.length],
-              decoration: BoxDecoration(
-                color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
+            return RepaintBoundary(
+              child: Container(
+                height: heights[index % heights.length],
+                decoration: BoxDecoration(
+                  color: vk.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
+            );
           },
         );
       },

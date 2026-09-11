@@ -138,7 +138,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       final clipRRect = tester.widget<ClipRRect>(find.byType(ClipRRect).first);
-      expect(clipRRect.borderRadius, BorderRadius.circular(12));
+      expect(clipRRect.borderRadius, BorderRadius.circular(18));
     });
 
     testWidgets('renders gradient overlay at bottom', (tester) async {

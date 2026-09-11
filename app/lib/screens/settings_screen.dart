@@ -6,6 +6,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
 import '../services/gallery_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
+import '../core/updates/update_checker.dart';
+import '../core/updates/widgets/update_dialog.dart';
+import 'logs_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -448,8 +452,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ).animate().fade(duration: 300.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
         ],
+
+        const SizedBox(height: 40),
+
+        Text(
+          'ABOUT',
+          style: GoogleFonts.oswald(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+            color: vk.onSurfaceSubtle,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        _buildSettingsTile(
+          icon: Icons.description_outlined,
+          title: 'App Logs',
+          subtitle: 'View system diagnostics and debug info',
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LogsScreen()));
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildSettingsTile(
+          icon: Icons.system_update_rounded,
+          title: 'Check for Updates',
+          subtitle: 'Wallbizz v1.1.0',
+          onTap: () async {
+            final info = await PackageInfo.fromPlatform();
+            final checker = UpdateChecker();
+            final update = await checker.checkForUpdate(info.version);
+            if (mounted) {
+              if (update != null) {
+                UpdateDialog.show(context, update);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('You\'re up to date!'), behavior: SnackBarBehavior.floating),
+                );
+              }
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildSettingsTile(
+          icon: Icons.info_outline_rounded,
+          title: 'About Wallbizz',
+          subtitle: 'Premium curated wallpapers',
+          onTap: () {},
+        ),
       ],
     );
+  }
+
+  Widget _buildSettingsTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: vk.surfaceContainer,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: cs.primary, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: vk.onSurfaceSubtle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: vk.onSurfaceSubtle, size: 22),
+          ],
+        ),
+      ),
+    ).animate().fade(duration: 300.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildStorageOption({

@@ -12,6 +12,7 @@ import 'search_screen.dart';
 import 'wishlist_screen.dart';
 import 'settings_screen.dart';
 import 'downloads_screen.dart';
+import 'wallpaper_swiper_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -66,22 +67,22 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_tabWidgets[0] != null || _currentNavIndex == 0)
               Offstage(
                 offstage: _currentNavIndex != 0,
-                child: _buildHomeTab(bottomInset + 90),
+                child: RepaintBoundary(child: _buildHomeTab(bottomInset + 90)),
               ),
             if (_tabWidgets[1] != null)
               Offstage(
                 offstage: _currentNavIndex != 1,
-                child: _tabWidgets[1]!,
+                child: RepaintBoundary(child: _tabWidgets[1]!),
               ),
             if (_tabWidgets[2] != null)
               Offstage(
                 offstage: _currentNavIndex != 2,
-                child: _tabWidgets[2]!,
+                child: RepaintBoundary(child: _tabWidgets[2]!),
               ),
             if (_tabWidgets[3] != null)
               Offstage(
                 offstage: _currentNavIndex != 3,
-                child: _tabWidgets[3]!,
+                child: RepaintBoundary(child: _tabWidgets[3]!),
               ),
           ],
         ),
@@ -213,10 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   key: ValueKey(_selectedCategory),
                   category: _selectedCategory,
                   scrollController: _scrollControllers[0],
-                  onWallpaperTap: (wallpaper) {
+                  onWallpaperTap: (wallpaper, allWallpapers) {
+                    final index = allWallpapers.indexWhere((w) => w.id == wallpaper.id);
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => DetailScreen(wallpaper: wallpaper),
+                        builder: (_) => WallpaperSwiperScreen(
+                          wallpapers: allWallpapers,
+                          initialIndex: index >= 0 ? index : 0,
+                        ),
                       ),
                     );
                   },

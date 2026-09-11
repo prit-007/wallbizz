@@ -28,11 +28,11 @@ void main() {
       ));
       await tester.pump();
 
-      expect(find.text('Trending'), findsOneWidget);
-      expect(find.text('Anime'), findsOneWidget);
+      expect(find.text('TRENDING'), findsOneWidget);
+      expect(find.text('ANIME'), findsOneWidget);
       expect(find.text('AMOLED'), findsOneWidget);
-      expect(find.text('Desktop'), findsOneWidget);
-      expect(find.text('Mobile'), findsOneWidget);
+      expect(find.text('DESKTOP'), findsOneWidget);
+      expect(find.text('MOBILE'), findsOneWidget);
     });
 
     testWidgets('renders all 5 icons', (tester) async {
@@ -61,7 +61,7 @@ void main() {
       ));
       await tester.pump();
 
-      await tester.tap(find.text('Anime'));
+      await tester.tap(find.text('ANIME'));
       expect(selected, 'anime');
     });
 
@@ -78,13 +78,13 @@ void main() {
       await tester.tap(find.text('AMOLED'));
       expect(selected, 'amoled');
 
-      await tester.tap(find.text('Desktop'));
+      await tester.tap(find.text('DESKTOP'));
       expect(selected, 'desktop');
 
-      await tester.tap(find.text('Mobile'));
+      await tester.tap(find.text('MOBILE'));
       expect(selected, 'mobile');
 
-      await tester.tap(find.text('Trending'));
+      await tester.tap(find.text('TRENDING'));
       expect(selected, 'trending');
     });
 
@@ -122,8 +122,8 @@ void main() {
       ));
       await tester.pump();
 
-      expect(find.text('Trending'), findsOneWidget);
-      expect(find.text('Anime'), findsOneWidget);
+      expect(find.text('TRENDING'), findsOneWidget);
+      expect(find.text('ANIME'), findsOneWidget);
     });
 
     testWidgets('handles rapid taps without errors', (tester) async {
@@ -136,11 +136,11 @@ void main() {
       ));
       await tester.pump();
 
-      await tester.tap(find.text('Anime'));
+      await tester.tap(find.text('ANIME'));
       await tester.tap(find.text('AMOLED'));
-      await tester.tap(find.text('Desktop'));
-      await tester.tap(find.text('Mobile'));
-      await tester.tap(find.text('Trending'));
+      await tester.tap(find.text('DESKTOP'));
+      await tester.tap(find.text('MOBILE'));
+      await tester.tap(find.text('TRENDING'));
 
       expect(selections, ['anime', 'amoled', 'desktop', 'mobile', 'trending']);
     });

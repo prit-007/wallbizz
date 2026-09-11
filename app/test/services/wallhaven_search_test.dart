@@ -3,9 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
 import 'package:vivek_app/services/wallhaven_search.dart';
+import 'package:vivek_app/services/api_cache.dart';
 import 'package:vivek_app/models/wallpaper.dart';
 
 void main() {
+  setUp(() {
+    ApiCache.clear();
+  });
   group('SearchResult', () {
     test('holds wallpapers and meta', () {
       final result = SearchResult(

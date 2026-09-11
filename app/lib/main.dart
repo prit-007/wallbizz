@@ -3,15 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/backend_config.dart';
+import 'config/scroll_config.dart';
 import 'config/supabase_config.dart';
 import 'config/theme_config.dart';
+import 'core/logger/logger.dart';
+import 'core/updates/update_checker.dart';
+import 'core/updates/widgets/update_dialog.dart';
 import 'screens/splash_screen.dart';
 import 'utils/share_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (details) {
+    logError(details.exceptionAsString(), details.exception, details.stack);
+  };
   await dotenv.load();
   await Hive.initFlutter();
   await Hive.openBox('downloads');
@@ -60,6 +68,20 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.detached) {
       Hive.close();
     }
+    if (state == AppLifecycleState.resumed) {
+      _checkForUpdates();
+    }
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final checker = UpdateChecker();
+      final update = await checker.checkForUpdate(info.version);
+      if (update != null && mounted) {
+        UpdateDialog.show(context, update);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -70,6 +92,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
         return MaterialApp(
           title: 'Wallbizz',
           debugShowCheckedModeBanner: false,
+          scrollBehavior: WallbizzScrollBehavior(),
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: _lightTheme(),
           darkTheme: _darkTheme(),

@@ -59,18 +59,28 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     });
   }
 
-  String _calculateStorageUsage(List<DownloadedWallpaper> items) {
+  String _storageSizeStr = '0 KB';
+
+  @override
+  void initState() {
+    super.initState();
+    _recalculateStorage();
+  }
+
+  void _recalculateStorage() {
+    final all = DownloadsService.getDownloads();
     int totalBytes = 0;
-    for (var item in items) {
+    for (var item in all) {
       final file = File(item.localPath);
       if (file.existsSync()) {
         totalBytes += file.lengthSync();
       }
     }
     if (totalBytes < 1024 * 1024) {
-      return '${(totalBytes / 1024).toStringAsFixed(1)} KB';
+      _storageSizeStr = '${(totalBytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      _storageSizeStr = '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
-    return '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
   Future<void> _deleteSelected() async {
@@ -175,9 +185,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return ValueListenableBuilder(
       valueListenable: Hive.box('downloads').listenable(),
       builder: (context, Box box, _) {
-        final allDownloads = DownloadsService.getDownloads();
         final filteredItems = DownloadsService.getDownloads(searchQuery: _searchQuery);
-        final storageSizeStr = _calculateStorageUsage(allDownloads);
+        if (_storageSizeStr == '0 KB') _recalculateStorage();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +227,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                         border: Border.all(color: vk.glassBorder, width: 1),
                       ),
                       child: Text(
-                        '${allDownloads.length} ITEMS · $storageSizeStr',
+                        '${filteredItems.length} ITEMS · $_storageSizeStr',
                         style: GoogleFonts.oswald(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -279,7 +288,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 ),
               ).animate().slideY(begin: -1.0, end: 0, duration: 250.ms, curve: Curves.easeOutCubic),
 
-            if (!_selectionMode && allDownloads.isNotEmpty)
+            if (!_selectionMode && box.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                 child: Container(
