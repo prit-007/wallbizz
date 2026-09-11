@@ -32,9 +32,15 @@ class LogsScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: vk.surfaceContainer,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15)),
+                        border: Border.all(
+                          color: vk.glassBorder.withValues(alpha: 0.15),
+                        ),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -68,9 +74,7 @@ class LogsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              child: TalkerScreen(talker: talker),
-            ),
+            Expanded(child: TalkerScreen(talker: talker)),
           ],
         ),
       ),

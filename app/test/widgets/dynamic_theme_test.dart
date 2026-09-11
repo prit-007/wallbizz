@@ -3,32 +3,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vivek_app/widgets/dynamic_theme.dart';
 
 Widget _wrapInApp(Widget child) {
-  return MaterialApp(
-    home: Scaffold(body: child),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
   group('DynamicTheme', () {
     testWidgets('renders child widget', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#FF0000',
-          child: Text('Hello'),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#FF0000', child: Text('Hello')),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Hello'), findsOneWidget);
     });
 
     testWidgets('applies color background from hex', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#FF0000',
-          child: SizedBox(),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#FF0000', child: SizedBox()),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final container = tester.widget<AnimatedContainer>(
@@ -41,24 +37,22 @@ void main() {
     });
 
     testWidgets('uses AnimatedContainer for transition', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#00FF00',
-          child: SizedBox(),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#00FF00', child: SizedBox()),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(AnimatedContainer), findsOneWidget);
     });
 
     testWidgets('handles different hex colors', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#66cccc',
-          child: Text('Test'),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#66cccc', child: Text('Test')),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final container = tester.widget<AnimatedContainer>(
@@ -69,12 +63,11 @@ void main() {
     });
 
     testWidgets('handles black color', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#000000',
-          child: Text('Dark'),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#000000', child: Text('Dark')),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Dark'), findsOneWidget);
@@ -86,12 +79,11 @@ void main() {
     });
 
     testWidgets('handles white color', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        const DynamicTheme(
-          primaryColor: '#FFFFFF',
-          child: Text('Light'),
+      await tester.pumpWidget(
+        _wrapInApp(
+          const DynamicTheme(primaryColor: '#FFFFFF', child: Text('Light')),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Light'), findsOneWidget);

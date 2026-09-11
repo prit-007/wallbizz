@@ -7,7 +7,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../config/theme_config.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/staggered_grid.dart';
-import 'detail_screen.dart';
 import 'search_screen.dart';
 import 'wishlist_screen.dart';
 import 'settings_screen.dart';
@@ -34,7 +33,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _navItems = [
     _DockItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'DISCOVER'),
-    _DockItem(Icons.favorite_outline_rounded, Icons.favorite_rounded, 'ARCHIVE'),
+    _DockItem(
+      Icons.favorite_outline_rounded,
+      Icons.favorite_rounded,
+      'ARCHIVE',
+    ),
     _DockItem(Icons.download_outlined, Icons.download_rounded, 'VAULT'),
     _DockItem(Icons.tune_outlined, Icons.tune_rounded, 'SYSTEM'),
   ];
@@ -50,7 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _scrollToTop(int index) {
     final c = _scrollControllers[index];
     if (c.hasClients) {
-      c.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
+      c.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -107,10 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTabContent(int index) {
     switch (index) {
-      case 1: return const WishlistScreen();
-      case 2: return const DownloadsScreen();
-      case 3: return const SettingsScreen();
-      default: return const SizedBox.shrink();
+      case 1:
+        return const WishlistScreen();
+      case 2:
+        return const DownloadsScreen();
+      case 3:
+        return const SettingsScreen();
+      default:
+        return const SizedBox.shrink();
     }
   }
 
@@ -127,26 +138,37 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(horizontalPadding, 24, horizontalPadding, 0),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                24,
+                horizontalPadding,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'WALLBIZZ',
-                    style: GoogleFonts.oswald(
-                      fontSize: isCompact ? 42 : 56,
-                      fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
-                      letterSpacing: 4.5,
-                      height: 1.0,
-                    ),
-                  ).animate().fade(duration: 600.ms).slideX(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
+                        'WALLBIZZ',
+                        style: GoogleFonts.oswald(
+                          fontSize: isCompact ? 42 : 56,
+                          fontWeight: FontWeight.w900,
+                          color: cs.onSurface,
+                          letterSpacing: 4.5,
+                          height: 1.0,
+                        ),
+                      )
+                      .animate()
+                      .fade(duration: 600.ms)
+                      .slideX(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
                   const SizedBox(height: 8),
-                  Container(
-                    width: 48,
-                    height: 3,
-                    color: cs.primary,
-                  ).animate().fade(delay: 200.ms).scaleX(begin: 0, end: 1, alignment: Alignment.centerLeft),
+                  Container(width: 48, height: 3, color: cs.primary)
+                      .animate()
+                      .fade(delay: 200.ms)
+                      .scaleX(
+                        begin: 0,
+                        end: 1,
+                        alignment: Alignment.centerLeft,
+                      ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -154,48 +176,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: GestureDetector(
-                key: const Key('search_bar'),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const SearchScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(0),
-                    border: Border.all(
-                      color: vk.glassBorder,
-                      width: 1.5,
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 24),
-                  child: Row(
-                    children: [
-                      Text(
-                        'EXPLORE CURATED ARCHIVES...',
-                        style: GoogleFonts.inter(
-                          color: vk.onSurfaceSubtle,
-                          fontSize: isCompact ? 12 : 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.5,
+              child:
+                  GestureDetector(
+                        key: const Key('search_bar'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SearchScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(0),
+                            border: Border.all(
+                              color: vk.glassBorder,
+                              width: 1.5,
+                            ),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompact ? 16 : 24,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'EXPLORE CURATED ARCHIVES...',
+                                style: GoogleFonts.inter(
+                                  color: vk.onSurfaceSubtle,
+                                  fontSize: isCompact ? 12 : 14,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(
+                                Icons.search_rounded,
+                                color: cs.onSurface,
+                                size: isCompact ? 20 : 24,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.search_rounded,
-                        color: cs.onSurface,
-                        size: isCompact ? 20 : 24,
-                      ),
-                    ],
-                  ),
-                ),
-              ).animate().fade(delay: 300.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
+                      )
+                      .animate()
+                      .fade(delay: 300.ms)
+                      .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
             ),
             const SizedBox(height: 24),
 
@@ -215,7 +243,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   category: _selectedCategory,
                   scrollController: _scrollControllers[0],
                   onWallpaperTap: (wallpaper, allWallpapers) {
-                    final index = allWallpapers.indexWhere((w) => w.id == wallpaper.id);
+                    final index = allWallpapers.indexWhere(
+                      (w) => w.id == wallpaper.id,
+                    );
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => WallpaperSwiperScreen(
@@ -277,10 +307,7 @@ class _FloatingNavBar extends StatelessWidget {
                 height: 72,
                 decoration: BoxDecoration(
                   color: vk.surfaceContainer.withValues(alpha: 0.7),
-                  border: Border.all(
-                    color: vk.glassBorder,
-                    width: 1,
-                  ),
+                  border: Border.all(color: vk.glassBorder, width: 1),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -302,7 +329,12 @@ class _FloatingNavBar extends StatelessWidget {
               ),
             ),
           ),
-        ).animate().slideY(begin: 1.0, end: 0, curve: Curves.easeOutExpo, duration: 800.ms);
+        ).animate().slideY(
+          begin: 1.0,
+          end: 0,
+          curve: Curves.easeOutExpo,
+          duration: 800.ms,
+        );
       },
     );
   }
@@ -333,8 +365,12 @@ class _NavBarItemState extends State<_NavBarItem> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final iconColor = widget.isSelected ? cs.surface : cs.onSurface.withValues(alpha: 0.6);
-    final iconData = widget.isSelected ? widget.item.selectedIcon : widget.item.icon;
+    final iconColor = widget.isSelected
+        ? cs.surface
+        : cs.onSurface.withValues(alpha: 0.6);
+    final iconData = widget.isSelected
+        ? widget.item.selectedIcon
+        : widget.item.icon;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -363,14 +399,18 @@ class _NavBarItemState extends State<_NavBarItem> {
                 Badge(
                   isLabelVisible: widget.downloadCount > 0,
                   label: Text(
-                    widget.downloadCount > 99 ? '99+' : '${widget.downloadCount}',
+                    widget.downloadCount > 99
+                        ? '99+'
+                        : '${widget.downloadCount}',
                     style: TextStyle(
                       color: widget.isSelected ? cs.onSurface : cs.surface,
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  backgroundColor: widget.isSelected ? cs.surface : cs.onSurface,
+                  backgroundColor: widget.isSelected
+                      ? cs.surface
+                      : cs.onSurface,
                   child: Icon(iconData, size: 22, color: iconColor),
                 )
               else

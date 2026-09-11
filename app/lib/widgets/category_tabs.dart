@@ -54,7 +54,9 @@ class _CategoryTabsState extends State<CategoryTabs> {
                 color: isSelected ? cs.primary : vk.surfaceContainer,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? cs.primary : vk.glassBorder.withValues(alpha: 0.12),
+                  color: isSelected
+                      ? cs.primary
+                      : vk.glassBorder.withValues(alpha: 0.12),
                   width: 1,
                 ),
                 boxShadow: isSelected
@@ -63,7 +65,7 @@ class _CategoryTabsState extends State<CategoryTabs> {
                           color: cs.primary.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
-                        )
+                        ),
                       ]
                     : [],
               ),

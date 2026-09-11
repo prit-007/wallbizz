@@ -30,10 +30,12 @@ class NetworkImageWidget extends StatelessWidget {
 
     Widget buildPlaceholder() {
       return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(color: vk.surfaceContainer),
-      ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
+            width: width,
+            height: height,
+            decoration: BoxDecoration(color: vk.surfaceContainer),
+          )
+          .animate(onPlay: (c) => c.repeat())
+          .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
     }
 
     if (kIsWeb) {
@@ -46,7 +48,10 @@ class NetworkImageWidget extends StatelessWidget {
           cacheWidth: memCacheWidth,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) {
-              return child.animate().fade(duration: 400.ms, curve: Curves.easeOut);
+              return child.animate().fade(
+                duration: 400.ms,
+                curve: Curves.easeOut,
+              );
             }
             return buildPlaceholder();
           },

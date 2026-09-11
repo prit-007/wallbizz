@@ -23,7 +23,10 @@ Future<void> showSetWallpaperDialog(
             color: Colors.black.withValues(alpha: 0.75),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             border: Border(
-              top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+              top: BorderSide(
+                color: Colors.white.withValues(alpha: 0.2),
+                width: 1.5,
+              ),
             ),
           ),
           child: Column(
@@ -109,60 +112,61 @@ class _WallpaperOptionState extends State<_WallpaperOption> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
-      onTap: () {
-        Future.delayed(const Duration(milliseconds: 150), () {
-          if (context.mounted) Navigator.pop(context, widget.target);
-        });
-      },
-      child: AnimatedScale(
-        scale: _isPressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.15),
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTap: () {
+            Future.delayed(const Duration(milliseconds: 150), () {
+              if (context.mounted) Navigator.pop(context, widget.target);
+            });
+          },
+          child: AnimatedScale(
+            scale: _isPressed ? 0.95 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutCubic,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                boxShadow: _isPressed
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+              ),
+              child: Row(
+                children: [
+                  Icon(widget.icon, color: Colors.white, size: 24),
+                  const SizedBox(width: 16),
+                  Text(
+                    widget.title,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white.withValues(alpha: 0.4),
+                    size: 16,
+                  ),
+                ],
+              ),
             ),
-            boxShadow: _isPressed
-                ? []
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
           ),
-          child: Row(
-            children: [
-              Icon(widget.icon, color: Colors.white, size: 24),
-              const SizedBox(width: 16),
-              Text(
-                widget.title,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-              const Spacer(),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withValues(alpha: 0.4),
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ).animate().fade(duration: 400.ms, delay: widget.delay.ms).slideX(begin: 0.1, end: 0);
+        )
+        .animate()
+        .fade(duration: 400.ms, delay: widget.delay.ms)
+        .slideX(begin: 0.1, end: 0);
   }
 }
 
@@ -238,7 +242,9 @@ Future<void> _applyWallpaper(
         SnackBar(
           backgroundColor: Colors.greenAccent.shade700,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           content: Text(
             'Wallpaper set successfully!',
             style: GoogleFonts.inter(fontWeight: FontWeight.bold),
@@ -250,7 +256,9 @@ Future<void> _applyWallpaper(
         SnackBar(
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           content: Text(
             'Failed: ${result.error?.message ?? "Unknown error"}',
             style: GoogleFonts.inter(fontWeight: FontWeight.bold),

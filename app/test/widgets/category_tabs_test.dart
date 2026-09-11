@@ -5,12 +5,7 @@ import 'package:vivek_app/widgets/category_tabs.dart';
 
 Widget _wrapInApp(Widget child) {
   return MaterialApp(
-    home: Scaffold(
-      body: SizedBox(
-        height: 200,
-        child: child,
-      ),
-    ),
+    home: Scaffold(body: SizedBox(height: 200, child: child)),
   );
 }
 
@@ -20,12 +15,14 @@ void main() {
 
   group('CategoryTabs', () {
     testWidgets('renders all 5 categories', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (_) {},
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (_) {},
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       expect(find.text('TRENDING'), findsOneWidget);
@@ -36,12 +33,14 @@ void main() {
     });
 
     testWidgets('renders all 5 icons', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (_) {},
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (_) {},
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       expect(find.text('\u{1F525}'), findsOneWidget);
@@ -51,28 +50,36 @@ void main() {
       expect(find.text('\u{1F4F1}'), findsOneWidget);
     });
 
-    testWidgets('calls onCategorySelected when category is tapped', (tester) async {
+    testWidgets('calls onCategorySelected when category is tapped', (
+      tester,
+    ) async {
       String? selected;
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (cat) => selected = cat,
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (cat) => selected = cat,
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       await tester.tap(find.text('ANIME'));
       expect(selected, 'anime');
     });
 
-    testWidgets('calls callback with correct value for each category', (tester) async {
+    testWidgets('calls callback with correct value for each category', (
+      tester,
+    ) async {
       String? selected;
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (cat) => selected = cat,
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (cat) => selected = cat,
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       await tester.tap(find.text('AMOLED'));
@@ -89,12 +96,14 @@ void main() {
     });
 
     testWidgets('is a horizontal ListView', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (_) {},
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (_) {},
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       final listView = tester.widget<ListView>(find.byType(ListView));
@@ -102,24 +111,27 @@ void main() {
     });
 
     testWidgets('shows 5 AnimatedContainers for categories', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (_) {},
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (_) {},
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       expect(find.byType(AnimatedContainer), findsNWidgets(5));
     });
 
-    testWidgets('renders when no category is selected initially', (tester) async {
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: '',
-          onCategorySelected: (_) {},
+    testWidgets('renders when no category is selected initially', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(selectedCategory: '', onCategorySelected: (_) {}),
         ),
-      ));
+      );
       await tester.pump();
 
       expect(find.text('TRENDING'), findsOneWidget);
@@ -128,12 +140,14 @@ void main() {
 
     testWidgets('handles rapid taps without errors', (tester) async {
       final selections = <String>[];
-      await tester.pumpWidget(_wrapInApp(
-        CategoryTabs(
-          selectedCategory: 'trending',
-          onCategorySelected: (cat) => selections.add(cat),
+      await tester.pumpWidget(
+        _wrapInApp(
+          CategoryTabs(
+            selectedCategory: 'trending',
+            onCategorySelected: (cat) => selections.add(cat),
+          ),
         ),
-      ));
+      );
       await tester.pump();
 
       await tester.tap(find.text('ANIME'));

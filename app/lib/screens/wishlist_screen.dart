@@ -103,7 +103,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 children: [
                   Text(
                     'Removed from collection',
-                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -134,7 +138,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
     await Future.delayed(const Duration(seconds: 4));
     if (!undoClicked) {
-      final success = await SupabaseService.instance.removeFromWishlist(user.id, wallpaper.id);
+      final success = await SupabaseService.instance.removeFromWishlist(
+        user.id,
+        wallpaper.id,
+      );
       if (success && mounted) {
         SupabaseService.wishlistNotifier.value++;
       }
@@ -153,9 +160,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
         userId: user.id,
         onSelect: (board) {
           Navigator.pop(ctx);
-          Navigator.push(context, MaterialPageRoute(
-            builder: (_) => MoodboardScreen(moodboard: board),
-          ));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MoodboardScreen(moodboard: board),
+            ),
+          );
         },
       ),
     );
@@ -169,7 +179,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final bottomPadding = MediaQuery.of(context).padding.bottom + 85;
 
     if (!_isLoggedIn) return _buildGuestView();
-    if (_isLoading) return Center(child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2));
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,15 +208,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Container(
-                    width: 40,
-                    height: 3,
-                    color: cs.primary,
-                  ),
+                  Container(width: 40, height: 3, color: cs.primary),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: vk.surfaceContainer,
                   borderRadius: BorderRadius.circular(4),
@@ -222,15 +235,25 @@ class _WishlistScreenState extends State<WishlistScreen> {
               GestureDetector(
                 onTap: () => _openMoodboards(context),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.25), width: 1),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.dashboard_customize_rounded, size: 12, color: cs.primary),
+                      Icon(
+                        Icons.dashboard_customize_rounded,
+                        size: 12,
+                        color: cs.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'BOARDS',
@@ -261,91 +284,132 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       final crossAxisCount = constraints.maxWidth > 900
                           ? 4
                           : constraints.maxWidth > 600
-                              ? 3
-                              : 2;
+                          ? 3
+                          : 2;
 
                       return MasonryGridView.count(
                         crossAxisCount: crossAxisCount,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                         padding: EdgeInsets.fromLTRB(16, 4, 16, bottomPadding),
-                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
                         itemCount: _wishlist.length,
                         itemBuilder: (context, index) {
                           final wallpaper = _wishlist[index];
                           return Dismissible(
-                            key: Key(wallpaper.id),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent.withValues(alpha: 0.85),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 26),
-                            ),
-                            onDismissed: (_) => _removeItemOptimistically(index, wallpaper),
-                            child: GestureDetector(
-                              onTap: () {
-                                final index = _wishlist.indexWhere((w) => w.id == wallpaper.id);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => WallpaperSwiperScreen(
-                                      wallpapers: _wishlist,
-                                      initialIndex: index >= 0 ? index : 0,
+                                key: Key(wallpaper.id),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.redAccent.withValues(
+                                      alpha: 0.85,
                                     ),
+                                    borderRadius: BorderRadius.circular(18),
                                   ),
-                                );
-                              },
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: AspectRatio(
-                                  aspectRatio: wallpaper.aspectRatio,
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      NetworkImageWidget(
-                                        imageUrl: wallpaper.urlThumb,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Positioned(
-                                        bottom: 0, left: 0, right: 0,
-                                        child: Container(
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
-                                            ),
-                                          ),
+                                  child: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Colors.white,
+                                    size: 26,
+                                  ),
+                                ),
+                                onDismissed: (_) =>
+                                    _removeItemOptimistically(index, wallpaper),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    final index = _wishlist.indexWhere(
+                                      (w) => w.id == wallpaper.id,
+                                    );
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => WallpaperSwiperScreen(
+                                          wallpapers: _wishlist,
+                                          initialIndex: index >= 0 ? index : 0,
                                         ),
                                       ),
-                                      Positioned(
-                                        bottom: 8,
-                                        left: 8,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: BackdropFilter(
-                                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                    );
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: AspectRatio(
+                                      aspectRatio: wallpaper.aspectRatio,
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          NetworkImageWidget(
+                                            imageUrl: wallpaper.urlThumb,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Positioned(
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
                                             child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                              color: Colors.black.withValues(alpha: 0.35),
-                                              child: Text(
-                                                wallpaper.resolution,
-                                                style: GoogleFonts.inter(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600),
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    Colors.transparent,
+                                                    Colors.black.withValues(
+                                                      alpha: 0.7,
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
+                                          Positioned(
+                                            bottom: 8,
+                                            left: 8,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              child: BackdropFilter(
+                                                filter: ImageFilter.blur(
+                                                  sigmaX: 6,
+                                                  sigmaY: 6,
+                                                ),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 3,
+                                                      ),
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.35),
+                                                  child: Text(
+                                                    wallpaper.resolution,
+                                                    style: GoogleFonts.inter(
+                                                      color: Colors.white,
+                                                      fontSize: 9,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 40));
+                              )
+                              .animate()
+                              .fade(duration: 350.ms)
+                              .slideY(
+                                begin: 0.1,
+                                end: 0,
+                                delay: Duration(
+                                  milliseconds: (index % crossAxisCount) * 40,
+                                ),
+                              );
                         },
                       );
                     },
@@ -372,7 +436,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 color: vk.surfaceContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.lock_outline_rounded, size: 48, color: vk.onSurfaceDim),
+              child: Icon(
+                Icons.lock_outline_rounded,
+                size: 48,
+                color: vk.onSurfaceDim,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -388,7 +456,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
             Text(
               'Sign in to sync and view your curated collection across all your devices.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 14, color: vk.onSurfaceSubtle, height: 1.5),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: vk.onSurfaceSubtle,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 32),
             ElevatedButton(
@@ -396,13 +468,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: cs.onSurface,
                 foregroundColor: cs.surface,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 16,
+                ),
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               child: Text(
                 'SIGN IN NOW',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ],
@@ -427,7 +508,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 color: vk.surfaceContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.favorite_border_rounded, size: 48, color: vk.onSurfaceDim),
+              child: Icon(
+                Icons.favorite_border_rounded,
+                size: 48,
+                color: vk.onSurfaceDim,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -443,7 +528,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
             Text(
               'Tap the heart icon on any wallpaper to add it to your personal collection.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 14, color: vk.onSurfaceSubtle, height: 1.5),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: vk.onSurfaceSubtle,
+                height: 1.5,
+              ),
             ),
           ],
         ),
@@ -473,8 +562,15 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
   }
 
   Future<void> _load() async {
-    final boards = await SupabaseService.instance.fetchMoodboards(widget.userId);
-    if (mounted) setState(() { _boards = boards; _loading = false; });
+    final boards = await SupabaseService.instance.fetchMoodboards(
+      widget.userId,
+    );
+    if (mounted) {
+      setState(() {
+        _boards = boards;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -490,29 +586,50 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           decoration: BoxDecoration(
             color: v.surfaceContainer.withValues(alpha: 0.85),
-            border: Border(top: BorderSide(color: v.glassBorder.withValues(alpha: 0.3), width: 1.5)),
+            border: Border(
+              top: BorderSide(
+                color: v.glassBorder.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 48, height: 5,
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(3)),
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ).animate().fade(duration: 400.ms).slideY(begin: 0.5, end: 0),
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Text('MOODBOARDS', style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2, color: cs.onSurface)),
+                  Text(
+                    'MOODBOARDS',
+                    style: GoogleFonts.oswald(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      color: cs.onSurface,
+                    ),
+                  ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () {
                       showDialog(
                         context: context,
-                        builder: (_) => CreateMoodboardDialog(onCreate: _create),
+                        builder: (_) =>
+                            CreateMoodboardDialog(onCreate: _create),
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
@@ -522,7 +639,15 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                         children: [
                           Icon(Icons.add_rounded, size: 16, color: cs.primary),
                           const SizedBox(width: 4),
-                          Text('NEW', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1, color: cs.primary)),
+                          Text(
+                            'NEW',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: cs.primary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -531,11 +656,20 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
               ),
               const SizedBox(height: 16),
               if (_loading)
-                const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(strokeWidth: 2))
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               else if (_boards.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text('No moodboards yet. Create your first one!', style: GoogleFonts.inter(color: v.onSurfaceSubtle, fontSize: 14)),
+                  child: Text(
+                    'No moodboards yet. Create your first one!',
+                    style: GoogleFonts.inter(
+                      color: v.onSurfaceSubtle,
+                      fontSize: 14,
+                    ),
+                  ),
                 )
               else
                 Flexible(
@@ -546,32 +680,62 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                     itemBuilder: (context, index) {
                       final board = _boards[index];
                       return GestureDetector(
-                        onTap: () => widget.onSelect(board),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: v.glassBorder.withValues(alpha: 0.15)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.dashboard_customize_rounded, color: cs.primary, size: 22),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(board.name, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
-                                    Text('${board.itemCount} items', style: GoogleFonts.inter(fontSize: 12, color: v.onSurfaceSubtle)),
-                                  ],
+                            onTap: () => widget.onSelect(board),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: v.glassBorder.withValues(alpha: 0.15),
                                 ),
                               ),
-                              Icon(Icons.arrow_forward_ios_rounded, color: v.onSurfaceSubtle, size: 14),
-                            ],
-                          ),
-                        ),
-                      ).animate().fade(duration: 300.ms, delay: (index * 60).ms).slideX(begin: 0.1, end: 0);
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.dashboard_customize_rounded,
+                                    color: cs.primary,
+                                    size: 22,
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          board.name,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: cs.onSurface,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${board.itemCount} items',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12,
+                                            color: v.onSurfaceSubtle,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: v.onSurfaceSubtle,
+                                    size: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .animate()
+                          .fade(duration: 300.ms, delay: (index * 60).ms)
+                          .slideX(begin: 0.1, end: 0);
                     },
                   ),
                 ),
@@ -585,7 +749,10 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
 
   Future<void> _create(String name) async {
     Navigator.pop(context); // close dialog
-    final board = await SupabaseService.instance.createMoodboard(widget.userId, name);
+    final board = await SupabaseService.instance.createMoodboard(
+      widget.userId,
+      name,
+    );
     if (board != null) {
       if (mounted) widget.onSelect(board);
     }

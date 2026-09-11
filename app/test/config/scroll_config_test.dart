@@ -12,7 +12,10 @@ void main() {
           scrollBehavior: behavior,
           home: Scaffold(
             body: ListView(
-              children: List.generate(50, (i) => ListTile(title: Text('Item $i'))),
+              children: List.generate(
+                50,
+                (i) => ListTile(title: Text('Item $i')),
+              ),
             ),
           ),
         ),
@@ -29,7 +32,10 @@ void main() {
           scrollBehavior: behavior,
           home: Scaffold(
             body: ListView(
-              children: List.generate(20, (i) => ListTile(title: Text('Item $i'))),
+              children: List.generate(
+                20,
+                (i) => ListTile(title: Text('Item $i')),
+              ),
             ),
           ),
         ),
@@ -43,7 +49,9 @@ void main() {
       expect(find.byType(GlowingOverscrollIndicator), findsNothing);
     });
 
-    testWidgets('scroll view works normally with custom behavior', (tester) async {
+    testWidgets('scroll view works normally with custom behavior', (
+      tester,
+    ) async {
       final behavior = WallbizzScrollBehavior();
 
       await tester.pumpWidget(
@@ -51,7 +59,10 @@ void main() {
           scrollBehavior: behavior,
           home: Scaffold(
             body: ListView(
-              children: List.generate(10, (i) => ListTile(title: Text('Item $i'))),
+              children: List.generate(
+                10,
+                (i) => ListTile(title: Text('Item $i')),
+              ),
             ),
           ),
         ),

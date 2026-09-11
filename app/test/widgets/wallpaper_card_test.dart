@@ -28,13 +28,7 @@ Wallpaper _makeWallpaper({
 
 Widget _wrapInApp(Widget child) {
   return MaterialApp(
-    home: Scaffold(
-      body: SizedBox(
-        width: 400,
-        height: 600,
-        child: child,
-      ),
-    ),
+    home: Scaffold(body: SizedBox(width: 400, height: 600, child: child)),
   );
 }
 
@@ -42,9 +36,7 @@ void main() {
   group('WallpaperCard', () {
     testWidgets('renders resolution badge', (tester) async {
       final wallpaper = _makeWallpaper(resolution: '3840x2160');
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wallpaper)));
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('3840x2160'), findsOneWidget);
@@ -52,38 +44,39 @@ void main() {
 
     testWidgets('renders with default isWishlisted false', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(
-          wallpaper: wallpaper,
-          onHeartTap: () {},
-        ),
-      ));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperCard(wallpaper: wallpaper, onHeartTap: () {})),
+      );
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byIcon(Icons.favorite_border), findsOneWidget);
       expect(find.byIcon(Icons.favorite), findsNothing);
     });
 
-    testWidgets('renders filled heart when isWishlisted is true', (tester) async {
+    testWidgets('renders filled heart when isWishlisted is true', (
+      tester,
+    ) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(
-          wallpaper: wallpaper,
-          onHeartTap: () {},
-          isWishlisted: true,
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperCard(
+            wallpaper: wallpaper,
+            onHeartTap: () {},
+            isWishlisted: true,
+          ),
         ),
-      ));
+      );
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byIcon(Icons.favorite), findsOneWidget);
       expect(find.byIcon(Icons.favorite_border), findsNothing);
     });
 
-    testWidgets('does not show heart icon when onHeartTap is null', (tester) async {
+    testWidgets('does not show heart icon when onHeartTap is null', (
+      tester,
+    ) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wallpaper)));
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byIcon(Icons.favorite_border), findsNothing);
@@ -93,12 +86,11 @@ void main() {
     testWidgets('calls onTap when card is tapped', (tester) async {
       bool tapped = false;
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(
-          wallpaper: wallpaper,
-          onTap: () => tapped = true,
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperCard(wallpaper: wallpaper, onTap: () => tapped = true),
         ),
-      ));
+      );
       await tester.pump(const Duration(milliseconds: 500));
 
       await tester.tap(find.byType(WallpaperCard));
@@ -108,23 +100,25 @@ void main() {
     testWidgets('calls onHeartTap when heart icon is tapped', (tester) async {
       bool heartTapped = false;
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(
-          wallpaper: wallpaper,
-          onHeartTap: () => heartTapped = true,
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperCard(
+            wallpaper: wallpaper,
+            onHeartTap: () => heartTapped = true,
+          ),
         ),
-      ));
+      );
       await tester.pump(const Duration(milliseconds: 500));
 
       await tester.tap(find.byIcon(Icons.favorite_border));
       expect(heartTapped, true);
     });
 
-    testWidgets('renders correct resolution for different wallpapers', (tester) async {
+    testWidgets('renders correct resolution for different wallpapers', (
+      tester,
+    ) async {
       final wp = _makeWallpaper(resolution: '2560x1440');
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(wallpaper: wp),
-      ));
+      await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wp)));
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('2560x1440'), findsOneWidget);
@@ -132,9 +126,7 @@ void main() {
 
     testWidgets('renders ClipRRect for rounded corners', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wallpaper)));
       await tester.pump(const Duration(milliseconds: 500));
 
       final clipRRect = tester.widget<ClipRRect>(find.byType(ClipRRect).first);
@@ -143,9 +135,7 @@ void main() {
 
     testWidgets('renders gradient overlay at bottom', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wallpaper)));
       await tester.pump(const Duration(milliseconds: 500));
 
       final positioned = find.byWidgetPredicate(
@@ -156,12 +146,9 @@ void main() {
 
     testWidgets('card has GestureDetector for taps', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        WallpaperCard(
-          wallpaper: wallpaper,
-          onTap: () {},
-        ),
-      ));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperCard(wallpaper: wallpaper, onTap: () {})),
+      );
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(GestureDetector), findsWidgets);

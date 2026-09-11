@@ -105,9 +105,21 @@ class VivekColors extends ThemeExtension<VivekColors> {
   VivekColors lerp(ThemeExtension<VivekColors>? other, double t) {
     if (other is! VivekColors) return this;
     return VivekColors(
-      surfaceContainer: Color.lerp(surfaceContainer, other.surfaceContainer, t)!,
-      surfaceContainerHigh: Color.lerp(surfaceContainerHigh, other.surfaceContainerHigh, t)!,
-      surfaceContainerLow: Color.lerp(surfaceContainerLow, other.surfaceContainerLow, t)!,
+      surfaceContainer: Color.lerp(
+        surfaceContainer,
+        other.surfaceContainer,
+        t,
+      )!,
+      surfaceContainerHigh: Color.lerp(
+        surfaceContainerHigh,
+        other.surfaceContainerHigh,
+        t,
+      )!,
+      surfaceContainerLow: Color.lerp(
+        surfaceContainerLow,
+        other.surfaceContainerLow,
+        t,
+      )!,
       onSurfaceSubtle: Color.lerp(onSurfaceSubtle, other.onSurfaceSubtle, t)!,
       onSurfaceFaint: Color.lerp(onSurfaceFaint, other.onSurfaceFaint, t)!,
       onSurfaceDim: Color.lerp(onSurfaceDim, other.onSurfaceDim, t)!,
@@ -115,7 +127,11 @@ class VivekColors extends ThemeExtension<VivekColors> {
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       glassBackground: Color.lerp(glassBackground, other.glassBackground, t)!,
       shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
-      shimmerHighlight: Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
+      shimmerHighlight: Color.lerp(
+        shimmerHighlight,
+        other.shimmerHighlight,
+        t,
+      )!,
     );
   }
 }
@@ -128,4 +144,3 @@ extension VivekTheme on BuildContext {
             : VivekColors.light);
   }
 }
-

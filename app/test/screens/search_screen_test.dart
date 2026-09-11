@@ -59,7 +59,8 @@ void main() {
     testWidgets('SFW chip selected by default', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
       final sfwChip = tester.widget<ChoiceChip>(
-          find.byKey(const Key('purity_sfw')));
+        find.byKey(const Key('purity_sfw')),
+      );
       expect(sfwChip.selected, true);
     });
 
@@ -84,24 +85,26 @@ void main() {
     });
 
     testWidgets('back button pops navigation', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SearchScreen(
-                    httpClient: mockClient(),
-                    isAuthenticated: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SearchScreen(
+                      httpClient: mockClient(),
+                      isAuthenticated: false,
+                    ),
                   ),
                 ),
+                child: const Text('Go'),
               ),
-              child: const Text('Go'),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Go'));
       await tester.pumpAndSettle();
@@ -161,23 +164,25 @@ void main() {
     });
 
     testWidgets('shows results in grid after search', (tester) async {
-      final client = mockClient(data: [
-        {
-          'id': 'test1',
-          'path': 'https://example.com/full.jpg',
-          'resolution': '1920x1080',
-          'dimension_x': 1920,
-          'dimension_y': 1080,
-          'file_size': 1000000,
-          'category': 'general',
-          'colors': ['#ff0000'],
-          'thumbs': {
-            'large': '',
-            'original': 'https://example.com/thumb.jpg',
-            'small': '',
+      final client = mockClient(
+        data: [
+          {
+            'id': 'test1',
+            'path': 'https://example.com/full.jpg',
+            'resolution': '1920x1080',
+            'dimension_x': 1920,
+            'dimension_y': 1080,
+            'file_size': 1000000,
+            'category': 'general',
+            'colors': ['#ff0000'],
+            'thumbs': {
+              'large': '',
+              'original': 'https://example.com/thumb.jpg',
+              'small': '',
+            },
           },
-        },
-      ]);
+        ],
+      );
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'nature');
@@ -191,23 +196,25 @@ void main() {
     });
 
     testWidgets('hides empty state after results load', (tester) async {
-      final client = mockClient(data: [
-        {
-          'id': 'test1',
-          'path': 'https://example.com/full.jpg',
-          'resolution': '1920x1080',
-          'dimension_x': 1920,
-          'dimension_y': 1080,
-          'file_size': 1000000,
-          'category': 'general',
-          'colors': ['#ff0000'],
-          'thumbs': {
-            'large': '',
-            'original': 'https://example.com/thumb.jpg',
-            'small': '',
+      final client = mockClient(
+        data: [
+          {
+            'id': 'test1',
+            'path': 'https://example.com/full.jpg',
+            'resolution': '1920x1080',
+            'dimension_x': 1920,
+            'dimension_y': 1080,
+            'file_size': 1000000,
+            'category': 'general',
+            'colors': ['#ff0000'],
+            'thumbs': {
+              'large': '',
+              'original': 'https://example.com/thumb.jpg',
+              'small': '',
+            },
           },
-        },
-      ]);
+        ],
+      );
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
       await tester.enterText(find.byType(TextField), 'nature');
@@ -220,8 +227,7 @@ void main() {
       expect(find.text('Search millions of wallpapers'), findsNothing);
     });
 
-    testWidgets('shows no results message for empty response',
-        (tester) async {
+    testWidgets('shows no results message for empty response', (tester) async {
       final client = mockClient(data: []);
 
       await tester.pumpWidget(buildTestApp(httpClient: client));
@@ -253,11 +259,13 @@ void main() {
         );
       });
 
-      await tester.pumpWidget(buildTestApp(
-        httpClient: client,
-        isAuthenticated: true,
-        accessToken: 'fake-token',
-      ));
+      await tester.pumpWidget(
+        buildTestApp(
+          httpClient: client,
+          isAuthenticated: true,
+          accessToken: 'fake-token',
+        ),
+      );
 
       await tester.enterText(find.byType(TextField), 'test');
       await tester.pump();
@@ -315,7 +323,15 @@ void main() {
       final client = http_testing.MockClient((request) async {
         requestedUrl = request.url.toString();
         return http.Response(
-          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          jsonEncode({
+            'data': <dynamic>[],
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
+          }),
           200,
         );
       });

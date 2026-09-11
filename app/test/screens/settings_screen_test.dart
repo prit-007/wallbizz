@@ -7,9 +7,7 @@ import 'package:vivek_app/config/theme_config.dart';
 import 'package:vivek_app/screens/settings_screen.dart';
 
 Widget _wrapInApp(Widget child) {
-  return MaterialApp(
-    home: Scaffold(body: child),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -20,7 +18,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(
       url: 'https://test.supabase.co',
-      anonKey: 'test-anon-key',
+      publishableKey: 'test-anon-key',
     );
   });
 
@@ -49,7 +47,9 @@ void main() {
       await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
       await tester.pumpAndSettle();
 
-      final switchWidget = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      final switchWidget = tester.widget<SwitchListTile>(
+        find.byType(SwitchListTile),
+      );
       expect(switchWidget.value, true);
     });
 
@@ -60,7 +60,9 @@ void main() {
       await tester.tap(find.byType(SwitchListTile));
       await tester.pumpAndSettle();
 
-      final switchWidget = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      final switchWidget = tester.widget<SwitchListTile>(
+        find.byType(SwitchListTile),
+      );
       expect(switchWidget.value, false);
     });
 
@@ -116,7 +118,9 @@ void main() {
       await tester.pumpWidget(_wrapInApp(const SettingsScreen()));
       await tester.pumpAndSettle();
 
-      final switchWidget = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+      final switchWidget = tester.widget<SwitchListTile>(
+        find.byType(SwitchListTile),
+      );
       expect(switchWidget.value, false);
     });
 

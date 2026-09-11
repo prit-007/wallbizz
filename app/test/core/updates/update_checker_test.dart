@@ -80,7 +80,8 @@ void main() {
               'draft': false,
               'prerelease': false,
               'body': '- New feature\n- Bug fix',
-              'html_url': 'https://github.com/prit-007/wallbizz/releases/tag/v2.0.0',
+              'html_url':
+                  'https://github.com/prit-007/wallbizz/releases/tag/v2.0.0',
               'published_at': '2025-01-15T10:00:00Z',
               'assets': [
                 {
@@ -204,9 +205,18 @@ void main() {
               'body': '',
               'html_url': '',
               'assets': [
-                {'name': 'app-arm64-v8a-release.apk', 'browser_download_url': 'https://example.com/arm64.apk'},
-                {'name': 'app-armeabi-v7a-release.apk', 'browser_download_url': 'https://example.com/arm.apk'},
-                {'name': 'source.zip', 'browser_download_url': 'https://example.com/source.zip'},
+                {
+                  'name': 'app-arm64-v8a-release.apk',
+                  'browser_download_url': 'https://example.com/arm64.apk',
+                },
+                {
+                  'name': 'app-armeabi-v7a-release.apk',
+                  'browser_download_url': 'https://example.com/arm.apk',
+                },
+                {
+                  'name': 'source.zip',
+                  'browser_download_url': 'https://example.com/source.zip',
+                },
               ],
             },
           ]),
@@ -228,7 +238,8 @@ void main() {
               'name': 'v2.0.0',
               'draft': false,
               'prerelease': false,
-              'body': '## What\'s New\n- Added feature A\n- Fixed bug B\n- Improved C',
+              'body':
+                  '## What\'s New\n- Added feature A\n- Fixed bug B\n- Improved C',
               'html_url': '',
               'assets': [],
             },

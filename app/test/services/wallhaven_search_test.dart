@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
 import 'package:vivek_app/services/wallhaven_search.dart';
 import 'package:vivek_app/services/api_cache.dart';
-import 'package:vivek_app/models/wallpaper.dart';
 
 void main() {
   setUp(() {
@@ -25,17 +24,32 @@ void main() {
     });
 
     test('hasMore returns true when not on last page', () {
-      final result = SearchResult(wallpapers: [], currentPage: 1, lastPage: 5, total: 120);
+      final result = SearchResult(
+        wallpapers: [],
+        currentPage: 1,
+        lastPage: 5,
+        total: 120,
+      );
       expect(result.hasMore, true);
     });
 
     test('hasMore returns false when on last page', () {
-      final result = SearchResult(wallpapers: [], currentPage: 5, lastPage: 5, total: 120);
+      final result = SearchResult(
+        wallpapers: [],
+        currentPage: 5,
+        lastPage: 5,
+        total: 120,
+      );
       expect(result.hasMore, false);
     });
 
     test('hasMore returns false when lastPage is 0', () {
-      final result = SearchResult(wallpapers: [], currentPage: 1, lastPage: 0, total: 0);
+      final result = SearchResult(
+        wallpapers: [],
+        currentPage: 1,
+        lastPage: 0,
+        total: 0,
+      );
       expect(result.hasMore, false);
     });
   });
@@ -159,8 +173,14 @@ void main() {
       final result = WallhavenSearch.parseResponse(json);
       expect(result.wallpapers.length, 1);
       expect(result.wallpapers[0].wallhavenId, 'abc123');
-      expect(result.wallpapers[0].urlFull, 'https://w.wallhaven.cc/full/ab/abc123.jpg');
-      expect(result.wallpapers[0].urlThumb, 'https://th.wallhaven.cc/sm/ab/abc123.jpg');
+      expect(
+        result.wallpapers[0].urlFull,
+        'https://w.wallhaven.cc/full/ab/abc123.jpg',
+      );
+      expect(
+        result.wallpapers[0].urlThumb,
+        'https://th.wallhaven.cc/sm/ab/abc123.jpg',
+      );
       expect(result.currentPage, 1);
       expect(result.lastPage, 5);
       expect(result.total, 120);
@@ -169,12 +189,7 @@ void main() {
     test('parses empty data array', () {
       final json = {
         'data': <dynamic>[],
-        'meta': {
-          'current_page': 1,
-          'last_page': 0,
-          'per_page': 24,
-          'total': 0,
-        },
+        'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0},
       };
 
       final result = WallhavenSearch.parseResponse(json);
@@ -183,10 +198,7 @@ void main() {
     });
 
     test('handles missing meta fields', () {
-      final json = {
-        'data': <dynamic>[],
-        'meta': <String, dynamic>{},
-      };
+      final json = {'data': <dynamic>[], 'meta': <String, dynamic>{}};
 
       final result = WallhavenSearch.parseResponse(json);
       expect(result.currentPage, 0);
@@ -211,7 +223,12 @@ void main() {
         return http.Response(
           jsonEncode({
             'data': <dynamic>[],
-            'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0},
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
           }),
           200,
         );
@@ -246,7 +263,12 @@ void main() {
                 },
               },
             ],
-            'meta': {'current_page': 1, 'last_page': 3, 'per_page': 24, 'total': 72},
+            'meta': {
+              'current_page': 1,
+              'last_page': 3,
+              'per_page': 24,
+              'total': 72,
+            },
           }),
           200,
         );
@@ -290,7 +312,15 @@ void main() {
       final client = http_testing.MockClient((request) async {
         requestedUrl = request.url.toString();
         return http.Response(
-          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          jsonEncode({
+            'data': <dynamic>[],
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
+          }),
           200,
         );
       });
@@ -325,7 +355,15 @@ void main() {
       final client = http_testing.MockClient((request) async {
         authHeader = request.headers['Authorization'];
         return http.Response(
-          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          jsonEncode({
+            'data': <dynamic>[],
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
+          }),
           200,
         );
       });
@@ -347,7 +385,15 @@ void main() {
       final client = http_testing.MockClient((request) async {
         requestedUrl = request.url.toString();
         return http.Response(
-          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          jsonEncode({
+            'data': <dynamic>[],
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
+          }),
           200,
         );
       });
@@ -370,7 +416,15 @@ void main() {
       final client = http_testing.MockClient((request) async {
         requestedUrl = request.url.toString();
         return http.Response(
-          jsonEncode({'data': <dynamic>[], 'meta': {'current_page': 1, 'last_page': 0, 'per_page': 24, 'total': 0}}),
+          jsonEncode({
+            'data': <dynamic>[],
+            'meta': {
+              'current_page': 1,
+              'last_page': 0,
+              'per_page': 24,
+              'total': 0,
+            },
+          }),
           200,
         );
       });

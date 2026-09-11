@@ -26,9 +26,7 @@ Wallpaper _makeWallpaper({
 }
 
 Widget _wrapInApp(Widget child) {
-  return MaterialApp(
-    home: Scaffold(body: child),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -38,9 +36,7 @@ void main() {
   group('SpecsCard', () {
     testWidgets('renders resolution with × separator', (tester) async {
       final wallpaper = _makeWallpaper(resolution: '3840x2160');
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('3840 × 2160'), findsOneWidget);
@@ -48,9 +44,7 @@ void main() {
 
     testWidgets('renders different resolution correctly', (tester) async {
       final wallpaper = _makeWallpaper(resolution: '2560x1440');
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('2560 × 1440'), findsOneWidget);
@@ -58,9 +52,7 @@ void main() {
 
     testWidgets('renders formatted file size in MB', (tester) async {
       final wallpaper = _makeWallpaper(fileSize: 4200000);
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('4.0 MB'), findsOneWidget);
@@ -68,9 +60,7 @@ void main() {
 
     testWidgets('renders formatted file size in KB', (tester) async {
       final wallpaper = _makeWallpaper(fileSize: 512000);
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('500.0 KB'), findsOneWidget);
@@ -78,9 +68,7 @@ void main() {
 
     testWidgets('renders category chip in uppercase', (tester) async {
       final wallpaper = _makeWallpaper(sourceQuery: 'amoled');
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('AMOLED'), findsOneWidget);
@@ -88,9 +76,7 @@ void main() {
 
     testWidgets('renders different category chip', (tester) async {
       final wallpaper = _makeWallpaper(sourceQuery: 'desktop');
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('DESKTOP'), findsOneWidget);
@@ -98,9 +84,7 @@ void main() {
 
     testWidgets('has ClipRRect for rounded corners', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.byType(ClipRRect), findsOneWidget);
@@ -108,9 +92,7 @@ void main() {
 
     testWidgets('has BackdropFilter for glassmorphism', (tester) async {
       final wallpaper = _makeWallpaper();
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.byType(BackdropFilter), findsOneWidget);
@@ -122,9 +104,7 @@ void main() {
         fileSize: 2000000,
         sourceQuery: 'mobile',
       );
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('1920 × 1080'), findsOneWidget);
@@ -134,9 +114,7 @@ void main() {
 
     testWidgets('renders tiny file size', (tester) async {
       final wallpaper = _makeWallpaper(fileSize: 50000);
-      await tester.pumpWidget(_wrapInApp(
-        SpecsCard(wallpaper: wallpaper),
-      ));
+      await tester.pumpWidget(_wrapInApp(SpecsCard(wallpaper: wallpaper)));
       await tester.pumpAndSettle();
 
       expect(find.text('48.8 KB'), findsOneWidget);

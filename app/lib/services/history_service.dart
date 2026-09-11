@@ -43,7 +43,9 @@ class HistoryService {
     if (data == null) return [];
     try {
       final list = json.decode(data) as List<dynamic>;
-      return list.map((e) => Wallpaper.fromMap(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => Wallpaper.fromMap(e as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       return [];
     }
@@ -68,20 +70,26 @@ class HistoryService {
     }
     await prefs.setString(
       _recentKey,
-      json.encode(recent.map((w) => {
-        'id': w.id,
-        'wallhaven_id': w.wallhavenId,
-        'url_full': w.urlFull,
-        'url_thumb': w.urlThumb,
-        'resolution': w.resolution,
-        'width': w.width,
-        'height': w.height,
-        'file_size': w.fileSize,
-        'primary_color': w.primaryColor,
-        'category': w.category,
-        'source_query': w.sourceQuery,
-        'created_at': w.createdAt.toIso8601String(),
-      }).toList()),
+      json.encode(
+        recent
+            .map(
+              (w) => {
+                'id': w.id,
+                'wallhaven_id': w.wallhavenId,
+                'url_full': w.urlFull,
+                'url_thumb': w.urlThumb,
+                'resolution': w.resolution,
+                'width': w.width,
+                'height': w.height,
+                'file_size': w.fileSize,
+                'primary_color': w.primaryColor,
+                'category': w.category,
+                'source_query': w.sourceQuery,
+                'created_at': w.createdAt.toIso8601String(),
+              },
+            )
+            .toList(),
+      ),
     );
   }
 

@@ -103,24 +103,51 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 decoration: BoxDecoration(
                   color: v.surfaceContainerHigh.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: v.glassBorder.withValues(alpha: 0.3), width: 1.5),
+                  border: Border.all(
+                    color: v.glassBorder.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.delete_sweep_rounded, size: 48, color: c.error.withValues(alpha: 0.9))
-                      .animate().fade(duration: 400.ms).scale(begin: const Offset(0.6, 0.6), end: const Offset(1, 1), curve: Curves.elasticOut),
+                    Icon(
+                          Icons.delete_sweep_rounded,
+                          size: 48,
+                          color: c.error.withValues(alpha: 0.9),
+                        )
+                        .animate()
+                        .fade(duration: 400.ms)
+                        .scale(
+                          begin: const Offset(0.6, 0.6),
+                          end: const Offset(1, 1),
+                          curve: Curves.elasticOut,
+                        ),
                     const SizedBox(height: 16),
                     Text(
-                      'DELETE ${_selectedIds.length} ITEM${_selectedIds.length == 1 ? '' : 'S'}?',
-                      style: GoogleFonts.oswald(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5),
-                    ).animate().fade(duration: 400.ms, delay: 100.ms).slideY(begin: 0.3, end: 0),
+                          'DELETE ${_selectedIds.length} ITEM${_selectedIds.length == 1 ? '' : 'S'}?',
+                          style: GoogleFonts.oswald(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
+                        )
+                        .animate()
+                        .fade(duration: 400.ms, delay: 100.ms)
+                        .slideY(begin: 0.3, end: 0),
                     const SizedBox(height: 12),
                     Text(
-                      'This action will permanently remove the selected wallpaper${_selectedIds.length == 1 ? '' : 's'} from your device storage.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.7), height: 1.4),
-                    ).animate().fade(duration: 400.ms, delay: 180.ms).slideY(begin: 0.2, end: 0),
+                          'This action will permanently remove the selected wallpaper${_selectedIds.length == 1 ? '' : 's'} from your device storage.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            height: 1.4,
+                          ),
+                        )
+                        .animate()
+                        .fade(duration: 400.ms, delay: 180.ms)
+                        .slideY(begin: 0.2, end: 0),
                     const SizedBox(height: 24),
                     Row(
                       children: [
@@ -131,10 +158,19 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: v.glassBorder.withValues(alpha: 0.3)),
+                                border: Border.all(
+                                  color: v.glassBorder.withValues(alpha: 0.3),
+                                ),
                               ),
                               child: Center(
-                                child: Text('CANCEL', style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.7), fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                child: Text(
+                                  'CANCEL',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -150,7 +186,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
-                                child: Text('DELETE', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                child: Text(
+                                  'DELETE',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -173,7 +216,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     }
     if (!mounted) return;
     _exitSelectionMode();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Deleted ${_selectedIds.length} wallpaper${_selectedIds.length == 1 ? '' : 's'}'), behavior: SnackBarBehavior.floating));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Deleted ${_selectedIds.length} wallpaper${_selectedIds.length == 1 ? '' : 's'}',
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -185,7 +235,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return ValueListenableBuilder(
       valueListenable: Hive.box('downloads').listenable(),
       builder: (context, Box box, _) {
-        final filteredItems = DownloadsService.getDownloads(searchQuery: _searchQuery);
+        final filteredItems = DownloadsService.getDownloads(
+          searchQuery: _searchQuery,
+        );
         if (_storageSizeStr == '0 KB') _recalculateStorage();
 
         return Column(
@@ -212,15 +264,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Container(
-                          width: 40,
-                          height: 3,
-                          color: cs.primary,
-                        ),
+                        Container(width: 40, height: 3, color: cs.primary),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: vk.surfaceContainer,
                         borderRadius: BorderRadius.circular(4),
@@ -242,10 +293,19 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
             if (_selectionMode)
               Container(
-                padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 12),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  MediaQuery.of(context).padding.top + 8,
+                  16,
+                  12,
+                ),
                 decoration: BoxDecoration(
                   color: cs.primary.withValues(alpha: 0.15),
-                  border: Border(bottom: BorderSide(color: cs.primary.withValues(alpha: 0.3))),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: cs.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -253,25 +313,50 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                       onTap: _exitSelectionMode,
                       child: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         '${_selectedIds.length} SELECTED',
-                        style: GoogleFonts.oswald(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                        style: GoogleFonts.oswald(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
                       ),
                     ),
                     GestureDetector(
                       onTap: () => _selectAll(filteredItems),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Text(
-                          _selectedIds.length == filteredItems.length ? 'DESELECT ALL' : 'SELECT ALL',
-                          style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                          _selectedIds.length == filteredItems.length
+                              ? 'DESELECT ALL'
+                              : 'SELECT ALL',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
@@ -280,13 +365,27 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                       onTap: _selectedIds.isNotEmpty ? _deleteSelected : null,
                       child: Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: _selectedIds.isNotEmpty ? cs.error.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                        decoration: BoxDecoration(
+                          color: _selectedIds.isNotEmpty
+                              ? cs.error.withValues(alpha: 0.8)
+                              : Colors.black.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ).animate().slideY(begin: -1.0, end: 0, duration: 250.ms, curve: Curves.easeOutCubic),
+              ).animate().slideY(
+                begin: -1.0,
+                end: 0,
+                duration: 250.ms,
+                curve: Curves.easeOutCubic,
+              ),
 
             if (!_selectionMode && box.isNotEmpty)
               Padding(
@@ -296,30 +395,50 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                   decoration: BoxDecoration(
                     color: vk.surfaceContainer,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: vk.glassBorder.withValues(alpha: 0.15), width: 1),
+                    border: Border.all(
+                      color: vk.glassBorder.withValues(alpha: 0.15),
+                      width: 1,
+                    ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Icon(Icons.search_rounded, color: vk.onSurfaceSubtle, size: 20),
+                      Icon(
+                        Icons.search_rounded,
+                        color: vk.onSurfaceSubtle,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
-                          style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                           decoration: InputDecoration(
-                            hintText: 'Search downloads by tags or resolution...',
-                            hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint, fontSize: 14),
+                            hintText:
+                                'Search downloads by tags or resolution...',
+                            hintStyle: GoogleFonts.inter(
+                              color: vk.onSurfaceFaint,
+                              fontSize: 14,
+                            ),
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
                           ),
-                          onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                          onChanged: (value) => setState(
+                            () => _searchQuery = value.toLowerCase(),
+                          ),
                         ),
                       ),
                       if (_searchQuery.isNotEmpty)
                         GestureDetector(
                           onTap: () => setState(() => _searchQuery = ''),
-                          child: Icon(Icons.cancel_rounded, color: vk.onSurfaceFaint, size: 18),
+                          child: Icon(
+                            Icons.cancel_rounded,
+                            color: vk.onSurfaceFaint,
+                            size: 18,
+                          ),
                         ),
                     ],
                   ),
@@ -338,19 +457,36 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           final crossAxisCount = constraints.maxWidth > 900
                               ? 4
                               : constraints.maxWidth > 600
-                                  ? 3
-                                  : 2;
+                              ? 3
+                              : 2;
 
                           return MasonryGridView.count(
                             crossAxisCount: crossAxisCount,
                             mainAxisSpacing: 10,
                             crossAxisSpacing: 10,
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
-                            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              8,
+                              16,
+                              bottomPadding,
+                            ),
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics(),
+                            ),
                             itemCount: filteredItems.length,
                             itemBuilder: (context, index) {
                               final data = filteredItems[index];
-                              return _buildDownloadCard(data).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 40));
+                              return _buildDownloadCard(data)
+                                  .animate()
+                                  .fade(duration: 350.ms)
+                                  .slideY(
+                                    begin: 0.1,
+                                    end: 0,
+                                    delay: Duration(
+                                      milliseconds:
+                                          (index % crossAxisCount) * 40,
+                                    ),
+                                  );
                             },
                           );
                         },
@@ -374,7 +510,11 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return LocalWallpaperCard(
       wallpaper: data,
       isSelected: false,
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => DownloadedDetailScreen(downloadedWallpaper: data))),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DownloadedDetailScreen(downloadedWallpaper: data),
+        ),
+      ),
       onLongPress: () => _enterSelectionMode(data.wallhavenId),
     );
   }
@@ -388,20 +528,38 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: vk.surfaceContainer, shape: BoxShape.circle),
-              child: Icon(Icons.download_done_rounded, size: 48, color: vk.onSurfaceDim),
-            ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(end: 1.1, duration: 1500.ms, curve: Curves.easeInOut),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.download_done_rounded,
+                    size: 48,
+                    color: vk.onSurfaceDim,
+                  ),
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scaleXY(end: 1.1, duration: 1500.ms, curve: Curves.easeInOut),
             const SizedBox(height: 24),
             Text(
               'NO DOWNLOADS YET',
-              style: GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2),
+              style: GoogleFonts.oswald(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 2,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tap the download button on any wallpaper to save it for offline viewing in full resolution.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 14, color: vk.onSurfaceSubtle, height: 1.5),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: vk.onSurfaceSubtle,
+                height: 1.5,
+              ),
             ),
           ],
         ),

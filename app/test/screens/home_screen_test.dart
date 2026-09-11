@@ -24,7 +24,7 @@ void main() {
     await ThemeConfig.load();
     await Supabase.initialize(
       url: 'https://test.supabase.co',
-      anonKey: 'test-anon-key',
+      publishableKey: 'test-anon-key',
     );
   });
 
@@ -44,11 +44,7 @@ void main() {
 
   Widget buildTestApp() {
     return MaterialApp(
-      home: SizedBox(
-        width: 400,
-        height: 800,
-        child: const HomeScreen(),
-      ),
+      home: SizedBox(width: 400, height: 800, child: const HomeScreen()),
     );
   }
 
@@ -79,8 +75,7 @@ void main() {
       expect(decoration.borderRadius, BorderRadius.circular(0));
     });
 
-    testWidgets('tapping search bar navigates to SearchScreen',
-        (tester) async {
+    testWidgets('tapping search bar navigates to SearchScreen', (tester) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
 
@@ -90,8 +85,9 @@ void main() {
       expect(find.byType(SearchScreen), findsOneWidget);
     });
 
-    testWidgets('back button from SearchScreen returns to HomeScreen',
-        (tester) async {
+    testWidgets('back button from SearchScreen returns to HomeScreen', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
 

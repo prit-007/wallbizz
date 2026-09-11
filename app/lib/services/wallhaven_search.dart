@@ -29,7 +29,7 @@ class WallhavenSearch {
   final http.Client _httpClient;
 
   WallhavenSearch({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? http.Client();
 
   static String buildPublicURL({
     required String query,
@@ -149,9 +149,21 @@ class WallhavenSearch {
       }
       final body = response.body;
       final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: msg,
+      );
     } catch (e) {
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: e.toString(),
+      );
     }
   }
 
@@ -198,9 +210,21 @@ class WallhavenSearch {
       }
       final body = response.body;
       final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: msg,
+      );
     } catch (e) {
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: e.toString(),
+      );
     }
   }
 }

@@ -26,9 +26,7 @@ Wallpaper _makeWallpaper({String id = 'test-id', String color = '#7B8CFF'}) {
 }
 
 Widget _wrapInApp(Widget child) {
-  return MaterialApp(
-    home: Scaffold(body: child),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -41,51 +39,75 @@ void main() {
     await ThemeConfig.load();
     await Supabase.initialize(
       url: 'https://test.supabase.co',
-      anonKey: 'test-anon-key',
+      publishableKey: 'test-anon-key',
     );
   });
 
   group('WallpaperSwiperScreen', () {
     testWidgets('renders with single wallpaper', (tester) async {
       final wallpapers = [_makeWallpaper()];
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: wallpapers)));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: wallpapers)),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(WallpaperSwiperScreen), findsOneWidget);
     });
 
     testWidgets('shows page counter for multiple wallpapers', (tester) async {
-      final wallpapers = [_makeWallpaper(id: '1'), _makeWallpaper(id: '2'), _makeWallpaper(id: '3')];
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 0)));
+      final wallpapers = [
+        _makeWallpaper(id: '1'),
+        _makeWallpaper(id: '2'),
+        _makeWallpaper(id: '3'),
+      ];
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 0),
+        ),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('1 / 3'), findsOneWidget);
     });
 
     testWidgets('shows back button', (tester) async {
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
     });
 
     testWidgets('shows heart button', (tester) async {
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
     });
 
     testWidgets('shows download button', (tester) async {
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])));
+      await tester.pumpWidget(
+        _wrapInApp(WallpaperSwiperScreen(wallpapers: [_makeWallpaper()])),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('DOWNLOAD WALLPAPER'), findsOneWidget);
     });
 
     testWidgets('initializes at correct page index', (tester) async {
-      final wallpapers = [_makeWallpaper(id: '1'), _makeWallpaper(id: '2'), _makeWallpaper(id: '3')];
-      await tester.pumpWidget(_wrapInApp(WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 1)));
+      final wallpapers = [
+        _makeWallpaper(id: '1'),
+        _makeWallpaper(id: '2'),
+        _makeWallpaper(id: '3'),
+      ];
+      await tester.pumpWidget(
+        _wrapInApp(
+          WallpaperSwiperScreen(wallpapers: wallpapers, initialIndex: 1),
+        ),
+      );
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('2 / 3'), findsOneWidget);

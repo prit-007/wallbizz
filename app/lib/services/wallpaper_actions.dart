@@ -6,7 +6,6 @@ import '../widgets/auth_bottom_sheet.dart';
 
 class WallpaperActions {
   static Wallpaper? _pendingWallpaper;
-  static VoidCallback? _onPendingComplete;
   static bool _isProcessing = false;
 
   static void handleHeartTap(
@@ -20,12 +19,10 @@ class WallpaperActions {
 
     if (user == null) {
       _pendingWallpaper = wallpaper;
-      _onPendingComplete = onComplete;
       showAuthBottomSheet(
         context,
         onDismissed: () {
           _pendingWallpaper = null;
-          _onPendingComplete = null;
         },
       );
       return;
@@ -49,9 +46,15 @@ class WallpaperActions {
 
       bool success;
       if (isInList) {
-        success = await SupabaseService.instance.removeFromWishlist(userId, wallpaper.id);
+        success = await SupabaseService.instance.removeFromWishlist(
+          userId,
+          wallpaper.id,
+        );
       } else {
-        success = await SupabaseService.instance.addToWishlist(userId, wallpaper.id);
+        success = await SupabaseService.instance.addToWishlist(
+          userId,
+          wallpaper.id,
+        );
       }
 
       if (success) {
@@ -59,7 +62,11 @@ class WallpaperActions {
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isInList ? 'Failed to remove from collection' : 'Failed to add to collection'),
+            content: Text(
+              isInList
+                  ? 'Failed to remove from collection'
+                  : 'Failed to add to collection',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -82,7 +89,6 @@ class WallpaperActions {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null && _pendingWallpaper != null) {
       _pendingWallpaper = null;
-      _onPendingComplete = null;
     }
   }
 }

@@ -79,17 +79,28 @@ void main() {
     });
 
     test('getDownloads filters by sourceQuery', () async {
-      await box.put('wp1', _makeDownload(id: 'wp1', sourceQuery: 'cyberpunk').toMap());
-      await box.put('wp2', _makeDownload(id: 'wp2', sourceQuery: 'nature').toMap());
+      await box.put(
+        'wp1',
+        _makeDownload(id: 'wp1', sourceQuery: 'cyberpunk').toMap(),
+      );
+      await box.put(
+        'wp2',
+        _makeDownload(id: 'wp2', sourceQuery: 'nature').toMap(),
+      );
 
-      final cyberpunkResults = DownloadsService.getDownloads(searchQuery: 'cyberpunk');
+      final cyberpunkResults = DownloadsService.getDownloads(
+        searchQuery: 'cyberpunk',
+      );
       expect(cyberpunkResults.length, 1);
       expect(cyberpunkResults.first.sourceQuery, 'cyberpunk');
     });
 
     test('getDownloads filters by category', () async {
       await box.put('wp1', _makeDownload(id: 'wp1', category: 'anime').toMap());
-      await box.put('wp2', _makeDownload(id: 'wp2', category: 'general').toMap());
+      await box.put(
+        'wp2',
+        _makeDownload(id: 'wp2', category: 'general').toMap(),
+      );
 
       final animeResults = DownloadsService.getDownloads(searchQuery: 'anime');
       expect(animeResults.length, 1);
@@ -97,8 +108,14 @@ void main() {
     });
 
     test('getDownloads filters by resolution', () async {
-      await box.put('wp1', _makeDownload(id: 'wp1', resolution: '1920x1080').toMap());
-      await box.put('wp2', _makeDownload(id: 'wp2', resolution: '3840x2160').toMap());
+      await box.put(
+        'wp1',
+        _makeDownload(id: 'wp1', resolution: '1920x1080').toMap(),
+      );
+      await box.put(
+        'wp2',
+        _makeDownload(id: 'wp2', resolution: '3840x2160').toMap(),
+      );
 
       final hdResults = DownloadsService.getDownloads(searchQuery: '3840');
       expect(hdResults.length, 1);
@@ -107,18 +124,32 @@ void main() {
 
     test('getDownloads filters by primaryColor', () async {
       final wp1 = DownloadedWallpaper(
-        wallhavenId: 'wp1', localPath: '/tmp/wp1.jpg',
-        urlFull: '', urlThumb: '', sourceQuery: '',
-        category: '', primaryColor: '#ff0000',
-        resolution: '', width: 0, height: 0,
-        fileSize: 0, downloadedAt: DateTime(2024, 1, 1),
+        wallhavenId: 'wp1',
+        localPath: '/tmp/wp1.jpg',
+        urlFull: '',
+        urlThumb: '',
+        sourceQuery: '',
+        category: '',
+        primaryColor: '#ff0000',
+        resolution: '',
+        width: 0,
+        height: 0,
+        fileSize: 0,
+        downloadedAt: DateTime(2024, 1, 1),
       );
       final wp2 = DownloadedWallpaper(
-        wallhavenId: 'wp2', localPath: '/tmp/wp2.jpg',
-        urlFull: '', urlThumb: '', sourceQuery: '',
-        category: '', primaryColor: '#00ff00',
-        resolution: '', width: 0, height: 0,
-        fileSize: 0, downloadedAt: DateTime(2024, 1, 1),
+        wallhavenId: 'wp2',
+        localPath: '/tmp/wp2.jpg',
+        urlFull: '',
+        urlThumb: '',
+        sourceQuery: '',
+        category: '',
+        primaryColor: '#00ff00',
+        resolution: '',
+        width: 0,
+        height: 0,
+        fileSize: 0,
+        downloadedAt: DateTime(2024, 1, 1),
       );
       await box.put('wp1', wp1.toMap());
       await box.put('wp2', wp2.toMap());
@@ -129,7 +160,10 @@ void main() {
     });
 
     test('getDownloads returns empty for non-matching query', () async {
-      await box.put('wp1', _makeDownload(id: 'wp1', sourceQuery: 'cyberpunk').toMap());
+      await box.put(
+        'wp1',
+        _makeDownload(id: 'wp1', sourceQuery: 'cyberpunk').toMap(),
+      );
       final results = DownloadsService.getDownloads(searchQuery: 'nature');
       expect(results, isEmpty);
     });

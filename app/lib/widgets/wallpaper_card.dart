@@ -77,8 +77,11 @@ class _WallpaperCardState extends State<WallpaperCard> {
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              color: Colors.black.withValues(alpha: 0.35),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          color: Colors.black.withValues(alpha: 0.35),
                           child: Text(
                             widget.wallpaper.resolution,
                             style: GoogleFonts.inter(
@@ -104,10 +107,14 @@ class _WallpaperCardState extends State<WallpaperCard> {
                             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                             child: Container(
                               padding: const EdgeInsets.all(7),
-                          color: Colors.black.withValues(alpha: 0.35),
+                              color: Colors.black.withValues(alpha: 0.35),
                               child: Icon(
-                                widget.isWishlisted ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                                color: widget.isWishlisted ? Colors.redAccent : Colors.white,
+                                widget.isWishlisted
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_outline_rounded,
+                                color: widget.isWishlisted
+                                    ? Colors.redAccent
+                                    : Colors.white,
                                 size: 18,
                               ),
                             ),

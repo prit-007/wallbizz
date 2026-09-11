@@ -66,7 +66,8 @@ class DownloadedWallpaper {
       width: map['width'] ?? 0,
       height: map['height'] ?? 0,
       fileSize: map['fileSize'] ?? 0,
-      downloadedAt: DateTime.tryParse(map['downloadedAt'] ?? '') ?? DateTime.now(),
+      downloadedAt:
+          DateTime.tryParse(map['downloadedAt'] ?? '') ?? DateTime.now(),
     );
   }
 }

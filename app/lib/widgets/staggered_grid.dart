@@ -10,7 +10,8 @@ import '../services/wallpaper_actions.dart';
 
 class StaggeredGrid extends StatefulWidget {
   final String? category;
-  final Function(Wallpaper wallpaper, List<Wallpaper> allWallpapers)? onWallpaperTap;
+  final Function(Wallpaper wallpaper, List<Wallpaper> allWallpapers)?
+  onWallpaperTap;
   final ScrollController? scrollController;
 
   const StaggeredGrid({
@@ -98,7 +99,10 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   Future<void> _loadWallpapers() async {
     if (_isLoading || !_hasMore) return;
     setState(() => _isLoading = true);
-    final newWallpapers = await SupabaseService.instance.fetchWallpapers(category: widget.category, page: _page);
+    final newWallpapers = await SupabaseService.instance.fetchWallpapers(
+      category: widget.category,
+      page: _page,
+    );
     if (mounted) {
       setState(() {
         _wallpapers.addAll(newWallpapers);
@@ -110,7 +114,8 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadWallpapers();
     }
   }
@@ -136,8 +141,8 @@ class _StaggeredGridState extends State<StaggeredGrid> {
           final crossAxisCount = constraints.maxWidth > 900
               ? 4
               : constraints.maxWidth > 600
-                  ? 3
-                  : 2;
+              ? 3
+              : 2;
 
           return MasonryGridView.count(
             crossAxisCount: crossAxisCount,
@@ -145,25 +150,41 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             crossAxisSpacing: 10,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
             itemCount: _wallpapers.length + (_hasMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == _wallpapers.length) {
                 return Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2)),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: cs.primary,
+                      strokeWidth: 2,
+                    ),
+                  ),
                 );
               }
 
               final wp = _wallpapers[index];
               return RepaintBoundary(
-                child: WallpaperCard(
-                  wallpaper: wp,
-                  isWishlisted: _wishlistedIds.contains(wp.id),
-                  onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
-                  onHeartTap: () => _onHeartTap(wp),
-                ),
-              ).animate().fade(duration: 400.ms).slideY(begin: 0.1, end: 0, delay: Duration(milliseconds: (index % crossAxisCount) * 50));
+                    child: WallpaperCard(
+                      wallpaper: wp,
+                      isWishlisted: _wishlistedIds.contains(wp.id),
+                      onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
+                      onHeartTap: () => _onHeartTap(wp),
+                    ),
+                  )
+                  .animate()
+                  .fade(duration: 400.ms)
+                  .slideY(
+                    begin: 0.1,
+                    end: 0,
+                    delay: Duration(
+                      milliseconds: (index % crossAxisCount) * 50,
+                    ),
+                  );
             },
           );
         },
@@ -179,8 +200,8 @@ class _StaggeredGridState extends State<StaggeredGrid> {
         final crossAxisCount = constraints.maxWidth > 900
             ? 4
             : constraints.maxWidth > 600
-                ? 3
-                : 2;
+            ? 3
+            : 2;
         final heights = [220.0, 300.0, 250.0, 340.0, 190.0, 280.0];
 
         return MasonryGridView.count(
@@ -192,13 +213,16 @@ class _StaggeredGridState extends State<StaggeredGrid> {
           itemCount: crossAxisCount * 3,
           itemBuilder: (context, index) {
             return RepaintBoundary(
-              child: Container(
-                height: heights[index % heights.length],
-                decoration: BoxDecoration(
-                  color: vk.surfaceContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
+              child:
+                  Container(
+                        height: heights[index % heights.length],
+                        decoration: BoxDecoration(
+                          color: vk.surfaceContainer,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      )
+                      .animate(onPlay: (controller) => controller.repeat())
+                      .shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
             );
           },
         );

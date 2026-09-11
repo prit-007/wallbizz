@@ -21,7 +21,9 @@ class AppVersion {
   bool isNewerThan(AppVersion other) {
     if (major > other.major) return true;
     if (major == other.major && minor > other.minor) return true;
-    if (major == other.major && minor == other.minor && patch > other.patch) return true;
+    if (major == other.major && minor == other.minor && patch > other.patch) {
+      return true;
+    }
     return false;
   }
 
@@ -52,7 +54,8 @@ class UpdateInfo {
 class UpdateChecker {
   static const _repoOwner = 'prit-007';
   static const _repoName = 'wallbizz';
-  static const _apiUrl = 'https://api.github.com/repos/$_repoOwner/$_repoName/releases';
+  static const _apiUrl =
+      'https://api.github.com/repos/$_repoOwner/$_repoName/releases';
 
   final http.Client _client;
 

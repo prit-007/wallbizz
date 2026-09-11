@@ -18,10 +18,10 @@ class SupabaseService {
   final String _anonKey = SupabaseConfig.anonKey;
 
   Map<String, String> get _headers => {
-        'apikey': _anonKey,
-        'Authorization': 'Bearer $_anonKey',
-        'Content-Type': 'application/json',
-      };
+    'apikey': _anonKey,
+    'Authorization': 'Bearer $_anonKey',
+    'Content-Type': 'application/json',
+  };
 
   String? get _userToken =>
       Supabase.instance.client.auth.currentSession?.accessToken;
@@ -62,10 +62,7 @@ class SupabaseService {
     final url = Uri.parse('$_baseUrl/rest/v1/wallpapers?$query');
     final response = await http.get(
       url,
-      headers: {
-        ..._headers,
-        'Range': '$from-$to',
-      },
+      headers: {..._headers, 'Range': '$from-$to'},
     );
 
     if (response.statusCode == 200) {
@@ -86,9 +83,7 @@ class SupabaseService {
     final cached = ApiCache.get(cacheKey);
     if (cached != null) {
       final List<dynamic> data = json.decode(cached);
-      return data
-          .map((item) => Wallpaper.fromMap(item['wallpapers']))
-          .toList();
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
     }
 
     final url = Uri.parse(
@@ -99,9 +94,7 @@ class SupabaseService {
     if (response.statusCode == 200) {
       ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
       final List<dynamic> data = json.decode(response.body);
-      return data
-          .map((item) => Wallpaper.fromMap(item['wallpapers']))
-          .toList();
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
     }
 
     return [];
@@ -112,10 +105,7 @@ class SupabaseService {
     final response = await http.post(
       url,
       headers: _authHeaders,
-      body: json.encode({
-        'user_id': userId,
-        'wallpaper_id': wallpaperId,
-      }),
+      body: json.encode({'user_id': userId, 'wallpaper_id': wallpaperId}),
     );
 
     final success = response.statusCode == 201 || response.statusCode == 200;
@@ -179,10 +169,7 @@ class SupabaseService {
     final response = await http.post(
       url,
       headers: _authHeaders,
-      body: json.encode({
-        'user_id': userId,
-        'name': name,
-      }),
+      body: json.encode({'user_id': userId, 'name': name}),
     );
 
     if (response.statusCode == 201) {
@@ -195,9 +182,7 @@ class SupabaseService {
   }
 
   Future<bool> deleteMoodboard(String moodboardId) async {
-    final url = Uri.parse(
-      '$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId',
-    );
+    final url = Uri.parse('$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId');
     final response = await http.delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
@@ -228,7 +213,10 @@ class SupabaseService {
     return false;
   }
 
-  Future<bool> removeFromMoodboard(String moodboardId, String wallpaperId) async {
+  Future<bool> removeFromMoodboard(
+    String moodboardId,
+    String wallpaperId,
+  ) async {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$wallpaperId',
     );

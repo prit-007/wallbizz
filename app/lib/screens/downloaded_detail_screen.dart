@@ -22,39 +22,42 @@ class DownloadedDetailScreen extends StatefulWidget {
   State<DownloadedDetailScreen> createState() => _DownloadedDetailScreenState();
 }
 
-class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with SingleTickerProviderStateMixin {
-  final TransformationController _transformController = TransformationController();
+class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
+    with SingleTickerProviderStateMixin {
+  final TransformationController _transformController =
+      TransformationController();
   late AnimationController _animationController;
   Animation<Matrix4>? _zoomAnimation;
 
   DownloadedWallpaper get downloadedWallpaper => widget.downloadedWallpaper;
 
   Wallpaper get _wallpaper => Wallpaper(
-        id: 'wh-${downloadedWallpaper.wallhavenId}',
-        wallhavenId: downloadedWallpaper.wallhavenId,
-        urlFull: downloadedWallpaper.urlFull,
-        urlThumb: downloadedWallpaper.urlThumb,
-        resolution: downloadedWallpaper.resolution,
-        width: downloadedWallpaper.width,
-        height: downloadedWallpaper.height,
-        fileSize: downloadedWallpaper.fileSize,
-        primaryColor: downloadedWallpaper.primaryColor,
-        category: downloadedWallpaper.category,
-        sourceQuery: downloadedWallpaper.sourceQuery,
-        createdAt: downloadedWallpaper.downloadedAt,
-      );
+    id: 'wh-${downloadedWallpaper.wallhavenId}',
+    wallhavenId: downloadedWallpaper.wallhavenId,
+    urlFull: downloadedWallpaper.urlFull,
+    urlThumb: downloadedWallpaper.urlThumb,
+    resolution: downloadedWallpaper.resolution,
+    width: downloadedWallpaper.width,
+    height: downloadedWallpaper.height,
+    fileSize: downloadedWallpaper.fileSize,
+    primaryColor: downloadedWallpaper.primaryColor,
+    category: downloadedWallpaper.category,
+    sourceQuery: downloadedWallpaper.sourceQuery,
+    createdAt: downloadedWallpaper.downloadedAt,
+  );
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..addListener(() {
-        if (_zoomAnimation != null) {
-          _transformController.value = _zoomAnimation!.value;
-        }
-      });
+    _animationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 300),
+        )..addListener(() {
+          if (_zoomAnimation != null) {
+            _transformController.value = _zoomAnimation!.value;
+          }
+        });
   }
 
   @override
@@ -72,25 +75,25 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
     final isZoomed = currentMatrix.getMaxScaleOnAxis() > 1.1;
 
     if (isZoomed) {
-      _zoomAnimation = Matrix4Tween(
-        begin: currentMatrix,
-        end: Matrix4.identity(),
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ));
+      _zoomAnimation =
+          Matrix4Tween(begin: currentMatrix, end: Matrix4.identity()).animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
     } else {
       final position = details.localPosition;
       final targetMatrix = Matrix4.identity()
         ..translate(-position.dx * 1.5, -position.dy * 1.5)
         ..scale(2.5);
-      _zoomAnimation = Matrix4Tween(
-        begin: currentMatrix,
-        end: targetMatrix,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ));
+      _zoomAnimation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
+          .animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
     }
     _animationController.forward(from: 0);
   }
@@ -128,14 +131,19 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
                             return Container(
                               color: vk.surfaceContainer,
                               child: Center(
-                                child: CircularProgressIndicator(color: vk.onSurfaceDim),
+                                child: CircularProgressIndicator(
+                                  color: vk.onSurfaceDim,
+                                ),
                               ),
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: vk.surfaceContainer,
-                              child: Icon(Icons.error_outline, color: vk.onSurfaceDim),
+                              child: Icon(
+                                Icons.error_outline,
+                                color: vk.onSurfaceDim,
+                              ),
                             );
                           },
                         ),
@@ -176,11 +184,7 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: cs.onSurface,
-                    size: 24,
-                  ),
+                  child: Icon(Icons.arrow_back, color: cs.onSurface, size: 24),
                 ),
               ),
             ),
@@ -197,31 +201,24 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
                         color: Colors.black.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.share,
-                        color: cs.onSurface,
-                        size: 20,
-                      ),
+                      child: Icon(Icons.share, color: cs.onSurface, size: 20),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: vk.glassBorder,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: vk.glassBorder,
-                      ),
+                      border: Border.all(color: vk.glassBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: cs.onSurface,
-                          size: 16,
-                        ),
+                        Icon(Icons.check_circle, color: cs.onSurface, size: 16),
                         const SizedBox(width: 6),
                         Text(
                           'Downloaded',
@@ -262,8 +259,9 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              ColorUtils.hexToColor(downloadedWallpaper.primaryColor),
+                          backgroundColor: ColorUtils.hexToColor(
+                            downloadedWallpaper.primaryColor,
+                          ),
                           foregroundColor: cs.onSurface,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -316,7 +314,8 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
                 children: [
                   const CircularProgressIndicator(color: Colors.white),
                   const SizedBox(height: 20),
-                  Text('Preparing share...',
+                  Text(
+                    'Preparing share...',
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 14,
@@ -335,6 +334,7 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen> with Si
     if (file.existsSync()) {
       bytes = await file.readAsBytes();
     }
+    if (!context.mounted) return;
     await ShareUtils.shareWithWatermark(
       imageUrl: downloadedWallpaper.urlFull,
       context: context,
