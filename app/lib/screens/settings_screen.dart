@@ -22,6 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDarkMode = true;
   String _storageChoice = 'pictures';
   User? _user;
+  String _appVersion = '';
 
   @override
   void initState() {
@@ -31,6 +32,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) setState(() => _user = event.session?.user);
     });
     _loadSettings();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _appVersion = info.version);
   }
 
   Future<void> _loadSettings() async {
@@ -638,14 +645,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _buildSettingsTile(
           icon: Icons.system_update_rounded,
           title: 'Check for Updates',
-          subtitle: 'Wallbizz v1.1.0',
+          subtitle: _appVersion.isNotEmpty
+              ? 'Wallbizz v$_appVersion'
+              : 'Wallbizz',
           onTap: () async {
             final info = await PackageInfo.fromPlatform();
             final checker = UpdateChecker();
             final update = await checker.checkForUpdate(info.version);
             if (!context.mounted) return;
             if (update != null) {
-              UpdateDialog.show(context, update);
+              UpdateDialog.show(context, update, currentVersion: info.version);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

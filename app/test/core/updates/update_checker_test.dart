@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
-import 'package:vivek_app/core/updates/update_checker.dart';
+import 'package:wallbizz/core/updates/update_checker.dart';
 
 void main() {
   group('AppVersion', () {

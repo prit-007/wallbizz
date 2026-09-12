@@ -6,9 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vivek_app/config/theme_config.dart';
-import 'package:vivek_app/screens/home_screen.dart';
-import 'package:vivek_app/screens/search_screen.dart';
+import 'package:wallbizz/config/theme_config.dart';
+import 'package:wallbizz/screens/home_screen.dart';
+import 'package:wallbizz/screens/search_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

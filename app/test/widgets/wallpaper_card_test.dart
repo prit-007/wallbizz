@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/widgets/wallpaper_card.dart';
-import 'package:vivek_app/models/wallpaper.dart';
+import 'package:wallbizz/widgets/wallpaper_card.dart';
+import 'package:wallbizz/models/wallpaper.dart';
 
 Wallpaper _makeWallpaper({
   String id = 'test-id',

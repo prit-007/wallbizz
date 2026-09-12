@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/core/logger/logger.dart';
+import 'package:wallbizz/core/logger/logger.dart';
 
 void main() {
   group('Logger', () {

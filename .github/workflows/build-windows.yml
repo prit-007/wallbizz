@@ -56,7 +56,7 @@ jobs:
         shell: pwsh
         run: |
           $releaseDir = "build\windows\x64\runner\Release"
-          $exe = "$releaseDir\vivek_app.exe"
+          $exe = "$releaseDir\wallbizz.exe"
           if (-not (Test-Path $exe)) {
             echo "Build output not found: $exe"
             exit 1

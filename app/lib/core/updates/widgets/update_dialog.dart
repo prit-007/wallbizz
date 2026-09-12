@@ -12,14 +12,26 @@ import '../update_checker.dart';
 
 class UpdateDialog extends StatefulWidget {
   final UpdateInfo updateInfo;
+  final String currentVersion;
 
-  const UpdateDialog({super.key, required this.updateInfo});
+  const UpdateDialog({
+    super.key,
+    required this.updateInfo,
+    required this.currentVersion,
+  });
 
-  static Future<void> show(BuildContext context, UpdateInfo info) async {
+  static Future<void> show(
+    BuildContext context,
+    UpdateInfo info, {
+    String currentVersion = '',
+  }) async {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => UpdateDialog(updateInfo: info),
+      builder: (_) => UpdateDialog(
+        updateInfo: info,
+        currentVersion: currentVersion,
+      ),
     );
   }
 
@@ -150,7 +162,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _versionPill('Current', '1.1.0', vk),
+                        _versionPill('Current', widget.currentVersion, vk),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Icon(

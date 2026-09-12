@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
-import 'package:vivek_app/services/wallhaven_search.dart';
-import 'package:vivek_app/services/api_cache.dart';
+import 'package:wallbizz/services/wallhaven_search.dart';
+import 'package:wallbizz/services/api_cache.dart';
 
 void main() {
   setUp(() {

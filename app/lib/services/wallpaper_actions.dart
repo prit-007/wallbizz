@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/logger/logger.dart';
 import '../models/wallpaper.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
@@ -41,6 +42,10 @@ class WallpaperActions {
   ) async {
     _isProcessing = true;
     try {
+      logInfo(
+        'Checking wishlist: ${wallpaper.wallhavenId}',
+        domain: LogDomain.auth,
+      );
       final isInList = await SupabaseService.instance.isInWishlist(
         userId,
         wallpaper.id,
@@ -48,11 +53,19 @@ class WallpaperActions {
 
       bool success;
       if (isInList) {
+        logInfo(
+          'Removing from wishlist: ${wallpaper.wallhavenId}',
+          domain: LogDomain.auth,
+        );
         success = await SupabaseService.instance.removeFromWishlist(
           userId,
           wallpaper.id,
         );
       } else {
+        logInfo(
+          'Adding to wishlist: ${wallpaper.wallhavenId}',
+          domain: LogDomain.auth,
+        );
         success = await SupabaseService.instance.addToWishlist(
           userId,
           wallpaper.id,
@@ -60,6 +73,10 @@ class WallpaperActions {
       }
 
       if (success) {
+        logInfo(
+          'Wishlist toggle success: ${wallpaper.wallhavenId}',
+          domain: LogDomain.auth,
+        );
         onComplete?.call();
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +90,13 @@ class WallpaperActions {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      logError(
+        'Wishlist toggle failed: ${wallpaper.wallhavenId}',
+        error: e,
+        stackTrace: st,
+        domain: LogDomain.auth,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

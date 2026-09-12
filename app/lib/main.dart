@@ -17,6 +17,8 @@ import 'utils/share_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  logInfo('App starting', domain: LogDomain.general);
+
   FlutterError.onError = (details) {
     logError(
       details.exceptionAsString(),
@@ -25,8 +27,12 @@ Future<void> main() async {
     );
   };
   await dotenv.load();
+  logInfo('Environment loaded', domain: LogDomain.general);
+
   await Hive.initFlutter();
   await Hive.openBox('downloads');
+  logInfo('Hive initialized', domain: LogDomain.general);
+
   await ThemeConfig.load();
   ShareUtils.cleanOldShareFiles();
 
@@ -34,6 +40,7 @@ Future<void> main() async {
     BackendConfig.init(
       dotenv.env['BACKEND_URL'] ?? 'https://wallbizz.onrender.com',
     );
+    logInfo('Backend config initialized (web)', domain: LogDomain.general);
   }
 
   await Supabase.initialize(
@@ -43,6 +50,7 @@ Future<void> main() async {
       authFlowType: AuthFlowType.pkce,
     ),
   );
+  logInfo('Supabase initialized', domain: LogDomain.general);
 
   runApp(const WallbizzApp());
 }
@@ -83,7 +91,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
       final checker = UpdateChecker();
       final update = await checker.checkForUpdate(info.version);
       if (update != null && mounted) {
-        UpdateDialog.show(context, update);
+        UpdateDialog.show(context, update, currentVersion: info.version);
       }
     } catch (_) {}
   }

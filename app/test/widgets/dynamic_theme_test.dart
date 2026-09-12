@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/widgets/dynamic_theme.dart';
+import 'package:wallbizz/widgets/dynamic_theme.dart';
 
 Widget _wrapInApp(Widget child) {
   return MaterialApp(home: Scaffold(body: child));
