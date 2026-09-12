@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WALLBIZZ — Premium wallpapers, curated for you</title>
-<meta name="description" content="WALLBIZZ is a Flutter wallpaper app that syncs from Wallhaven twice a day. Browse, save into moodboards, and set wallpapers with a dark, editorial, glass interface.">
+<title>WALLBIZZ — Premium 4K Wallpapers, Curated for You</title>
+<meta name="description" content="Discover and save stunning 4K wallpapers. Browse curated collections, create moodboards, and set wallpapers with a beautiful dark interface. Free on web and Android.">
+<meta property="og:title" content="WALLBIZZ — Premium 4K Wallpapers">
+<meta property="og:description" content="Discover and save stunning 4K wallpapers. Browse curated collections, create moodboards, and set wallpapers with a beautiful dark interface.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wallbizz.netlify.app">
+<meta name="theme-color" content="#0A0A18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 
-  /* ============ Design tokens ============ */
   :root{
     --bg: #0A0A18;
     --bg-1: #0E0E20;
@@ -26,6 +30,8 @@
     --indigo-soft: #A9B4FF;
     --indigo-dim: #454C8C;
     --amber: #F2C879;
+    --coral: #FF8A9B;
+    --teal: #7BCBCB;
     --display: 'Oswald', sans-serif;
     --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --radius-s: 10px;
@@ -82,7 +88,6 @@
   .btn-ghost:hover{ background:var(--glass-strong); border-color:rgba(255,255,255,0.18); }
   .btn svg{ width:16px; height:16px; flex-shrink:0; }
 
-  /* glass card base */
   .glass{
     background:var(--glass);
     border:1px solid var(--border);
@@ -187,13 +192,31 @@
   .scroll-cue .line{ width:1px; height:34px; background:linear-gradient(var(--indigo-soft), transparent); animation:cueMove 1.8s ease-in-out infinite; }
   @keyframes cueMove{ 0%,100%{ opacity:0.3; } 50%{ opacity:1; } }
 
+  /* ============ Features grid ============ */
+  .features{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:20px; margin-top:48px;
+  }
+  .feat-card{
+    padding:28px; border-radius:var(--radius-m);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .feat-card:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,0.18); }
+  .feat-icon{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:18px;
+  }
+  .feat-icon svg{ width:22px; height:22px; }
+  .feat-card h3{ font-size:1.15rem; margin-bottom:8px; text-transform:none; }
+  .feat-card p{ font-size:0.88rem; color:var(--text-muted); line-height:1.55; }
+
   /* ============ Section shell ============ */
   section{ position:relative; padding:120px 0; }
   .section-head{ max-width:640px; margin-bottom:64px; }
   .section-head h2{ font-size:clamp(2rem, 4vw, 2.8rem); margin-top:14px; text-transform:none; }
   .section-head p{ margin-top:16px; color:var(--text-muted); font-size:1.02rem; max-width:520px; }
 
-  /* ============ Gallery (swipe strip) ============ */
+  /* ============ Gallery ============ */
   .gallery-strip{
     display:flex; gap:20px; overflow-x:auto; padding:10px 32px 30px;
     scroll-snap-type:x mandatory; scroll-padding-left:32px;
@@ -269,7 +292,6 @@
   .phone .screen{ position:relative; width:100%; height:100%; border-radius:30px; overflow:hidden; background:var(--bg-1); }
   .phone .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:70px; height:16px; border-radius:20px; background:#08081a; z-index:5; }
 
-  /* Discover mockup */
   .m-pills{ position:absolute; top:38px; left:14px; right:14px; display:flex; gap:6px; overflow:hidden; }
   .m-pills span{ flex:0 0 auto; padding:5px 10px; border-radius:100px; font-size:0.58rem; font-family:var(--display); letter-spacing:0.04em; background:var(--glass); border:1px solid var(--border); color:var(--text-muted); }
   .m-pills span.active{ background:var(--indigo); color:#0A0A18; border-color:var(--indigo); }
@@ -281,7 +303,6 @@
   .m-dock .ico{ width:18px; height:18px; border-radius:5px; background:var(--text-faint); opacity:0.5; }
   .m-dock .ico.active{ background:var(--indigo); opacity:1; }
 
-  /* Detail mockup */
   .m-detail-bg{ position:absolute; inset:0; }
   .m-detail-blur{ position:absolute; inset:0; filter:blur(30px) brightness(0.65) saturate(1.3); transform:scale(1.3); }
   .m-detail-frame{ position:absolute; inset:34px 26px 96px; border-radius:22px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
@@ -292,22 +313,20 @@
   .m-specs .swatch{ width:11px; height:11px; border-radius:50%; }
   .m-dl-btn{ position:absolute; bottom:16px; left:14px; right:14px; height:44px; border-radius:100px; background:var(--indigo); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:0.62rem; color:#0A0A18; letter-spacing:0.06em; }
 
-  /* Vault mockup */
   .m-vault-grid{ position:absolute; top:56px; left:14px; right:14px; bottom:16px; display:grid; grid-template-columns:1fr 1fr; gap:8px; grid-auto-rows:78px; }
   .m-vault-grid .tile{ border-radius:12px; position:relative; }
   .m-vault-grid .tile.sel{ outline:2px solid var(--indigo); }
   .m-vault-grid .check{ position:absolute; top:6px; right:6px; width:16px; height:16px; border-radius:50%; background:var(--indigo); }
   .m-vault-search{ position:absolute; top:16px; left:14px; right:14px; height:32px; border-radius:100px; display:flex; align-items:center; padding:0 12px; font-size:0.6rem; color:var(--text-faint); }
 
-  /* Settings mockup */
   .m-settings{ position:absolute; top:36px; left:14px; right:14px; bottom:16px; display:flex; flex-direction:column; gap:10px; }
   .m-row{ height:46px; border-radius:14px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; }
   .m-row .lbl{ font-size:0.64rem; color:var(--text-muted); }
   .m-toggle{ width:30px; height:16px; border-radius:20px; background:var(--indigo); position:relative; }
   .m-toggle::after{ content:''; position:absolute; right:2px; top:2px; width:12px; height:12px; border-radius:50%; background:#fff; }
 
-  /* ============ Under the hood ============ */
-  .stack-section{ background:var(--bg-1); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft); }
+  /* ============ How it works ============ */
+  .how-section{ background:var(--bg-1); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft); }
   .flow{
     display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:48px 0 56px;
   }
@@ -324,15 +343,10 @@
     .flow-arrow::after{ right:-3px; top:auto; bottom:0; transform:rotate(135deg); }
   }
 
-  .stack-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:1px; background:var(--border-soft); border:1px solid var(--border-soft); border-radius:var(--radius-m); overflow:hidden; margin-bottom:40px; }
-  .stack-cell{ background:var(--bg-1); padding:22px 22px 24px; }
-  .stack-cell .role{ font-size:0.72rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; }
-  .stack-cell .tech{ font-family:var(--display); font-size:1.05rem; margin-top:6px; }
-
-  .test-badges{ display:flex; gap:14px; flex-wrap:wrap; }
-  .test-badge{ display:flex; align-items:center; gap:10px; padding:12px 18px; border-radius:var(--radius-s); }
-  .test-badge b{ font-family:var(--display); font-size:1.2rem; color:var(--amber); }
-  .test-badge span{ font-size:0.8rem; color:var(--text-muted); }
+  .trust-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; }
+  .trust-card{ padding:24px; border-radius:var(--radius-m); text-align:center; }
+  .trust-card b{ display:block; font-family:var(--display); font-size:1.8rem; color:var(--indigo-soft); }
+  .trust-card span{ font-size:0.82rem; color:var(--text-muted); margin-top:6px; display:block; }
 
   /* ============ Download ============ */
   .download-card{
@@ -359,20 +373,6 @@
   .foot-links a:hover{ color:var(--text); }
   .foot-built{ font-size:0.8rem; color:var(--text-faint); margin-top:18px; }
 
-  /* ============ Changelog ============ */
-  .changelog{ list-style:none; }
-  .changelog li{
-    padding:28px 0; border-top:1px solid var(--border-soft);
-  }
-  .changelog li:first-child{ border-top:none; padding-top:0; }
-  .cl-head{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
-  .cl-ver{ font-family:var(--display); font-size:1.3rem; }
-  .cl-date{ font-size:0.82rem; color:var(--text-faint); }
-  .cl-tag{ font-size:0.68rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:3px 9px; border-radius:100px; color:#0A0A18; background:var(--indigo); }
-  .cl-body{ margin-top:14px; display:flex; flex-direction:column; gap:6px; }
-  .cl-body span{ font-size:0.9rem; color:var(--text-muted); display:flex; gap:8px; align-items:flex-start; }
-  .cl-body span::before{ content:''; flex-shrink:0; width:5px; height:5px; border-radius:50%; background:var(--indigo-dim); margin-top:7px; }
-
 </style>
 </head>
 <body>
@@ -382,17 +382,13 @@
   <div class="wrap">
     <a href="#top" class="nav-mark"><span class="nav-dot"></span>WALLBIZZ</a>
     <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#screens">Inside the app</a></li>
-      <li><a href="#stack">Under the hood</a></li>
-      <li><a href="#changelog">Changelog</a></li>
       <li><a href="#download">Download</a></li>
     </ul>
     <div class="nav-cta">
-      <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-1.93c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.7 5.38-5.26 5.67.42.36.78 1.07.78 2.16v3.2c0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
-        GitHub
-      </a>
+      <a class="btn btn-primary" href="https://wallbizz.netlify.app" target="_blank" rel="noopener">Try on Web</a>
       <button class="nav-menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -400,12 +396,11 @@
   </div>
 </nav>
 <div class="mobile-panel" id="mobilePanel">
+  <a href="#features">Features</a>
   <a href="#gallery">Gallery</a>
   <a href="#screens">Inside the app</a>
-  <a href="#stack">Under the hood</a>
-  <a href="#changelog">Changelog</a>
   <a href="#download">Download</a>
-  <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">View on GitHub</a>
+  <a class="btn btn-primary" href="https://wallbizz.netlify.app" target="_blank" rel="noopener">Try on Web</a>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -413,31 +408,88 @@
   <div class="hero-glow" id="heroGlow"></div>
   <div class="hero-grain"></div>
   <div class="hero-content">
-    <span class="eyebrow">Flutter · Web PWA + Android</span>
+    <span class="eyebrow">Free on Web + Android</span>
     <h1>Wallbizz</h1>
-    <p class="hero-sub">A wallpaper app that treats every picture like it belongs on a wall, not in a feed. <strong>168 wallpapers</strong> are pulled from Wallhaven twice a day, and the one you're looking at colors everything around it.</p>
+    <p class="hero-sub">Stunning <strong>4K wallpapers</strong> curated from the best collections on the web. Browse seven hand-picked categories, save your favorites, and set them as your background — all with a beautiful, dark interface designed to get out of the way.</p>
     <div class="hero-cta">
-      <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
-        Get the latest build
+      <a class="btn btn-primary" href="https://wallbizz.netlify.app" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+        Try on Web — No Install
       </a>
-      <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">Read the source</a>
+      <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        Download Android
+      </a>
     </div>
     <div class="hero-stats">
-      <div><b>168 / day</b><span>wallpapers synced, 7 categories</span></div>
-      <div><b>235 tests</b><span>162 Flutter + 38 Go, all passing</span></div>
-      <div><b>MIT</b><span>open source, free to fork</span></div>
+      <div><b>7</b><span>curated categories</span></div>
+      <div><b>4K</b><span>ultra HD quality</span></div>
+      <div><b>Free</b><span>no ads, no trackers</span></div>
     </div>
   </div>
   <div class="scroll-cue"><span class="line"></span>SCROLL</div>
 </header>
 
+<!-- ============ FEATURES ============ -->
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Why Wallbizz</span>
+      <h2>Wallpapers that feel like they belong on your screen</h2>
+    </div>
+    <div class="features">
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(123,140,255,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+        </div>
+        <h3>7 Curated Categories</h3>
+        <p>Trending, Anime, Nature, Cyberpunk, Space, Desktop, and Mobile — refreshed daily from top-rated collections.</p>
+      </div>
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(255,138,155,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <h3>Smart Search</h3>
+        <p>Search millions of wallpapers with filters for sort, date range, category, and aspect ratio. Find exactly what you need.</p>
+      </div>
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(123,203,203,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Moodboard Collections</h3>
+        <p>Create named boards to organize your favorites. Add wallpapers with a tap, browse your curated collections anytime.</p>
+      </div>
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(242,200,121,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <h3>Download Vault</h3>
+        <p>Save wallpapers locally, browse your collection offline, and search by resolution or color. Set as wallpaper directly.</p>
+      </div>
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(123,140,255,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </div>
+        <h3>Gesture Controls</h3>
+        <p>Swipe down to close, tap to hide UI, double-tap to zoom. Designed to feel natural from the first touch.</p>
+      </div>
+      <div class="feat-card glass">
+        <div class="feat-icon" style="background:rgba(255,138,155,0.12);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3>Save Across Devices</h3>
+        <p>Sign in to sync your wishlist and moodboards across all your devices. Your collection, always with you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ GALLERY ============ -->
 <section id="gallery">
   <div class="wrap section-head">
-    <span class="eyebrow">Browsing</span>
-    <h2>Flipping through it should feel like a photo book, not a feed</h2>
-    <p>Every wallpaper gets a full-bleed swipe, a haptic snap when it lands, and a blurred copy of itself bleeding into the frame behind it. The seven category pills below are the real ones in the app.</p>
+    <span class="eyebrow">Browse</span>
+    <h2>Every wallpaper gets the full-screen treatment</h2>
+    <p>Swipe through collections like a photo book. Each wallpaper loads in full resolution with a blurred backdrop that matches its colors.</p>
   </div>
   <div class="gallery-strip">
     <article class="wp-card"><div class="art art-trending"></div><div class="veil"></div><div class="top-row"><span class="chip">Trending</span><span class="heart"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Trending</div><div class="res">3840 × 2160</div></div></article>
@@ -448,7 +500,7 @@
     <article class="wp-card"><div class="art art-desktop"></div><div class="veil"></div><div class="top-row"><span class="chip">Desktop</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Desktop</div><div class="res">2560 × 1600</div></div></article>
     <article class="wp-card"><div class="art art-mobile"></div><div class="veil"></div><div class="top-row"><span class="chip">Mobile</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Mobile</div><div class="res">1440 × 3200</div></div></article>
   </div>
-  <p class="gallery-note">Swipe or drag — this strip works with a trackpad, a wheel, or a thumb.</p>
+  <p class="gallery-note">Scroll horizontally — works with trackpad, mouse wheel, or thumb.</p>
 </section>
 
 <!-- ============ SCREEN TOUR ============ -->
@@ -456,8 +508,7 @@
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Inside the app</span>
-      <h2>Four stops, from first open to "set as wallpaper"</h2>
-      <p>Pulled straight from how the app is actually built — no invented feature list.</p>
+      <h2>From browsing to "set as wallpaper"</h2>
     </div>
 
     <div class="tour-row">
@@ -480,11 +531,11 @@
       </div>
       <div class="tour-text">
         <span class="step">01 — Discover</span>
-        <h3>Seven category pills, one grid that never restarts</h3>
-        <p>Trending, Anime, Nature, Cyberpunk, Space, Desktop and Mobile sit above a staggered masonry grid. Each tab loads on first visit and stays alive in the background — switch categories and come back, and your scroll position is exactly where you left it.</p>
+        <h3>Seven categories, one seamless grid</h3>
+        <p>Switch between Trending, Anime, Nature, Cyberpunk, Space, Desktop, and Mobile. Each tab loads once and stays alive in the background — come back to the exact scroll position you left.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Shimmer skeletons while a category loads</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap the active tab again to jump back to the top</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Smooth shimmer skeletons while content loads</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap the active tab to jump back to the top</li>
         </ul>
       </div>
     </div>
@@ -507,12 +558,12 @@
         </div></div>
       </div>
       <div class="tour-text">
-        <span class="step">02 — Detail</span>
-        <h3>The wallpaper sets the mood of its own screen</h3>
-        <p>Pinch to zoom, double-tap for a snappy 2.5x, and drag down past a quarter of the screen to close — or it springs back if you let go early. A blurred, tinted copy of the image fills the background, so the frame around it always matches what's inside it.</p>
+        <span class="step">02 — Full Screen</span>
+        <h3>Every wallpaper sets the mood</h3>
+        <p>Pinch to zoom, double-tap for a snappy 2.5x, and drag down to close. A blurred, color-matched backdrop fills the frame behind the image.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap once to hide the bars for a clean, full-screen look</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Specs card shows resolution, size, and the image's own palette</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap once to hide all UI for a clean view</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Specs card shows resolution, size, and color palette</li>
         </ul>
       </div>
     </div>
@@ -520,7 +571,7 @@
     <div class="tour-row">
       <div class="tour-mock">
         <div class="phone"><div class="notch"></div><div class="screen" style="background:var(--bg-1);">
-          <div class="m-vault-search glass">Search by resolution or ID</div>
+          <div class="m-vault-search glass">Search by resolution or name</div>
           <div class="m-vault-grid">
             <div class="tile art-nature"></div>
             <div class="tile art-desktop sel"><span class="check"></span></div>
@@ -530,12 +581,12 @@
         </div></div>
       </div>
       <div class="tour-text">
-        <span class="step">03 — Save it</span>
-        <h3>A wishlist, moodboards, and a Vault of your own</h3>
-        <p>Tap the heart to add something to your wishlist, or drop it into a named moodboard — both sync per account through Supabase. Every download also lands in the Vault, tracked locally, searchable by ID or resolution, with long-press multi-select for cleaning house.</p>
+        <span class="step">03 — Save</span>
+        <h3>Your personal collection</h3>
+        <p>Tap the heart to save favorites, or drop wallpapers into named moodboards. Every download lands in your Vault — searchable, organized, and ready to set as your background.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign-in is only asked for when you actually save something</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Swipe to delete, or select several at once</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign in only when you need to — browsing is free</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Swipe to delete, or select multiple at once</li>
         </ul>
       </div>
     </div>
@@ -552,12 +603,12 @@
         </div></div>
       </div>
       <div class="tour-text">
-        <span class="step">04 — Make it yours</span>
-        <h3>Crop, rotate, and set it without leaving the app</h3>
-        <p>The wallpaper editor lets you pan, zoom, and rotate in 90° steps before applying it directly to your device. Sharing overlays a small WALLBIZZ watermark and cleans up the temp file after. Settings covers dark mode, where downloads land (Pictures, Downloads, or app-only storage), and account.</p>
+        <span class="step">04 — Make It Yours</span>
+        <h3>Set it as your wallpaper in one tap</h3>
+        <p>Crop, rotate, and apply any wallpaper directly from the app. Share with a subtle watermark, or adjust your download location and theme in Settings.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Choose whether downloads survive an uninstall</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign in with email or Google, only when you need to</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Choose where downloads are saved</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign in with email or Google — only when you want to</li>
         </ul>
       </div>
     </div>
@@ -565,81 +616,29 @@
   </div>
 </section>
 
-<!-- ============ UNDER THE HOOD ============ -->
-<section id="stack" class="stack-section">
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how" class="how-section">
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">Under the hood</span>
-      <h2>The app never talks to Wallhaven directly for browsing</h2>
-      <p>A Go service syncs a fresh batch into Supabase twice a day. The Flutter client reads from Supabase; Wallhaven is only touched for live search, and NSFW queries route through the backend with your session attached.</p>
+      <span class="eyebrow">How it works</span>
+      <h2>Fresh wallpapers, delivered daily</h2>
+      <p>A curated pipeline keeps your feed updated with the best wallpapers from across the web — no stale content, no manual refresh needed.</p>
     </div>
 
     <div class="flow">
-      <div class="flow-node glass"><div class="k">Wallhaven API</div><div class="d">source of the wallpapers</div></div>
+      <div class="flow-node glass"><div class="k">Curated Sources</div><div class="d">top-rated wallpaper collections</div></div>
       <div class="flow-arrow"></div>
-      <div class="flow-node glass"><div class="k">Go + Fiber</div><div class="d">cron sync, twice a day</div></div>
+      <div class="flow-node glass"><div class="k">Daily Sync</div><div class="d">refreshed twice a day</div></div>
       <div class="flow-arrow"></div>
-      <div class="flow-node glass"><div class="k">Supabase</div><div class="d">Postgres, auth, row-level security</div></div>
-      <div class="flow-arrow"></div>
-      <div class="flow-node glass"><div class="k">Flutter client</div><div class="d">Web PWA + Android</div></div>
+      <div class="flow-node glass"><div class="k">Your Device</div><div class="d">browse, save, set wallpapers</div></div>
     </div>
 
-    <div class="stack-grid">
-      <div class="stack-cell"><div class="role">Client</div><div class="tech">Flutter 3, Dart 3.12</div></div>
-      <div class="stack-cell"><div class="role">Backend</div><div class="tech">Golang, Fiber, robfig/cron</div></div>
-      <div class="stack-cell"><div class="role">Database</div><div class="tech">Supabase (Postgres + PostgREST)</div></div>
-      <div class="stack-cell"><div class="role">Local storage</div><div class="tech">Hive</div></div>
-      <div class="stack-cell"><div class="role">Hosting</div><div class="tech">Render + static / Netlify</div></div>
-      <div class="stack-cell"><div class="role">License</div><div class="tech">MIT</div></div>
+    <div class="trust-grid">
+      <div class="trust-card glass"><b>No Ads</b><span>Enjoy wallpapers without interruptions</span></div>
+      <div class="trust-card glass"><b>No Tracking</b><span>Your browsing stays private</span></div>
+      <div class="trust-card glass"><b>Open Source</b><span>MIT licensed, transparent code</span></div>
+      <div class="trust-card glass"><b>Cross-Platform</b><span>Web PWA + Android</span></div>
     </div>
-
-    <div class="test-badges">
-      <div class="test-badge glass"><b>162</b><span>Flutter tests</span></div>
-      <div class="test-badge glass"><b>38</b><span>Go tests</span></div>
-      <div class="test-badge glass"><b>7</b><span>wallpaper categories</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ CHANGELOG ============ -->
-<section id="changelog">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Changelog</span>
-      <h2>What changed, and when</h2>
-      <p>Pulled from the repo's CHANGELOG.md and kept in sync with every tagged release.</p>
-    </div>
-    <ul class="changelog">
-      <li>
-        <div class="cl-head"><span class="cl-ver">v1.4.0</span><span class="cl-tag">Latest</span><span class="cl-date">2026-09-12</span></div>
-        <div class="cl-body">
-          <span>Android build failure on AGP 9.0 resolved — patched async_wallpaper in pub cache</span>
-          <span>Gradle JVM heap reduced from 8G to 4G to fix OOM on release builds</span>
-          <span>All 26 flutter analyze issues resolved, all 235 tests passing</span>
-          <span>CI/CD split-per-ABI APKs (ARM, ARM64, x86_64)</span>
-          <span>Removed deprecated builtInKotlin and newDsl Gradle flags</span>
-        </div>
-      </li>
-      <li>
-        <div class="cl-head"><span class="cl-ver">v1.3.0</span><span class="cl-date">2025-06-01</span></div>
-        <div class="cl-body">
-          <span>Swipeable wallpaper viewer — swipe left/right like a photo gallery</span>
-          <span>In-memory API response caching for faster load times</span>
-          <span>Update checker, in-app log viewer, recent searches</span>
-          <span>Wishlist CRUD, moodboard toggle, heart optimistic UI fixes</span>
-          <span>RepaintBoundary optimization for 60fps scrolling</span>
-        </div>
-      </li>
-      <li>
-        <div class="cl-head"><span class="cl-ver">v1.0.0</span><span class="cl-date">2024-12-01</span></div>
-        <div class="cl-body">
-          <span>Initial release — browse, search, download, set wallpapers</span>
-          <span>Supabase-backed wishlist and moodboards</span>
-          <span>Dark and light themes with glassmorphic UI</span>
-          <span>Gesture controls — swipe-down-to-go-back, double-tap-to-zoom</span>
-        </div>
-      </li>
-    </ul>
   </div>
 </section>
 
@@ -647,21 +646,23 @@
 <section id="download">
   <div class="wrap">
     <div class="download-card glass">
-      <span class="eyebrow">Get it</span>
-      <h2>Not on the Play Store — everything ships through GitHub</h2>
-      <p>Grab the latest Android build or browse every past release. F-Droid is next on the list; for now, GitHub Releases is the only distribution channel.</p>
+      <span class="eyebrow">Get Wallbizz</span>
+      <h2>Start browsing in seconds</h2>
+      <p>Try it instantly on the web — no download required. Or grab the Android app for the full native experience.</p>
       <div class="download-cta">
-        <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
-          Latest release
+        <a class="btn btn-primary" href="https://wallbizz.netlify.app" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+          Try on Web
         </a>
-        <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz/releases" target="_blank" rel="noopener">All releases</a>
+        <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+          Download APK
+        </a>
       </div>
-      <div class="version-tag">Current build <b>v1.4.0</b> — AGP 9.0 fixes, async_wallpaper patch, CI/CD</div>
+      <div class="version-tag">Latest <b>v1.4.0</b></div>
       <div class="platform-note">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Android</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Web PWA</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>F-Droid, coming soon</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Web — No install needed</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Android — Free APK download</span>
       </div>
     </div>
   </div>
@@ -673,18 +674,17 @@
     <div class="foot-row">
       <span class="foot-mark">WALLBIZZ</span>
       <div class="foot-links">
+        <a href="https://wallbizz.netlify.app" target="_blank" rel="noopener">Web App</a>
         <a href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://github.com/prit-007/wallbizz/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener">Architecture</a>
         <a href="https://github.com/prit-007/wallbizz/releases" target="_blank" rel="noopener">Releases</a>
         <a href="https://github.com/prit-007/wallbizz/blob/main/README.md#license" target="_blank" rel="noopener">MIT License</a>
       </div>
     </div>
-    <div class="foot-built">Built with Flutter, Go, and Supabase. Wallpapers courtesy of Wallhaven.</div>
+    <div class="foot-built">Wallpapers powered by the open-source community.</div>
   </div>
 </footer>
 
 <script>
-  // Mobile nav toggle
   const menuBtn = document.getElementById('menuBtn');
   const panel = document.getElementById('mobilePanel');
   menuBtn.addEventListener('click', () => {
@@ -696,7 +696,6 @@
     menuBtn.setAttribute('aria-expanded', 'false');
   }));
 
-  // Subtle hero glow parallax on pointer move (desktop only, one orchestrated moment)
   const glow = document.getElementById('heroGlow');
   const supportsHover = window.matchMedia('(hover:hover)').matches;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -707,30 +706,6 @@
       glow.style.transform = `translate(${x}px, ${y}px)`;
     });
   }
-
-  // Fetch latest GitHub release and update download links
-  (async () => {
-    try {
-      const res = await fetch('https://api.github.com/repos/prit-007/wallbizz/releases/latest');
-      if (!res.ok) return;
-      const release = await res.json();
-      const tag = release.tag_name || '';
-      const name = release.name || tag;
-      const apk = (release.assets || []).find(a => a.name && a.name.endsWith('.apk'));
-      const dlBtn = document.querySelector('.download-cta .btn-primary');
-      const verTag = document.querySelector('.version-tag b');
-
-      if (dlBtn) {
-        if (apk) {
-          dlBtn.href = apk.browser_download_url;
-          dlBtn.querySelector('svg').nextSibling.textContent = 'Download ' + apk.name.replace('-release.apk', '');
-        } else {
-          dlBtn.href = release.html_url;
-        }
-      }
-      if (verTag) verTag.textContent = tag || name;
-    } catch (e) { /* silent — fallback links already in HTML */ }
-  })();
 </script>
 </body>
 </html>
