@@ -60,7 +60,8 @@ func main() {
 	}))
 
 	v1 := app.Group("/api/v1")
-	v1.Post("/sync", handlers.TriggerSync(cfg))
+	v1.Post("/sync", handlers.RequireCronSecret(cfg), handlers.TriggerSync(cfg))
+	v1.Post("/cleanup", handlers.RequireCronSecret(cfg), handlers.TriggerCleanup(cfg))
 	v1.Get("/search", handlers.SearchProxy(cfg))
 	v1.Get("/proxy-image", handlers.ProxyImage())
 	v1.Get("/health", handlers.HealthCheck())

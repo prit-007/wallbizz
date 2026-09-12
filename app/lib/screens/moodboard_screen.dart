@@ -10,6 +10,7 @@ import '../models/wallpaper.dart';
 import '../services/supabase_service.dart';
 import '../widgets/network_image.dart';
 import 'wallpaper_swiper_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MoodboardScreen extends StatefulWidget {
   final Moodboard moodboard;
@@ -109,8 +110,94 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
       );
       if (success && mounted) {
         SupabaseService.moodboardNotifier.value++;
+      } else if (!success && mounted) {
+        setState(() {
+          _items.insert(index, wallpaper);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to remove from moodboard',
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'DELETE MOODBOARD?',
+          style: GoogleFonts.oswald(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
+        content: Text(
+          'This will permanently delete "${widget.moodboard.name}" and all its wallpapers. This action cannot be undone.',
+          style: GoogleFonts.inter(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'CANCEL',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final user = Supabase.instance.client.auth.currentUser;
+              if (user == null) return;
+              final success = await SupabaseService.instance.deleteMoodboard(
+                widget.moodboard.id,
+              );
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Moodboard deleted',
+                      style: GoogleFonts.inter(color: Colors.white),
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                Navigator.pop(context);
+              } else if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Failed to delete moodboard',
+                      style: GoogleFonts.inter(color: Colors.white),
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            child: Text(
+              'DELETE',
+              style: GoogleFonts.inter(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -199,6 +286,25 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                         fontWeight: FontWeight.bold,
                         color: cs.primary,
                         letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => _confirmDelete(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.redAccent.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.delete_outline_rounded,
+                        size: 18,
+                        color: Colors.redAccent,
                       ),
                     ),
                   ),

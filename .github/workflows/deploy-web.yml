@@ -1,0 +1,80 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: stable
+
+      - name: Setup env
+        working-directory: app
+        run: |
+          cat > .env << EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          BACKEND_URL=${{ secrets.BACKEND_URL }}
+          EOF
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Build Flutter web
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Prepare deploy directory
+        run: |
+          mkdir -p /tmp/pages-deploy/app
+
+          # Flutter output → /app/
+          cp -r app/build/web/* /tmp/pages-deploy/app/
+
+          # Landing page from gh-pages branch → /root
+          git fetch origin gh-pages
+          git show origin gh-pages:index.html > /tmp/pages-deploy/index.html
+
+          # Ensure /app/ has its own index.html (Flutter already puts one there)
+          # but we need to fix the base href from / to /wallbizz/app/
+          sed -i 's|<base href="/"|<base href="/wallbizz/app/"|g' /tmp/pages-deploy/app/index.html
+
+          # Also fix any absolute paths in manifest.json
+          if [ -f /tmp/pages-deploy/app/manifest.json ]; then
+            sed -i 's|"/"|"/wallbizz/app/"|g' /tmp/pages-deploy/app/manifest.json
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/pages-deploy
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

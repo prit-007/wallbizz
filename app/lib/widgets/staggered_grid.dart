@@ -40,6 +40,18 @@ class _StaggeredGridState extends State<StaggeredGrid> {
     _loadWallpapers();
     _loadWishlist();
     _scrollController.addListener(_onScroll);
+    SupabaseService.wishlistNotifier.addListener(_onWishlistChanged);
+  }
+
+  @override
+  void dispose() {
+    SupabaseService.wishlistNotifier.removeListener(_onWishlistChanged);
+    if (widget.scrollController == null) _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onWishlistChanged() {
+    _loadWishlist();
   }
 
   @override
@@ -66,9 +78,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
     WallpaperActions.handleHeartTap(
       context,
       wallpaper,
-      onComplete: () {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user == null) return;
+      onToggle: () {
         setState(() {
           if (_wishlistedIds.contains(wallpaper.id)) {
             _wishlistedIds.remove(wallpaper.id);
@@ -76,15 +86,9 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             _wishlistedIds.add(wallpaper.id);
           }
         });
-        SupabaseService.wishlistNotifier.value++;
       },
+      onComplete: () => SupabaseService.wishlistNotifier.value++,
     );
-  }
-
-  @override
-  void dispose() {
-    if (widget.scrollController == null) _scrollController.dispose();
-    super.dispose();
   }
 
   void _resetAndLoad() {

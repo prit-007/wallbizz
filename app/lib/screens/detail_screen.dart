@@ -97,10 +97,8 @@ class _DetailScreenState extends State<DetailScreen>
     WallpaperActions.handleHeartTap(
       context,
       wallpaper,
-      onComplete: () {
-        setState(() => _isWishlisted = !_isWishlisted);
-        SupabaseService.wishlistNotifier.value++;
-      },
+      onToggle: () => setState(() => _isWishlisted = !_isWishlisted),
+      onComplete: () => SupabaseService.wishlistNotifier.value++,
     );
   }
 

@@ -289,7 +289,13 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
   Future<void> _createMoodboard(String name) async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
-    await SupabaseService.instance.createMoodboard(user.id, name);
+    final board = await SupabaseService.instance.createMoodboard(user.id, name);
+    if (board != null) {
+      await SupabaseService.instance.addToMoodboard(
+        board.id,
+        widget.wallpaperId,
+      );
+    }
     if (mounted) _load();
   }
 }
