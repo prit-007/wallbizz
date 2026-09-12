@@ -359,6 +359,20 @@
   .foot-links a:hover{ color:var(--text); }
   .foot-built{ font-size:0.8rem; color:var(--text-faint); margin-top:18px; }
 
+  /* ============ Changelog ============ */
+  .changelog{ list-style:none; }
+  .changelog li{
+    padding:28px 0; border-top:1px solid var(--border-soft);
+  }
+  .changelog li:first-child{ border-top:none; padding-top:0; }
+  .cl-head{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  .cl-ver{ font-family:var(--display); font-size:1.3rem; }
+  .cl-date{ font-size:0.82rem; color:var(--text-faint); }
+  .cl-tag{ font-size:0.68rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:3px 9px; border-radius:100px; color:#0A0A18; background:var(--indigo); }
+  .cl-body{ margin-top:14px; display:flex; flex-direction:column; gap:6px; }
+  .cl-body span{ font-size:0.9rem; color:var(--text-muted); display:flex; gap:8px; align-items:flex-start; }
+  .cl-body span::before{ content:''; flex-shrink:0; width:5px; height:5px; border-radius:50%; background:var(--indigo-dim); margin-top:7px; }
+
 </style>
 </head>
 <body>
@@ -371,6 +385,7 @@
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#screens">Inside the app</a></li>
       <li><a href="#stack">Under the hood</a></li>
+      <li><a href="#changelog">Changelog</a></li>
       <li><a href="#download">Download</a></li>
     </ul>
     <div class="nav-cta">
@@ -388,6 +403,7 @@
   <a href="#gallery">Gallery</a>
   <a href="#screens">Inside the app</a>
   <a href="#stack">Under the hood</a>
+  <a href="#changelog">Changelog</a>
   <a href="#download">Download</a>
   <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">View on GitHub</a>
 </div>
@@ -585,6 +601,48 @@
   </div>
 </section>
 
+<!-- ============ CHANGELOG ============ -->
+<section id="changelog">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Changelog</span>
+      <h2>What changed, and when</h2>
+      <p>Pulled from the repo's CHANGELOG.md and kept in sync with every tagged release.</p>
+    </div>
+    <ul class="changelog">
+      <li>
+        <div class="cl-head"><span class="cl-ver">v1.4.0</span><span class="cl-tag">Latest</span><span class="cl-date">2026-09-12</span></div>
+        <div class="cl-body">
+          <span>Android build failure on AGP 9.0 resolved — patched async_wallpaper in pub cache</span>
+          <span>Gradle JVM heap reduced from 8G to 4G to fix OOM on release builds</span>
+          <span>All 26 flutter analyze issues resolved, all 235 tests passing</span>
+          <span>CI/CD split-per-ABI APKs (ARM, ARM64, x86_64)</span>
+          <span>Removed deprecated builtInKotlin and newDsl Gradle flags</span>
+        </div>
+      </li>
+      <li>
+        <div class="cl-head"><span class="cl-ver">v1.3.0</span><span class="cl-date">2025-06-01</span></div>
+        <div class="cl-body">
+          <span>Swipeable wallpaper viewer — swipe left/right like a photo gallery</span>
+          <span>In-memory API response caching for faster load times</span>
+          <span>Update checker, in-app log viewer, recent searches</span>
+          <span>Wishlist CRUD, moodboard toggle, heart optimistic UI fixes</span>
+          <span>RepaintBoundary optimization for 60fps scrolling</span>
+        </div>
+      </li>
+      <li>
+        <div class="cl-head"><span class="cl-ver">v1.0.0</span><span class="cl-date">2024-12-01</span></div>
+        <div class="cl-body">
+          <span>Initial release — browse, search, download, set wallpapers</span>
+          <span>Supabase-backed wishlist and moodboards</span>
+          <span>Dark and light themes with glassmorphic UI</span>
+          <span>Gesture controls — swipe-down-to-go-back, double-tap-to-zoom</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
 <!-- ============ DOWNLOAD ============ -->
 <section id="download">
   <div class="wrap">
@@ -649,6 +707,30 @@
       glow.style.transform = `translate(${x}px, ${y}px)`;
     });
   }
+
+  // Fetch latest GitHub release and update download links
+  (async () => {
+    try {
+      const res = await fetch('https://api.github.com/repos/prit-007/wallbizz/releases/latest');
+      if (!res.ok) return;
+      const release = await res.json();
+      const tag = release.tag_name || '';
+      const name = release.name || tag;
+      const apk = (release.assets || []).find(a => a.name && a.name.endsWith('.apk'));
+      const dlBtn = document.querySelector('.download-cta .btn-primary');
+      const verTag = document.querySelector('.version-tag b');
+
+      if (dlBtn) {
+        if (apk) {
+          dlBtn.href = apk.browser_download_url;
+          dlBtn.querySelector('svg').nextSibling.textContent = 'Download ' + apk.name.replace('-release.apk', '');
+        } else {
+          dlBtn.href = release.html_url;
+        }
+      }
+      if (verTag) verTag.textContent = tag || name;
+    } catch (e) { /* silent — fallback links already in HTML */ }
+  })();
 </script>
 </body>
 </html>
