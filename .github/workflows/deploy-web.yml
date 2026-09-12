@@ -20,20 +20,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.x'
+          flutter-version: '3.44.8'
           channel: stable
 
       - name: Setup env
         working-directory: app
         run: |
-          cat > .env << EOF
+          cat > .env << ENVEOF
           SUPABASE_URL=${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
           BACKEND_URL=${{ secrets.BACKEND_URL }}
-          EOF
+          ENVEOF
 
       - name: Install dependencies
         working-directory: app
@@ -47,18 +49,17 @@ jobs:
         run: |
           mkdir -p /tmp/pages-deploy/app
 
-          # Flutter output → /app/
+          # Flutter output to /app/
           cp -r app/build/web/* /tmp/pages-deploy/app/
 
-          # Landing page from gh-pages branch → /root
-          git fetch origin gh-pages
-          git show origin gh-pages:index.html > /tmp/pages-deploy/index.html
+          # Fetch gh-pages branch and extract landing page
+          git fetch origin gh-pages:gh-pages
+          git show gh-pages:index.html > /tmp/pages-deploy/index.html
 
-          # Ensure /app/ has its own index.html (Flutter already puts one there)
-          # but we need to fix the base href from / to /wallbizz/app/
+          # Fix base href for Flutter subdirectory
           sed -i 's|<base href="/"|<base href="/wallbizz/app/"|g' /tmp/pages-deploy/app/index.html
 
-          # Also fix any absolute paths in manifest.json
+          # Fix manifest.json paths
           if [ -f /tmp/pages-deploy/app/manifest.json ]; then
             sed -i 's|"/"|"/wallbizz/app/"|g' /tmp/pages-deploy/app/manifest.json
           fi
