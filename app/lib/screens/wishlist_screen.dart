@@ -144,6 +144,21 @@ class _WishlistScreenState extends State<WishlistScreen> {
       );
       if (success && mounted) {
         SupabaseService.wishlistNotifier.value++;
+      } else if (!success && mounted) {
+        setState(() {
+          _wishlist.insert(index, wallpaper);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Failed to remove from collection',
+                style: GoogleFonts.inter(color: Colors.white),
+              ),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     }
   }
@@ -316,8 +331,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                     size: 26,
                                   ),
                                 ),
-                                onDismissed: (_) =>
-                                    _removeItemOptimistically(index, wallpaper),
+                                onDismissed: (_) {
+                                  final idx = _wishlist.indexWhere(
+                                    (w) => w.id == wallpaper.id,
+                                  );
+                                  if (idx >= 0) {
+                                    _removeItemOptimistically(idx, wallpaper);
+                                  }
+                                },
                                 child: GestureDetector(
                                   onTap: () {
                                     final index = _wishlist.indexWhere(
@@ -679,57 +700,125 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final board = _boards[index];
-                      return GestureDetector(
-                            onTap: () => widget.onSelect(board),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
+                      return Dismissible(
+                            key: Key(board.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                color: Colors.redAccent.withValues(alpha: 0.85),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: v.glassBorder.withValues(alpha: 0.15),
-                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.dashboard_customize_rounded,
-                                    color: cs.primary,
-                                    size: 22,
+                              child: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                            confirmDismiss: (_) async {
+                              return await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          board.name,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600,
-                                            color: cs.onSurface,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${board.itemCount} items',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12,
-                                            color: v.onSurfaceSubtle,
-                                          ),
-                                        ),
-                                      ],
+                                  title: Text(
+                                    'DELETE MOODBOARD?',
+                                    style: GoogleFonts.oswald(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1,
                                     ),
                                   ),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: v.onSurfaceSubtle,
-                                    size: 14,
+                                  content: Text(
+                                    'Delete "${board.name}" and all its wallpapers?',
+                                    style: GoogleFonts.inter(fontSize: 14),
                                   ),
-                                ],
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: Text(
+                                        'CANCEL',
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: Text(
+                                        'DELETE',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            onDismissed: (_) async {
+                              await SupabaseService.instance.deleteMoodboard(
+                                board.id,
+                              );
+                              setState(() => _boards.removeAt(index));
+                            },
+                            child: GestureDetector(
+                              onTap: () => widget.onSelect(board),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: v.glassBorder.withValues(alpha: 0.15),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.dashboard_customize_rounded,
+                                      color: cs.primary,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            board.name,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: cs.onSurface,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${board.itemCount} items',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color: v.onSurfaceSubtle,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      color: v.onSurfaceSubtle,
+                                      size: 14,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           )

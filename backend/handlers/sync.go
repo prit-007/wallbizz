@@ -44,6 +44,13 @@ func FetchAndSyncWallpapers(cfg config.Config) {
 	}
 
 	log.Info().Msg("All categories synced successfully")
+
+	log.Info().Msg("Running cleanup of old wallpapers")
+	if _, err := CleanupOldWallpapers(cfg); err != nil {
+		log.Error().Err(err).Msg("Cleanup failed after sync")
+	} else {
+		log.Info().Msg("Cleanup completed successfully")
+	}
 }
 
 func fetchCategory(cfg config.Config, category, extraParams string) int {

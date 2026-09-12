@@ -1,0 +1,106 @@
+name: Build Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.4.0)'
+        required: false
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Extract version
+        id: version
+        shell: pwsh
+        run: |
+          $pubspec = Get-Content pubspec.yaml -Raw
+          if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
+            $version = $Matches[1]
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "Resolved version: $version"
+          } else {
+            echo "Could not parse version from pubspec.yaml"
+            exit 1
+          }
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build installer
+        run: dart run tool/build_installer.dart --iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
+      - name: Verify artifacts
+        shell: pwsh
+        run: |
+          $releaseDir = "build\windows\x64\runner\Release"
+          $exe = "$releaseDir\vivek_app.exe"
+          if (-not (Test-Path $exe)) {
+            echo "Build output not found: $exe"
+            exit 1
+          }
+
+          $installer = "build\installers\wallbizz_setup_${{ steps.version.outputs.version }}.exe"
+          if (-not (Test-Path $installer)) {
+            echo "Installer not found: $installer"
+            exit 1
+          }
+          echo "All artifacts verified"
+
+      - name: Create ZIP artifact
+        shell: pwsh
+        run: |
+          $releaseDir = "build\windows\x64\runner\Release"
+          $zipName = "wallbizz-windows-v${{ steps.version.outputs.version }}.zip"
+          Compress-Archive -Path "$releaseDir\*" -DestinationPath $zipName
+          echo "Created $zipName"
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallbizz-windows
+          path: app/wallbizz-windows-v*.zip
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallbizz-installer
+          path: app/build/installers/wallbizz_setup_*.exe
+
+  release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            wallbizz-windows/wallbizz-windows-v*.zip
+            wallbizz-installer/wallbizz_setup_*.exe
+          generate_release_notes: true

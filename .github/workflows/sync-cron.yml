@@ -1,0 +1,29 @@
+name: Sync Wallpapers
+
+on:
+  schedule:
+    - cron: '0 2,14 * * *'  # 2 AM and 2 PM UTC daily
+  workflow_dispatch:         # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sync
+        run: |
+          curl -sf -X POST "${{ secrets.BACKEND_URL }}/api/v1/sync" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" || {
+            echo "Sync trigger failed"
+            exit 1
+          }
+          echo "Sync triggered successfully"
+
+      - name: Wait for sync to complete
+        run: sleep 30
+
+      - name: Verify health
+        run: |
+          curl -sf "${{ secrets.BACKEND_URL }}/api/v1/health" || {
+            echo "Health check failed"
+            exit 1
+          }

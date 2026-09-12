@@ -180,10 +180,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
     WallpaperActions.handleHeartTap(
       context,
       _currentWallpaper,
-      onComplete: () {
-        setState(() => _isWishlisted = !_isWishlisted);
-        SupabaseService.wishlistNotifier.value++;
-      },
+      onToggle: () => setState(() => _isWishlisted = !_isWishlisted),
+      onComplete: () => SupabaseService.wishlistNotifier.value++,
     );
   }
 

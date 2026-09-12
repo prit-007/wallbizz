@@ -11,6 +11,7 @@ class WallpaperActions {
   static void handleHeartTap(
     BuildContext context,
     Wallpaper wallpaper, {
+    VoidCallback? onToggle,
     VoidCallback? onComplete,
   }) {
     if (_isProcessing) return;
@@ -28,6 +29,7 @@ class WallpaperActions {
       return;
     }
 
+    onToggle?.call();
     _toggleWishlist(context, user.id, wallpaper, onComplete);
   }
 
@@ -88,7 +90,14 @@ class WallpaperActions {
   static void onAuthSuccess() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null && _pendingWallpaper != null) {
+      final wp = _pendingWallpaper!;
       _pendingWallpaper = null;
+      _isProcessing = true;
+      SupabaseService.instance.addToWishlist(user.id, wp.id).then((_) {
+        _isProcessing = false;
+      }).catchError((_) {
+        _isProcessing = false;
+      });
     }
   }
 }

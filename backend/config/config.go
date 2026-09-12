@@ -12,6 +12,7 @@ type Config struct {
 	SupabaseURL        string
 	SupabaseServiceKey string
 	WallhavenAPIKey    string
+	CronSecret         string
 	LogLevel           string
 }
 
@@ -25,6 +26,7 @@ func LoadConfig() Config {
 		SupabaseURL:        os.Getenv("SUPABASE_URL"),
 		SupabaseServiceKey: os.Getenv("SUPABASE_SERVICE_KEY"),
 		WallhavenAPIKey:    os.Getenv("WALLHAVEN_API_KEY"),
+		CronSecret:         os.Getenv("CRON_SECRET"),
 		LogLevel:           getEnv("LOG_LEVEL", "info"),
 	}
 
