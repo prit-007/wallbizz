@@ -18,7 +18,7 @@ jobs:
         working-directory: app
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -78,13 +78,13 @@ jobs:
           echo "Created $zipName"
 
       - name: Upload ZIP
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wallbizz-windows
           path: app/wallbizz-windows-v*.zip
 
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wallbizz-installer
           path: app/build/installers/wallbizz_setup_*.exe
@@ -96,7 +96,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
 
       - name: Create release
         uses: softprops/action-gh-release@v2
