@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/logger/logger.dart';
 import '../models/wallpaper.dart';
 import '../services/wallhaven_search.dart';
 import '../widgets/wallpaper_card.dart';
@@ -141,6 +142,10 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() => _isLoading = true);
+    logInfo(
+      'Searching: "$query" purity=$_purity sort=$_sorting page=${_page + 1}',
+      domain: LogDomain.search,
+    );
 
     SearchResult result;
     if (needsAuth) {
@@ -183,6 +188,14 @@ class _SearchScreenState extends State<SearchScreen> {
         _lastPage = result.lastPage;
         _isLoading = false;
       });
+      if (result.error != null) {
+        logError('Search error: ${result.error}', domain: LogDomain.search);
+      } else {
+        logInfo(
+          'Search results: ${result.wallpapers.length} wallpapers, page ${result.currentPage}/${result.lastPage}',
+          domain: LogDomain.search,
+        );
+      }
     }
   }
 

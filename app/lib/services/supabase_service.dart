@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
+import '../core/logger/logger.dart';
 import '../models/moodboard.dart';
 import '../models/wallpaper.dart';
 import 'api_cache.dart';
@@ -47,6 +48,7 @@ class SupabaseService {
     final cacheKey = 'wallpapers:${category ?? 'all'}:$page';
     final cached = ApiCache.get(cacheKey);
     if (cached != null) {
+      logDebug('Wallpapers cache hit: $cacheKey', domain: LogDomain.sync);
       final List<dynamic> data = json.decode(cached);
       return data.map((map) => Wallpaper.fromMap(map)).toList();
     }
@@ -60,6 +62,10 @@ class SupabaseService {
     }
 
     final url = Uri.parse('$_baseUrl/rest/v1/wallpapers?$query');
+    logDebug(
+      'Fetching wallpapers: $category page=$page',
+      domain: LogDomain.sync,
+    );
     final response = await http.get(
       url,
       headers: {..._headers, 'Range': '$from-$to'},
@@ -68,9 +74,17 @@ class SupabaseService {
     if (response.statusCode == 200) {
       ApiCache.set(cacheKey, response.body, const Duration(minutes: 3));
       final List<dynamic> data = json.decode(response.body);
+      logDebug(
+        'Fetched ${data.length} wallpapers ($category page=$page)',
+        domain: LogDomain.sync,
+      );
       return data.map((map) => Wallpaper.fromMap(map)).toList();
     }
 
+    logWarning(
+      'Failed to fetch wallpapers: ${response.statusCode}',
+      domain: LogDomain.sync,
+    );
     return [];
   }
 
@@ -102,6 +116,7 @@ class SupabaseService {
 
   Future<bool> addToWishlist(String userId, String wallpaperId) async {
     final url = Uri.parse('$_baseUrl/rest/v1/wishlists');
+    logInfo('Adding to wishlist: $wallpaperId', domain: LogDomain.auth);
     final response = await http.post(
       url,
       headers: _authHeaders,
@@ -109,7 +124,15 @@ class SupabaseService {
     );
 
     final success = response.statusCode == 201 || response.statusCode == 200;
-    if (success) ApiCache.invalidatePrefix('wishlist:$userId');
+    if (success) {
+      ApiCache.invalidatePrefix('wishlist:$userId');
+      logInfo('Added to wishlist: $wallpaperId', domain: LogDomain.auth);
+    } else {
+      logError(
+        'Failed to add to wishlist: ${response.statusCode}',
+        domain: LogDomain.auth,
+      );
+    }
     return success;
   }
 
@@ -117,10 +140,19 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId',
     );
+    logInfo('Removing from wishlist: $wallpaperId', domain: LogDomain.auth);
     final response = await http.delete(url, headers: _authHeaders);
 
     final success = response.statusCode == 200 || response.statusCode == 204;
-    if (success) ApiCache.invalidatePrefix('wishlist:$userId');
+    if (success) {
+      ApiCache.invalidatePrefix('wishlist:$userId');
+      logInfo('Removed from wishlist: $wallpaperId', domain: LogDomain.auth);
+    } else {
+      logError(
+        'Failed to remove from wishlist: ${response.statusCode}',
+        domain: LogDomain.auth,
+      );
+    }
     return success;
   }
 
@@ -166,6 +198,7 @@ class SupabaseService {
 
   Future<Moodboard?> createMoodboard(String userId, String name) async {
     final url = Uri.parse('$_baseUrl/rest/v1/moodboards');
+    logInfo('Creating moodboard: $name', domain: LogDomain.general);
     final response = await http.post(
       url,
       headers: _authHeaders,
@@ -175,27 +208,42 @@ class SupabaseService {
     if (response.statusCode == 201) {
       moodboardNotifier.value++;
       ApiCache.invalidatePrefix('moodboards:$userId');
+      logInfo('Created moodboard: $name', domain: LogDomain.general);
       return Moodboard.fromJson(json.decode(response.body));
     }
 
+    logError(
+      'Failed to create moodboard: ${response.statusCode}',
+      domain: LogDomain.general,
+    );
     return null;
   }
 
   Future<bool> deleteMoodboard(String moodboardId) async {
     final url = Uri.parse('$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId');
+    logInfo('Deleting moodboard: $moodboardId', domain: LogDomain.general);
     final response = await http.delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       moodboardNotifier.value++;
       ApiCache.invalidatePrefix('moodboards:');
+      logInfo('Deleted moodboard: $moodboardId', domain: LogDomain.general);
       return true;
     }
 
+    logError(
+      'Failed to delete moodboard: ${response.statusCode}',
+      domain: LogDomain.general,
+    );
     return false;
   }
 
   Future<bool> addToMoodboard(String moodboardId, String wallpaperId) async {
     final url = Uri.parse('$_baseUrl/rest/v1/moodboard_items');
+    logInfo(
+      'Adding to moodboard: $moodboardId <- $wallpaperId',
+      domain: LogDomain.general,
+    );
     final response = await http.post(
       url,
       headers: _authHeaders,
@@ -210,6 +258,10 @@ class SupabaseService {
       ApiCache.invalidatePrefix('moodboard_items:$moodboardId');
       return true;
     }
+    logError(
+      'Failed to add to moodboard: ${response.statusCode}',
+      domain: LogDomain.general,
+    );
     return false;
   }
 
@@ -220,6 +272,10 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$wallpaperId',
     );
+    logInfo(
+      'Removing from moodboard: $moodboardId <- $wallpaperId',
+      domain: LogDomain.general,
+    );
     final response = await http.delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
@@ -227,6 +283,10 @@ class SupabaseService {
       ApiCache.invalidatePrefix('moodboard_items:$moodboardId');
       return true;
     }
+    logError(
+      'Failed to remove from moodboard: ${response.statusCode}',
+      domain: LogDomain.general,
+    );
     return false;
   }
 

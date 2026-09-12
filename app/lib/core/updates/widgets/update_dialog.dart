@@ -28,10 +28,8 @@ class UpdateDialog extends StatefulWidget {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => UpdateDialog(
-        updateInfo: info,
-        currentVersion: currentVersion,
-      ),
+      builder: (_) =>
+          UpdateDialog(updateInfo: info, currentVersion: currentVersion),
     );
   }
 
