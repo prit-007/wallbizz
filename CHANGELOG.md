@@ -4,6 +4,20 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.6] - 2026-09-12
+
+### Fixed
+- Renamed `vivek_app` → `wallbizz` across all files (pubspec, CMake, tests, runner, installer)
+- Windows download crash — `MissingPluginException: getGalleryPath` on desktop platforms
+- Swipe left (previous) not working in wallpaper swiper — `InteractiveViewer` gesture conflict
+- Hardcoded `v1.1.0` in settings and update dialog — now reads from `PackageInfo`
+- Windows DLLs exposed as individual CI artifacts — now zipped before upload
+- Folder name `VivekWallpapers` → `Wallbizz`
+
+### Added
+- Logging to main init, download service, and wishlist toggle operations
+- `currentVersion` parameter in `UpdateDialog` for accurate version display
+
 ## [1.4.5] - 2026-09-12
 
 ### Added
