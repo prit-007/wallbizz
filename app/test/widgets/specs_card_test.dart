@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vivek_app/widgets/specs_card.dart';
-import 'package:vivek_app/models/wallpaper.dart';
+import 'package:wallbizz/widgets/specs_card.dart';
+import 'package:wallbizz/models/wallpaper.dart';
 
 Wallpaper _makeWallpaper({
   String resolution = '3840x2160',

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/config/scroll_config.dart';
+import 'package:wallbizz/config/scroll_config.dart';
 
 void main() {
   group('WallbizzScrollBehavior', () {

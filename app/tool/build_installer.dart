@@ -12,11 +12,11 @@ import 'dart:io';
 ///   --iscc     Absolute path to ISCC.exe when it is not resolvable from PATH.
 
 const _publisher = "Wallbizz";
-const _homeUrl = 'https://github.com/prit-007/vivek_app';
+const _homeUrl = 'https://github.com/prit-007/wallbizz';
 const _appId = '{{a3b1c4d5-e6f7-4890-ab12-cd34ef56ab78}}';
 
 const _releaseDir = 'build/windows/x64/runner/Release';
-const _exeName = 'vivek_app.exe';
+const _exeName = 'wallbizz.exe';
 const _iconPath = 'windows/runner/resources/app_icon.ico';
 const _outputDir = 'build/installers';
 

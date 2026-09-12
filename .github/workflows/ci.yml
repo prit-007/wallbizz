@@ -171,11 +171,15 @@ jobs:
       - name: Build Windows
         working-directory: app
         run: flutter build windows --release
+      - name: Zip Windows build
+        working-directory: app
+        shell: pwsh
+        run: Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "windows-build.zip"
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: app/build/windows/x64/runner/Release
+          path: app/windows-build.zip
 
   build-web:
     needs: [backend, analyze-and-test]

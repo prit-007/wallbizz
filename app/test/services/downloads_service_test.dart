@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:vivek_app/models/downloaded_wallpaper.dart';
-import 'package:vivek_app/services/downloads_service.dart';
+import 'package:wallbizz/models/downloaded_wallpaper.dart';
+import 'package:wallbizz/services/downloads_service.dart';
 
 DownloadedWallpaper _makeDownload({
   String id = 'wp1',

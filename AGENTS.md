@@ -3,7 +3,7 @@
 ## Structure
 
 ```
-vivek_app/
+wallbizz/
 ├── backend/            # Go (Fiber) cron sync + search/image proxy
 │   ├── main.go         # Entry: Fiber + robfig/cron + routes
 │   ├── config/         # Env loading (godotenv) + validation

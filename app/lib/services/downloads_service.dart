@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:hive/hive.dart';
+import '../core/logger/logger.dart';
 import '../models/downloaded_wallpaper.dart';
 import '../models/wallpaper.dart';
 import 'download_service.dart';
@@ -10,41 +11,59 @@ class DownloadsService {
   static Box get _box => Hive.box(_boxName);
 
   static Future<void> downloadAndSave(Wallpaper wallpaper) async {
-    final targetDir = await GalleryService.getTargetDirectory();
-    final dir = Directory(targetDir);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
+    logInfo(
+      'Starting download: ${wallpaper.wallhavenId}',
+      domain: LogDomain.download,
+    );
+    try {
+      final targetDir = await GalleryService.getTargetDirectory();
+      final dir = Directory(targetDir);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+
+      final fileName = '${wallpaper.wallhavenId}.jpg';
+
+      final filePath = await DownloadService.downloadImage(
+        imageUrl: wallpaper.urlFull,
+        fileName: fileName,
+        savePath: targetDir,
+      );
+
+      await GalleryService.saveToGallery(
+        sourcePath: filePath,
+        fileName: fileName,
+      );
+
+      final record = DownloadedWallpaper(
+        wallhavenId: wallpaper.wallhavenId,
+        localPath: filePath,
+        urlFull: wallpaper.urlFull,
+        urlThumb: wallpaper.urlThumb,
+        sourceQuery: wallpaper.sourceQuery,
+        category: wallpaper.category,
+        primaryColor: wallpaper.primaryColor,
+        resolution: wallpaper.resolution,
+        width: wallpaper.width,
+        height: wallpaper.height,
+        fileSize: wallpaper.fileSize,
+        downloadedAt: DateTime.now(),
+      );
+
+      await _box.put(wallpaper.wallhavenId, record.toMap());
+      logInfo(
+        'Download complete: ${wallpaper.wallhavenId}',
+        domain: LogDomain.download,
+      );
+    } catch (e, st) {
+      logError(
+        'Download failed: ${wallpaper.wallhavenId}',
+        error: e,
+        stackTrace: st,
+        domain: LogDomain.download,
+      );
+      rethrow;
     }
-
-    final fileName = '${wallpaper.wallhavenId}.jpg';
-
-    final filePath = await DownloadService.downloadImage(
-      imageUrl: wallpaper.urlFull,
-      fileName: fileName,
-      savePath: targetDir,
-    );
-
-    await GalleryService.saveToGallery(
-      sourcePath: filePath,
-      fileName: fileName,
-    );
-
-    final record = DownloadedWallpaper(
-      wallhavenId: wallpaper.wallhavenId,
-      localPath: filePath,
-      urlFull: wallpaper.urlFull,
-      urlThumb: wallpaper.urlThumb,
-      sourceQuery: wallpaper.sourceQuery,
-      category: wallpaper.category,
-      primaryColor: wallpaper.primaryColor,
-      resolution: wallpaper.resolution,
-      width: wallpaper.width,
-      height: wallpaper.height,
-      fileSize: wallpaper.fileSize,
-      downloadedAt: DateTime.now(),
-    );
-
-    await _box.put(wallpaper.wallhavenId, record.toMap());
   }
 
   static List<DownloadedWallpaper> getDownloads({String? searchQuery}) {

@@ -240,7 +240,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           transformationController: _transformController,
                           minScale: 1.0,
                           maxScale: 5.0,
-                          panEnabled: true,
+                          panEnabled: false,
                           scaleEnabled: true,
                           child: Center(
                             child: Hero(

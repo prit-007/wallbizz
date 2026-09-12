@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/utils/color_utils.dart';
+import 'package:wallbizz/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 void main() {

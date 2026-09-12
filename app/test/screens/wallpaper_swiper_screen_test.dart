@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vivek_app/config/theme_config.dart';
-import 'package:vivek_app/models/wallpaper.dart';
-import 'package:vivek_app/screens/wallpaper_swiper_screen.dart';
+import 'package:wallbizz/config/theme_config.dart';
+import 'package:wallbizz/models/wallpaper.dart';
+import 'package:wallbizz/screens/wallpaper_swiper_screen.dart';
 
 Wallpaper _makeWallpaper({String id = 'test-id', String color = '#7B8CFF'}) {
   return Wallpaper(

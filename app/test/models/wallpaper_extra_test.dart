@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vivek_app/models/wallpaper.dart';
+import 'package:wallbizz/models/wallpaper.dart';
 
 void main() {
   Wallpaper makeWp({

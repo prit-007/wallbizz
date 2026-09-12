@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vivek_app/services/recent_searches.dart';
+import 'package:wallbizz/services/recent_searches.dart';
 
 void main() {
   setUp(() {

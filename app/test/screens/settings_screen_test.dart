@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vivek_app/config/theme_config.dart';
-import 'package:vivek_app/screens/settings_screen.dart';
+import 'package:wallbizz/config/theme_config.dart';
+import 'package:wallbizz/screens/settings_screen.dart';
 
 Widget _wrapInApp(Widget child) {
   return MaterialApp(home: Scaffold(body: child));
