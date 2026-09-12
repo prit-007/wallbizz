@@ -31,11 +31,9 @@ jobs:
       - name: Setup env
         working-directory: app
         run: |
-          cat > .env << ENVEOF
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-          BACKEND_URL=${{ secrets.BACKEND_URL }}
-          ENVEOF
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
 
       - name: Install dependencies
         working-directory: app

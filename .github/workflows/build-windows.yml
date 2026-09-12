@@ -26,30 +26,22 @@ jobs:
           channel: stable
 
       - name: Setup env
-        shell: pwsh
+        shell: bash
         run: |
-          Set-Content -Path "app\.env" -Value @"
-          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-          BACKEND_URL=${{ secrets.BACKEND_URL }}
-          "@
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Extract version
         id: version
-        shell: pwsh
+        shell: bash
         run: |
-          $pubspec = Get-Content pubspec.yaml -Raw
-          if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
-            $version = $Matches[1]
-            echo "version=$version" >> $env:GITHUB_OUTPUT
-            echo "Resolved version: $version"
-          } else {
-            echo "Could not parse version from pubspec.yaml"
-            exit 1
-          }
+          version=$(grep 'version:' pubspec.yaml | head -1 | sed 's/.*: *//' | sed 's/+.*//')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Resolved version: $version"
 
       - name: Build Windows
         run: flutter build windows --release
