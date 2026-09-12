@@ -57,8 +57,10 @@ void main(List<String> args) {
 
 String _appVersion() {
   final pubspec = File('pubspec.yaml').readAsStringSync();
-  final match = RegExp(r'^version:\s*(\d+\.\d+\.\d+)', multiLine: true)
-      .firstMatch(pubspec);
+  final match = RegExp(
+    r'^version:\s*(\d+\.\d+\.\d+)',
+    multiLine: true,
+  ).firstMatch(pubspec);
   if (match == null) {
     stderr.writeln('Could not parse version from pubspec.yaml.');
     exit(1);

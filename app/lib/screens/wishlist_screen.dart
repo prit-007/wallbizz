@@ -720,7 +720,9 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                               return await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.surface,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
@@ -737,7 +739,8 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
                                       child: Text(
                                         'CANCEL',
                                         style: GoogleFonts.inter(
@@ -778,7 +781,9 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                                   color: Colors.transparent,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: v.glassBorder.withValues(alpha: 0.15),
+                                    color: v.glassBorder.withValues(
+                                      alpha: 0.15,
+                                    ),
                                   ),
                                 ),
                                 child: Row(

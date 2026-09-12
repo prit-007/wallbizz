@@ -93,11 +93,14 @@ class WallpaperActions {
       final wp = _pendingWallpaper!;
       _pendingWallpaper = null;
       _isProcessing = true;
-      SupabaseService.instance.addToWishlist(user.id, wp.id).then((_) {
-        _isProcessing = false;
-      }).catchError((_) {
-        _isProcessing = false;
-      });
+      SupabaseService.instance
+          .addToWishlist(user.id, wp.id)
+          .then((_) {
+            _isProcessing = false;
+          })
+          .catchError((_) {
+            _isProcessing = false;
+          });
     }
   }
 }
