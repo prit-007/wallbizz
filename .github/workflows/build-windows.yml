@@ -25,6 +25,15 @@ jobs:
           flutter-version: '3.44.x'
           channel: stable
 
+      - name: Setup env
+        shell: pwsh
+        run: |
+          Set-Content -Path "app\.env" -Value @"
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          BACKEND_URL=${{ secrets.BACKEND_URL }}
+          "@
+
       - name: Install dependencies
         run: flutter pub get
 
