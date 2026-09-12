@@ -4,6 +4,37 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.5] - 2026-09-12
+
+### Added
+- 3-day wallpaper retention — old wallpapers auto-cleaned after sync
+- Wishlist & moodboard protection — saved wallpapers never deleted by cleanup
+- `POST /api/v1/cleanup` endpoint for manual cleanup trigger
+- `CRON_SECRET` auth guard on sync and cleanup endpoints
+- GitHub Actions cron — syncs every 12 hours automatically
+- GitHub Actions — Flutter web deploy to GitHub Pages
+- GitHub Actions — Windows build with Inno Setup installer
+- `tool/build_installer.dart` — Inno Setup `.iss` script generator
+- `sql/005_cleanup.sql` — cleanup function + moodboard_items index
+- Moodboard delete — trash button with confirmation dialog
+- Moodboard swipe-to-delete in list sheet
+- Auto-add wallpaper to newly created moodboard
+- Consumer-facing gh-pages landing page with features section
+
+### Fixed
+- Stale heart icon in grid — StaggeredGrid now listens to wishlistNotifier
+- Swipe-to-remove using stale index in WishlistScreen
+- Post-auth heart tap — pending wallpaper auto-added to wishlist
+- Optimistic heart toggle — instant icon flip via onToggle callback
+- Optimistic removal rollback — item re-inserted on server failure
+- Moodboard screen missing export for Supabase import
+
+### Improved
+- Landing page rewritten for consumer audience (no dev jargon in hero)
+- Landing page: "Try on Web" CTA, features grid, trust badges
+- Download section: web-first CTA, simpler copy
+- Open Graph meta tags for social sharing
+
 ## [1.4.0] - 2026-09-12
 
 ### Added
