@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WALLBIZZ — Premium wallpapers, curated for you</title>
+<meta name="description" content="WALLBIZZ is a Flutter wallpaper app that syncs from Wallhaven twice a day. Browse, save into moodboards, and set wallpapers with a dark, editorial, glass interface.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ Design tokens ============ */
+  :root{
+    --bg: #0A0A18;
+    --bg-1: #0E0E20;
+    --bg-2: #121226;
+    --glass: rgba(255,255,255,0.045);
+    --glass-strong: rgba(255,255,255,0.075);
+    --border: rgba(255,255,255,0.09);
+    --border-soft: rgba(255,255,255,0.06);
+    --text: #F1F0F6;
+    --text-muted: #9C9CB2;
+    --text-faint: #6B6B80;
+    --indigo: #7B8CFF;
+    --indigo-soft: #A9B4FF;
+    --indigo-dim: #454C8C;
+    --amber: #F2C879;
+    --display: 'Oswald', sans-serif;
+    --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 26px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  img,svg{ display:block; max-width:100%; }
+  ul{ list-style:none; }
+  :focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:3px; border-radius:4px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:640px){ .wrap{ padding:0 20px; } }
+
+  h1,h2,h3{ font-family:var(--display); font-weight:600; letter-spacing:0.01em; line-height:1.08; }
+
+  .eyebrow{
+    font-family:var(--display);
+    font-size:0.78rem;
+    font-weight:500;
+    letter-spacing:0.14em;
+    color:var(--indigo-soft);
+    text-transform:uppercase;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--body); font-weight:600; font-size:0.95rem;
+    padding:13px 24px; border-radius:100px;
+    border:1px solid transparent;
+    cursor:pointer; transition:transform .18s ease, background .18s ease, border-color .18s ease;
+    white-space:nowrap;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--indigo); color:#0A0A18; }
+  .btn-primary:hover{ background:var(--indigo-soft); }
+  .btn-ghost{ background:var(--glass); color:var(--text); border-color:var(--border); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .btn-ghost:hover{ background:var(--glass-strong); border-color:rgba(255,255,255,0.18); }
+  .btn svg{ width:16px; height:16px; flex-shrink:0; }
+
+  /* glass card base */
+  .glass{
+    background:var(--glass);
+    border:1px solid var(--border);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+  }
+
+  /* ============ Nav ============ */
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:rgba(10,10,24,0.6);
+    border-bottom:1px solid var(--border-soft);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  }
+  .nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .nav-mark{ display:flex; align-items:center; gap:10px; font-family:var(--display); font-size:1.05rem; letter-spacing:0.04em; }
+  .nav-dot{ width:9px; height:9px; border-radius:50%; background:var(--indigo); box-shadow:0 0 14px 2px rgba(123,140,255,0.7); }
+  .nav-links{ display:flex; align-items:center; gap:34px; font-size:0.92rem; color:var(--text-muted); }
+  .nav-links a{ transition:color .15s ease; }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-cta{ display:flex; align-items:center; gap:14px; }
+  .nav-menu-btn{ display:none; background:none; border:none; color:var(--text); cursor:pointer; padding:8px; }
+  .nav-menu-btn svg{ width:22px; height:22px; }
+
+  @media (max-width:860px){
+    .nav-links{ display:none; }
+    .nav-menu-btn{ display:block; }
+    .nav-cta .btn-ghost{ display:none; }
+  }
+  .mobile-panel{
+    position:fixed; inset:68px 0 0 0; z-index:99;
+    background:rgba(9,9,20,0.97);
+    display:none; flex-direction:column; gap:2px; padding:18px 20px 30px;
+  }
+  .mobile-panel.open{ display:flex; }
+  .mobile-panel a{
+    padding:16px 6px; font-family:var(--display); font-size:1.15rem;
+    border-bottom:1px solid var(--border-soft); color:var(--text);
+  }
+  .mobile-panel .btn{ margin-top:18px; justify-content:center; }
+
+  /* ============ Hero ============ */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding:150px 24px 90px;
+    overflow:hidden;
+  }
+  .hero-glow{
+    position:absolute; inset:-20%;
+    z-index:0;
+    background:
+      radial-gradient(38% 30% at 20% 22%, rgba(123,140,255,0.32), transparent 60%),
+      radial-gradient(34% 28% at 82% 18%, rgba(242,200,121,0.16), transparent 60%),
+      radial-gradient(46% 40% at 50% 88%, rgba(255,110,165,0.14), transparent 60%),
+      radial-gradient(60% 50% at 50% 50%, rgba(20,20,40,0.0), rgba(10,10,24,1) 72%);
+    animation: driftGlow 22s ease-in-out infinite alternate;
+    filter:blur(10px);
+  }
+  @keyframes driftGlow{
+    0%{ transform: translate(0,0) scale(1); }
+    100%{ transform: translate(-2%, 2%) scale(1.06); }
+  }
+  .hero-grain{
+    position:absolute; inset:0; z-index:1; opacity:0.05; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .hero-content{ position:relative; z-index:2; max-width:800px; }
+  .hero .eyebrow{ display:inline-block; margin-bottom:22px; }
+  .hero h1{
+    font-size:clamp(3rem, 9vw, 6.2rem);
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    background:linear-gradient(180deg, #FFFFFF 0%, #C9CEFF 62%, #8890D6 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{
+    margin:26px auto 0; max-width:540px;
+    font-size:1.1rem; color:var(--text-muted); line-height:1.65;
+  }
+  .hero-sub strong{ color:var(--text); font-weight:600; }
+  .hero-cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:38px; }
+  .hero-stats{
+    margin-top:64px; display:flex; gap:0; justify-content:center; flex-wrap:wrap;
+  }
+  .hero-stats div{ padding:0 30px; border-left:1px solid var(--border-soft); text-align:left; }
+  .hero-stats div:first-child{ border-left:none; }
+  .hero-stats b{ display:block; font-family:var(--display); font-size:1.5rem; font-weight:600; color:var(--text); }
+  .hero-stats span{ font-size:0.82rem; color:var(--text-faint); }
+  @media (max-width:640px){
+    .hero-stats{ flex-direction:column; gap:16px; align-items:center; }
+    .hero-stats div{ border-left:none; padding:0; text-align:center; }
+  }
+
+  .scroll-cue{
+    position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+    z-index:2; display:flex; flex-direction:column; align-items:center; gap:8px;
+    color:var(--text-faint); font-size:0.75rem; letter-spacing:0.08em;
+  }
+  .scroll-cue .line{ width:1px; height:34px; background:linear-gradient(var(--indigo-soft), transparent); animation:cueMove 1.8s ease-in-out infinite; }
+  @keyframes cueMove{ 0%,100%{ opacity:0.3; } 50%{ opacity:1; } }
+
+  /* ============ Section shell ============ */
+  section{ position:relative; padding:120px 0; }
+  .section-head{ max-width:640px; margin-bottom:64px; }
+  .section-head h2{ font-size:clamp(2rem, 4vw, 2.8rem); margin-top:14px; text-transform:none; }
+  .section-head p{ margin-top:16px; color:var(--text-muted); font-size:1.02rem; max-width:520px; }
+
+  /* ============ Gallery (swipe strip) ============ */
+  .gallery-strip{
+    display:flex; gap:20px; overflow-x:auto; padding:10px 32px 30px;
+    scroll-snap-type:x mandatory; scroll-padding-left:32px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .gallery-strip::-webkit-scrollbar{ height:5px; }
+  .gallery-strip::-webkit-scrollbar-thumb{ background:var(--border); border-radius:10px; }
+  .wp-card{
+    position:relative; flex:0 0 auto;
+    width:230px; height:400px; border-radius:var(--radius-l);
+    scroll-snap-align:start;
+    overflow:hidden;
+    border:1px solid var(--border-soft);
+    transition:transform .35s ease;
+  }
+  .wp-card:hover{ transform:translateY(-6px); }
+  .wp-card .art{ position:absolute; inset:0; }
+  .wp-card .veil{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.65) 100%); }
+  .wp-card .top-row{ position:absolute; top:14px; left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; }
+  .wp-card .chip{
+    font-size:0.68rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    padding:6px 11px; border-radius:100px; color:#fff;
+    background:rgba(10,10,24,0.42); border:1px solid rgba(255,255,255,0.22);
+    backdrop-filter:blur(8px);
+  }
+  .wp-card .heart{
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:rgba(10,10,24,0.42); border:1px solid rgba(255,255,255,0.22); backdrop-filter:blur(8px);
+  }
+  .wp-card .heart svg{ width:15px; height:15px; }
+  .wp-card .bottom-row{ position:absolute; bottom:16px; left:16px; right:16px; }
+  .wp-card .name{ font-family:var(--display); font-size:1.15rem; color:#fff; }
+  .wp-card .res{ font-size:0.76rem; color:rgba(255,255,255,0.68); margin-top:2px; }
+
+  .art-trending{ background:radial-gradient(120% 90% at 20% 0%, #9AA6FF, #4433A0 55%, #14102C 100%); }
+  .art-anime{ background:radial-gradient(120% 90% at 80% 100%, #FF9DC3, #A238A0 50%, #2A0F3C 100%); }
+  .art-nature{ background:radial-gradient(120% 90% at 30% 100%, #7FE6C3, #1F8F6E 55%, #06251D 100%); }
+  .art-cyberpunk{ background:radial-gradient(120% 90% at 70% 0%, #FF63C7, #4A22FF 45%, #050014 100%); }
+  .art-space{ background:radial-gradient(120% 90% at 50% 20%, #6E51C9, #241242 55%, #030109 100%); }
+  .art-desktop{ background:radial-gradient(120% 90% at 20% 100%, #FFDE9E, #B9782F 55%, #241407 100%); }
+  .art-mobile{ background:radial-gradient(120% 90% at 80% 20%, #9FC2FF, #2C4FC7 55%, #060A22 100%); }
+
+  .gallery-note{ text-align:center; color:var(--text-faint); font-size:0.85rem; margin-top:4px; }
+
+  /* ============ Screen tour ============ */
+  .tour-row{
+    display:grid; grid-template-columns:0.86fr 1fr; gap:64px; align-items:center;
+    padding:56px 0; border-top:1px solid var(--border-soft);
+  }
+  .tour-row:first-of-type{ border-top:none; padding-top:0; }
+  .tour-row.reverse{ grid-template-columns:1fr 0.86fr; }
+  .tour-row.reverse .tour-mock{ order:2; }
+  .tour-row.reverse .tour-text{ order:1; }
+  @media (max-width:880px){
+    .tour-row, .tour-row.reverse{ grid-template-columns:1fr; gap:36px; }
+    .tour-row.reverse .tour-mock{ order:1; }
+    .tour-row.reverse .tour-text{ order:2; }
+  }
+  .tour-text .step{ font-family:var(--display); font-size:0.85rem; color:var(--indigo-soft); letter-spacing:0.1em; }
+  .tour-text h3{ font-size:1.7rem; margin-top:10px; text-transform:none; }
+  .tour-text p{ margin-top:14px; color:var(--text-muted); }
+  .tour-text ul{ margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+  .tour-text li{ display:flex; gap:10px; font-size:0.92rem; color:var(--text-muted); align-items:flex-start; }
+  .tour-text li svg{ width:15px; height:15px; margin-top:3px; flex-shrink:0; color:var(--indigo-soft); }
+
+  .tour-mock{ display:flex; justify-content:center; }
+  .phone{
+    width:250px; height:520px; border-radius:38px; padding:9px;
+    background:#08081a; border:1px solid rgba(255,255,255,0.1);
+    box-shadow:0 40px 80px -30px rgba(123,140,255,0.28), 0 0 0 1px rgba(255,255,255,0.02);
+    position:relative;
+  }
+  .phone .screen{ position:relative; width:100%; height:100%; border-radius:30px; overflow:hidden; background:var(--bg-1); }
+  .phone .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:70px; height:16px; border-radius:20px; background:#08081a; z-index:5; }
+
+  /* Discover mockup */
+  .m-pills{ position:absolute; top:38px; left:14px; right:14px; display:flex; gap:6px; overflow:hidden; }
+  .m-pills span{ flex:0 0 auto; padding:5px 10px; border-radius:100px; font-size:0.58rem; font-family:var(--display); letter-spacing:0.04em; background:var(--glass); border:1px solid var(--border); color:var(--text-muted); }
+  .m-pills span.active{ background:var(--indigo); color:#0A0A18; border-color:var(--indigo); }
+  .m-grid{ position:absolute; top:74px; left:14px; right:14px; bottom:76px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .m-grid .tile{ border-radius:14px; }
+  .m-grid .tile:nth-child(1){ grid-row:span 2; }
+  .m-grid .tile:nth-child(4){ grid-row:span 2; }
+  .m-dock{ position:absolute; bottom:16px; left:14px; right:14px; height:52px; border-radius:100px; display:flex; align-items:center; justify-content:space-around; }
+  .m-dock .ico{ width:18px; height:18px; border-radius:5px; background:var(--text-faint); opacity:0.5; }
+  .m-dock .ico.active{ background:var(--indigo); opacity:1; }
+
+  /* Detail mockup */
+  .m-detail-bg{ position:absolute; inset:0; }
+  .m-detail-blur{ position:absolute; inset:0; filter:blur(30px) brightness(0.65) saturate(1.3); transform:scale(1.3); }
+  .m-detail-frame{ position:absolute; inset:34px 26px 96px; border-radius:22px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+  .m-topbar{ position:absolute; top:16px; left:14px; right:14px; display:flex; justify-content:space-between; }
+  .m-circle{ width:30px; height:30px; border-radius:50%; }
+  .m-specs{ position:absolute; bottom:76px; left:14px; right:14px; border-radius:14px; padding:10px 12px; display:flex; justify-content:space-between; }
+  .m-specs .dot-row{ display:flex; gap:5px; }
+  .m-specs .swatch{ width:11px; height:11px; border-radius:50%; }
+  .m-dl-btn{ position:absolute; bottom:16px; left:14px; right:14px; height:44px; border-radius:100px; background:var(--indigo); display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:0.62rem; color:#0A0A18; letter-spacing:0.06em; }
+
+  /* Vault mockup */
+  .m-vault-grid{ position:absolute; top:56px; left:14px; right:14px; bottom:16px; display:grid; grid-template-columns:1fr 1fr; gap:8px; grid-auto-rows:78px; }
+  .m-vault-grid .tile{ border-radius:12px; position:relative; }
+  .m-vault-grid .tile.sel{ outline:2px solid var(--indigo); }
+  .m-vault-grid .check{ position:absolute; top:6px; right:6px; width:16px; height:16px; border-radius:50%; background:var(--indigo); }
+  .m-vault-search{ position:absolute; top:16px; left:14px; right:14px; height:32px; border-radius:100px; display:flex; align-items:center; padding:0 12px; font-size:0.6rem; color:var(--text-faint); }
+
+  /* Settings mockup */
+  .m-settings{ position:absolute; top:36px; left:14px; right:14px; bottom:16px; display:flex; flex-direction:column; gap:10px; }
+  .m-row{ height:46px; border-radius:14px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; }
+  .m-row .lbl{ font-size:0.64rem; color:var(--text-muted); }
+  .m-toggle{ width:30px; height:16px; border-radius:20px; background:var(--indigo); position:relative; }
+  .m-toggle::after{ content:''; position:absolute; right:2px; top:2px; width:12px; height:12px; border-radius:50%; background:#fff; }
+
+  /* ============ Under the hood ============ */
+  .stack-section{ background:var(--bg-1); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft); }
+  .flow{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:48px 0 56px;
+  }
+  .flow-node{
+    padding:16px 20px; border-radius:var(--radius-m); min-width:150px;
+  }
+  .flow-node .k{ font-family:var(--display); font-size:0.92rem; letter-spacing:0.02em; }
+  .flow-node .d{ font-size:0.76rem; color:var(--text-faint); margin-top:4px; }
+  .flow-arrow{ flex:1 1 32px; min-width:24px; height:1px; background:linear-gradient(90deg, var(--border), var(--indigo-dim)); position:relative; }
+  .flow-arrow::after{ content:''; position:absolute; right:0; top:-3px; width:7px; height:7px; border-top:1px solid var(--indigo-soft); border-right:1px solid var(--indigo-soft); transform:rotate(45deg); }
+  @media (max-width:760px){
+    .flow{ flex-direction:column; align-items:stretch; }
+    .flow-arrow{ width:1px; height:22px; align-self:center; background:linear-gradient(180deg, var(--border), var(--indigo-dim)); }
+    .flow-arrow::after{ right:-3px; top:auto; bottom:0; transform:rotate(135deg); }
+  }
+
+  .stack-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:1px; background:var(--border-soft); border:1px solid var(--border-soft); border-radius:var(--radius-m); overflow:hidden; margin-bottom:40px; }
+  .stack-cell{ background:var(--bg-1); padding:22px 22px 24px; }
+  .stack-cell .role{ font-size:0.72rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; }
+  .stack-cell .tech{ font-family:var(--display); font-size:1.05rem; margin-top:6px; }
+
+  .test-badges{ display:flex; gap:14px; flex-wrap:wrap; }
+  .test-badge{ display:flex; align-items:center; gap:10px; padding:12px 18px; border-radius:var(--radius-s); }
+  .test-badge b{ font-family:var(--display); font-size:1.2rem; color:var(--amber); }
+  .test-badge span{ font-size:0.8rem; color:var(--text-muted); }
+
+  /* ============ Download ============ */
+  .download-card{
+    border-radius:var(--radius-l); padding:56px; text-align:center;
+    background:
+      radial-gradient(80% 120% at 50% 0%, rgba(123,140,255,0.14), transparent 60%),
+      var(--glass);
+    position:relative; overflow:hidden;
+  }
+  .download-card h2{ font-size:clamp(1.8rem,3.6vw,2.5rem); text-transform:none; }
+  .download-card p{ color:var(--text-muted); max-width:480px; margin:16px auto 0; }
+  .download-cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:34px; }
+  .version-tag{ display:inline-block; margin-top:26px; font-family:var(--display); font-size:0.78rem; letter-spacing:0.08em; color:var(--text-faint); }
+  .version-tag b{ color:var(--indigo-soft); }
+  .platform-note{ margin-top:30px; display:flex; gap:22px; justify-content:center; flex-wrap:wrap; font-size:0.82rem; color:var(--text-faint); }
+  .platform-note span{ display:flex; align-items:center; gap:7px; }
+  .platform-note svg{ width:15px; height:15px; }
+
+  /* ============ Footer ============ */
+  footer{ padding:56px 0 44px; border-top:1px solid var(--border-soft); }
+  .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
+  .foot-mark{ font-family:var(--display); font-size:1rem; letter-spacing:0.04em; color:var(--text-muted); }
+  .foot-links{ display:flex; gap:26px; font-size:0.86rem; color:var(--text-faint); }
+  .foot-links a:hover{ color:var(--text); }
+  .foot-built{ font-size:0.8rem; color:var(--text-faint); margin-top:18px; }
+
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap">
+    <a href="#top" class="nav-mark"><span class="nav-dot"></span>WALLBIZZ</a>
+    <ul class="nav-links">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#screens">Inside the app</a></li>
+      <li><a href="#stack">Under the hood</a></li>
+      <li><a href="#download">Download</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-1.93c-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.7 5.38-5.26 5.67.42.36.78 1.07.78 2.16v3.2c0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+      <button class="nav-menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-panel" id="mobilePanel">
+  <a href="#gallery">Gallery</a>
+  <a href="#screens">Inside the app</a>
+  <a href="#stack">Under the hood</a>
+  <a href="#download">Download</a>
+  <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">View on GitHub</a>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-glow" id="heroGlow"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <span class="eyebrow">Flutter · Web PWA + Android</span>
+    <h1>Wallbizz</h1>
+    <p class="hero-sub">A wallpaper app that treats every picture like it belongs on a wall, not in a feed. <strong>168 wallpapers</strong> are pulled from Wallhaven twice a day, and the one you're looking at colors everything around it.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        Get the latest build
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">Read the source</a>
+    </div>
+    <div class="hero-stats">
+      <div><b>168 / day</b><span>wallpapers synced, 7 categories</span></div>
+      <div><b>235 tests</b><span>162 Flutter + 38 Go, all passing</span></div>
+      <div><b>MIT</b><span>open source, free to fork</span></div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="line"></span>SCROLL</div>
+</header>
+
+<!-- ============ GALLERY ============ -->
+<section id="gallery">
+  <div class="wrap section-head">
+    <span class="eyebrow">Browsing</span>
+    <h2>Flipping through it should feel like a photo book, not a feed</h2>
+    <p>Every wallpaper gets a full-bleed swipe, a haptic snap when it lands, and a blurred copy of itself bleeding into the frame behind it. The seven category pills below are the real ones in the app.</p>
+  </div>
+  <div class="gallery-strip">
+    <article class="wp-card"><div class="art art-trending"></div><div class="veil"></div><div class="top-row"><span class="chip">Trending</span><span class="heart"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Trending</div><div class="res">3840 × 2160</div></div></article>
+    <article class="wp-card"><div class="art art-anime"></div><div class="veil"></div><div class="top-row"><span class="chip">Anime</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Anime</div><div class="res">2560 × 1440</div></div></article>
+    <article class="wp-card"><div class="art art-nature"></div><div class="veil"></div><div class="top-row"><span class="chip">Nature</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Nature</div><div class="res">4000 × 2250</div></div></article>
+    <article class="wp-card"><div class="art art-cyberpunk"></div><div class="veil"></div><div class="top-row"><span class="chip">Cyberpunk</span><span class="heart"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Cyberpunk</div><div class="res">3440 × 1440</div></div></article>
+    <article class="wp-card"><div class="art art-space"></div><div class="veil"></div><div class="top-row"><span class="chip">Space</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Space</div><div class="res">3840 × 2160</div></div></article>
+    <article class="wp-card"><div class="art art-desktop"></div><div class="veil"></div><div class="top-row"><span class="chip">Desktop</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Desktop</div><div class="res">2560 × 1600</div></div></article>
+    <article class="wp-card"><div class="art art-mobile"></div><div class="veil"></div><div class="top-row"><span class="chip">Mobile</span><span class="heart"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 21s-7.5-4.9-10.1-9.3C.3 8.7 1.6 5 5.2 4.2c2-.4 4 .5 5 2.2 1-1.7 3-2.6 5-2.2 3.6.8 4.9 4.5 3.3 7.5C19.5 16.1 12 21 12 21z"/></svg></span></div><div class="bottom-row"><div class="name">Mobile</div><div class="res">1440 × 3200</div></div></article>
+  </div>
+  <p class="gallery-note">Swipe or drag — this strip works with a trackpad, a wheel, or a thumb.</p>
+</section>
+
+<!-- ============ SCREEN TOUR ============ -->
+<section id="screens">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Inside the app</span>
+      <h2>Four stops, from first open to "set as wallpaper"</h2>
+      <p>Pulled straight from how the app is actually built — no invented feature list.</p>
+    </div>
+
+    <div class="tour-row">
+      <div class="tour-mock">
+        <div class="phone"><div class="notch"></div><div class="screen" style="background:linear-gradient(160deg,#14142c,#0b0b1c);">
+          <div class="m-pills">
+            <span class="active">Trending</span><span>Anime</span><span>Nature</span><span>Cyberpunk</span>
+          </div>
+          <div class="m-grid">
+            <div class="tile art-trending"></div>
+            <div class="tile art-nature"></div>
+            <div class="tile art-cyberpunk"></div>
+            <div class="tile art-space"></div>
+            <div class="tile art-desktop"></div>
+          </div>
+          <div class="m-dock glass">
+            <div class="ico active"></div><div class="ico"></div><div class="ico"></div><div class="ico"></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="tour-text">
+        <span class="step">01 — Discover</span>
+        <h3>Seven category pills, one grid that never restarts</h3>
+        <p>Trending, Anime, Nature, Cyberpunk, Space, Desktop and Mobile sit above a staggered masonry grid. Each tab loads on first visit and stays alive in the background — switch categories and come back, and your scroll position is exactly where you left it.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Shimmer skeletons while a category loads</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap the active tab again to jump back to the top</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tour-row reverse">
+      <div class="tour-mock">
+        <div class="phone"><div class="notch"></div><div class="screen">
+          <div class="m-detail-bg art-cyberpunk"></div>
+          <div class="m-detail-blur art-cyberpunk"></div>
+          <div class="m-detail-frame art-cyberpunk"></div>
+          <div class="m-topbar">
+            <div class="m-circle glass"></div>
+            <div style="display:flex; gap:8px;"><div class="m-circle glass"></div><div class="m-circle glass"></div></div>
+          </div>
+          <div class="m-specs glass">
+            <span style="font-size:0.58rem; color:var(--text-muted);">3440×1440 · 4.2MB</span>
+            <div class="dot-row"><span class="swatch" style="background:#FF63C7;"></span><span class="swatch" style="background:#4A22FF;"></span><span class="swatch" style="background:#0A0A18;"></span></div>
+          </div>
+          <div class="m-dl-btn">DOWNLOAD</div>
+        </div></div>
+      </div>
+      <div class="tour-text">
+        <span class="step">02 — Detail</span>
+        <h3>The wallpaper sets the mood of its own screen</h3>
+        <p>Pinch to zoom, double-tap for a snappy 2.5x, and drag down past a quarter of the screen to close — or it springs back if you let go early. A blurred, tinted copy of the image fills the background, so the frame around it always matches what's inside it.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Tap once to hide the bars for a clean, full-screen look</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Specs card shows resolution, size, and the image's own palette</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tour-row">
+      <div class="tour-mock">
+        <div class="phone"><div class="notch"></div><div class="screen" style="background:var(--bg-1);">
+          <div class="m-vault-search glass">Search by resolution or ID</div>
+          <div class="m-vault-grid">
+            <div class="tile art-nature"></div>
+            <div class="tile art-desktop sel"><span class="check"></span></div>
+            <div class="tile art-space"></div>
+            <div class="tile art-mobile"></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="tour-text">
+        <span class="step">03 — Save it</span>
+        <h3>A wishlist, moodboards, and a Vault of your own</h3>
+        <p>Tap the heart to add something to your wishlist, or drop it into a named moodboard — both sync per account through Supabase. Every download also lands in the Vault, tracked locally, searchable by ID or resolution, with long-press multi-select for cleaning house.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign-in is only asked for when you actually save something</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Swipe to delete, or select several at once</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tour-row reverse">
+      <div class="tour-mock">
+        <div class="phone"><div class="notch"></div><div class="screen" style="background:var(--bg-1);">
+          <div class="m-settings">
+            <div class="m-row glass"><span class="lbl">Dark mode</span><span class="m-toggle"></span></div>
+            <div class="m-row glass"><span class="lbl">Download location</span><span class="lbl" style="color:var(--indigo-soft);">Pictures</span></div>
+            <div class="m-row glass"><span class="lbl">Account</span><span class="lbl" style="color:var(--text-faint);">Signed in</span></div>
+            <div class="m-row glass" style="justify-content:center;"><span class="lbl" style="color:var(--amber); font-family:var(--display); letter-spacing:0.05em;">SET AS WALLPAPER</span></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="tour-text">
+        <span class="step">04 — Make it yours</span>
+        <h3>Crop, rotate, and set it without leaving the app</h3>
+        <p>The wallpaper editor lets you pan, zoom, and rotate in 90° steps before applying it directly to your device. Sharing overlays a small WALLBIZZ watermark and cleans up the temp file after. Settings covers dark mode, where downloads land (Pictures, Downloads, or app-only storage), and account.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Choose whether downloads survive an uninstall</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Sign in with email or Google, only when you need to</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ UNDER THE HOOD ============ -->
+<section id="stack" class="stack-section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Under the hood</span>
+      <h2>The app never talks to Wallhaven directly for browsing</h2>
+      <p>A Go service syncs a fresh batch into Supabase twice a day. The Flutter client reads from Supabase; Wallhaven is only touched for live search, and NSFW queries route through the backend with your session attached.</p>
+    </div>
+
+    <div class="flow">
+      <div class="flow-node glass"><div class="k">Wallhaven API</div><div class="d">source of the wallpapers</div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node glass"><div class="k">Go + Fiber</div><div class="d">cron sync, twice a day</div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node glass"><div class="k">Supabase</div><div class="d">Postgres, auth, row-level security</div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node glass"><div class="k">Flutter client</div><div class="d">Web PWA + Android</div></div>
+    </div>
+
+    <div class="stack-grid">
+      <div class="stack-cell"><div class="role">Client</div><div class="tech">Flutter 3, Dart 3.12</div></div>
+      <div class="stack-cell"><div class="role">Backend</div><div class="tech">Golang, Fiber, robfig/cron</div></div>
+      <div class="stack-cell"><div class="role">Database</div><div class="tech">Supabase (Postgres + PostgREST)</div></div>
+      <div class="stack-cell"><div class="role">Local storage</div><div class="tech">Hive</div></div>
+      <div class="stack-cell"><div class="role">Hosting</div><div class="tech">Render + static / Netlify</div></div>
+      <div class="stack-cell"><div class="role">License</div><div class="tech">MIT</div></div>
+    </div>
+
+    <div class="test-badges">
+      <div class="test-badge glass"><b>162</b><span>Flutter tests</span></div>
+      <div class="test-badge glass"><b>38</b><span>Go tests</span></div>
+      <div class="test-badge glass"><b>7</b><span>wallpaper categories</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section id="download">
+  <div class="wrap">
+    <div class="download-card glass">
+      <span class="eyebrow">Get it</span>
+      <h2>Not on the Play Store — everything ships through GitHub</h2>
+      <p>Grab the latest Android build or browse every past release. F-Droid is next on the list; for now, GitHub Releases is the only distribution channel.</p>
+      <div class="download-cta">
+        <a class="btn btn-primary" href="https://github.com/prit-007/wallbizz/releases/latest" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+          Latest release
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/prit-007/wallbizz/releases" target="_blank" rel="noopener">All releases</a>
+      </div>
+      <div class="version-tag">Current build <b>v1.4.0</b> — AGP 9.0 fixes, async_wallpaper patch, CI/CD</div>
+      <div class="platform-note">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Android</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Web PWA</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7l9 5 9-5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>F-Droid, coming soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <span class="foot-mark">WALLBIZZ</span>
+      <div class="foot-links">
+        <a href="https://github.com/prit-007/wallbizz" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/prit-007/wallbizz/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener">Architecture</a>
+        <a href="https://github.com/prit-007/wallbizz/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/prit-007/wallbizz/blob/main/README.md#license" target="_blank" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="foot-built">Built with Flutter, Go, and Supabase. Wallpapers courtesy of Wallhaven.</div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const panel = document.getElementById('mobilePanel');
+  menuBtn.addEventListener('click', () => {
+    const open = panel.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    panel.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }));
+
+  // Subtle hero glow parallax on pointer move (desktop only, one orchestrated moment)
+  const glow = document.getElementById('heroGlow');
+  const supportsHover = window.matchMedia('(hover:hover)').matches;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (supportsHover && !reduceMotion) {
+    document.querySelector('.hero').addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 24;
+      const y = (e.clientY / window.innerHeight - 0.5) * 24;
+      glow.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  }
+</script>
+</body>
+</html>
