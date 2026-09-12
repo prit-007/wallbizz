@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
+import '../core/logger/logger.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
 import '../services/downloads_service.dart';
@@ -50,6 +51,10 @@ class _DetailScreenState extends State<DetailScreen>
   @override
   void initState() {
     super.initState();
+    logInfo(
+      'Detail screen opened: ${wallpaper.wallhavenId}',
+      domain: LogDomain.image,
+    );
     _checkDownloadState();
     _checkWishlist();
     _animationController =
