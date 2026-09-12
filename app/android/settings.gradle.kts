@@ -24,3 +24,26 @@ plugins {
 }
 
 include(":app")
+
+// Patch async_wallpaper's wallpaper.xml before any project is evaluated.
+// The plugin references @mipmap/ic_launcher in its own package namespace,
+// which doesn't exist during resource merging and fails on AGP 9+.
+run {
+    val pubCacheBase = System.getenv("PUB_CACHE") ?: (System.getProperty("user.home") + "/.pub-cache")
+    val pubCache = file("$pubCacheBase/hosted/pub.dev")
+    if (pubCache.isDirectory) {
+        pubCache.listFiles()
+            ?.filter { it.isDirectory && it.name.startsWith("async_wallpaper-") }
+            ?.forEach { dir ->
+                val xmlFile = java.io.File(dir, "android/src/main/res/xml/wallpaper.xml")
+                if (xmlFile.exists()) {
+                    val content = xmlFile.readText()
+                    if (content.contains("@mipmap/ic_launcher")) {
+                        xmlFile.writeText(
+                            content.replace("@mipmap/ic_launcher", "@android:drawable/sym_def_app_icon"),
+                        )
+                    }
+                }
+            }
+    }
+}
