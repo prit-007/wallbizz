@@ -26,12 +26,10 @@ class _SplashScreenState extends State<SplashScreen> {
     HapticFeedback.mediumImpact();
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const HomeScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
         transitionDuration: const Duration(milliseconds: 1000),
       ),
@@ -71,31 +69,53 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'CURATED 4K BACKGROUNDS & WALLPAPERS',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.7),
-                    letterSpacing: 3.5,
-                  ),
-                ).animate()
-                 .fade(delay: 800.ms, duration: 800.ms)
-                 .slideY(begin: 0.8, end: 0, curve: Curves.easeOutCubic),
+                      'CURATED 4K BACKGROUNDS & WALLPAPERS',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withValues(alpha: 0.7),
+                        letterSpacing: 3.5,
+                      ),
+                    )
+                    .animate()
+                    .fade(delay: 800.ms, duration: 800.ms)
+                    .slideY(begin: 0.8, end: 0, curve: Curves.easeOutCubic),
 
                 Text(
-                  'WALLBIZZ',
-                  style: GoogleFonts.bebasNeue(
-                    fontSize: 90,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
-                    letterSpacing: 6,
-                    height: 1.1,
-                  ),
-                ).animate()
-                 .fadeIn(delay: 400.ms, duration: 800.ms, curve: Curves.easeOut)
-                 .blur(delay: 400.ms, duration: 1000.ms, begin: const Offset(12, 0), end: Offset.zero, curve: Curves.easeOutCubic)
-                 .scale(delay: 400.ms, begin: const Offset(1.3, 1.3), end: const Offset(1.0, 1.0), duration: 1200.ms, curve: Curves.easeOutBack)
-                 .shimmer(delay: 1200.ms, duration: 3000.ms, color: Colors.white.withValues(alpha: 0.15)),
+                      'WALLBIZZ',
+                      style: GoogleFonts.bebasNeue(
+                        fontSize: 90,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.white,
+                        letterSpacing: 6,
+                        height: 1.1,
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(
+                      delay: 400.ms,
+                      duration: 800.ms,
+                      curve: Curves.easeOut,
+                    )
+                    .blur(
+                      delay: 400.ms,
+                      duration: 1000.ms,
+                      begin: const Offset(12, 0),
+                      end: Offset.zero,
+                      curve: Curves.easeOutCubic,
+                    )
+                    .scale(
+                      delay: 400.ms,
+                      begin: const Offset(1.3, 1.3),
+                      end: const Offset(1.0, 1.0),
+                      duration: 1200.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .shimmer(
+                      delay: 1200.ms,
+                      duration: 3000.ms,
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
               ],
             ),
           ),

@@ -26,7 +26,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email address'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Enter your email address'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -70,12 +73,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: cs.primary.withValues(alpha: 0.1),
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.3), width: 1),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                     boxShadow: [
-                      BoxShadow(color: cs.primary.withValues(alpha: 0.2), blurRadius: 40, spreadRadius: 5)
+                      BoxShadow(
+                        color: cs.primary.withValues(alpha: 0.2),
+                        blurRadius: 40,
+                        spreadRadius: 5,
+                      ),
                     ],
                   ),
-                  child: Icon(Icons.lock_reset_rounded, size: 56, color: cs.primary),
+                  child: Icon(
+                    Icons.lock_reset_rounded,
+                    size: 56,
+                    color: cs.primary,
+                  ),
                 ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
               ),
               const SizedBox(height: 48),
@@ -106,84 +120,137 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               if (!_sent) ...[
                 TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'Email Address',
-                    hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint),
-                    prefixIcon: Icon(Icons.alternate_email_rounded, color: vk.onSurfaceFaint, size: 22),
-                    filled: true,
-                    fillColor: vk.surfaceContainerLow.withValues(alpha: 0.5),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: vk.glassBorder.withValues(alpha: 0.1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: cs.primary),
-                    ),
-                  ),
-                ).animate().fade(duration: 500.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Email Address',
+                        hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint),
+                        prefixIcon: Icon(
+                          Icons.alternate_email_rounded,
+                          color: vk.onSurfaceFaint,
+                          size: 22,
+                        ),
+                        filled: true,
+                        fillColor: vk.surfaceContainerLow.withValues(
+                          alpha: 0.5,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: vk.glassBorder.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: cs.primary),
+                        ),
+                      ),
+                    )
+                    .animate()
+                    .fade(duration: 500.ms, delay: 200.ms)
+                    .slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
 
                 SizedBox(
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _sendResetEmail,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      foregroundColor: cs.onPrimary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: _isLoading
-                        ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: cs.onPrimary))
-                        : Text(
-                            'SEND RESET LINK',
-                            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1),
-                          ),
-                  ),
-                ).animate().fade(duration: 500.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
-              ] else ...[
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.greenAccent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.3)),
-                    boxShadow: [
-                      BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.05), blurRadius: 20)
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 28),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          'Link successfully sent to:\n${_emailController.text.trim()}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.greenAccent.shade100,
-                            height: 1.4,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _sendResetEmail,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cs.primary,
+                          foregroundColor: cs.onPrimary,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: cs.onPrimary,
+                                ),
+                              )
+                            : Text(
+                                'SEND RESET LINK',
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
                       ),
-                    ],
-                  ),
-                ).animate().fade(duration: 400.ms).scaleXY(begin: 0.9, end: 1.0, curve: Curves.easeOutBack),
+                    )
+                    .animate()
+                    .fade(duration: 500.ms, delay: 300.ms)
+                    .slideY(begin: 0.2, end: 0),
+              ] else ...[
+                Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.greenAccent.withValues(alpha: 0.3),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.greenAccent.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.greenAccent,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'Link successfully sent to:\n${_emailController.text.trim()}',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.greenAccent.shade100,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .animate()
+                    .fade(duration: 400.ms)
+                    .scaleXY(begin: 0.9, end: 1.0, curve: Curves.easeOutBack),
               ],
 
               const Spacer(),
               TextButton.icon(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.arrow_back_rounded, size: 18, color: vk.onSurfaceSubtle),
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 18,
+                  color: vk.onSurfaceSubtle,
+                ),
                 label: Text(
                   'BACK TO SIGN IN',
-                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1, color: vk.onSurfaceSubtle),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    color: vk.onSurfaceSubtle,
+                  ),
                 ),
               ),
               const Spacer(flex: 2),

@@ -92,19 +92,22 @@ class ShareUtils {
 
       final picture = recorder.endRecording();
       final watermarkedImage = await picture.toImage(w, h);
-      final byteData = await watermarkedImage.toByteData(format: ui.ImageByteFormat.png);
+      final byteData = await watermarkedImage.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/wallbizz_share_${DateTime.now().millisecondsSinceEpoch}.png');
+      final file = File(
+        '${tempDir.path}/wallbizz_share_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
       await file.writeAsBytes(byteData!.buffer.asUint8List());
 
       originalImage.dispose();
       watermarkedImage.dispose();
 
       HapticFeedback.lightImpact();
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'Wallbizz Wallpapers',
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], subject: 'Wallbizz Wallpapers'),
       );
     } catch (_) {
       _fallbackShare(imageUrl);
@@ -119,9 +122,11 @@ class ShareUtils {
 
   static void _fallbackShare(String imageUrl) {
     HapticFeedback.lightImpact();
-    Share.share(
-      'Check out this wallpaper from Wallbizz!\n$imageUrl',
-      subject: 'Wallbizz Wallpapers',
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out this wallpaper from Wallbizz!\n$imageUrl',
+        subject: 'Wallbizz Wallpapers',
+      ),
     );
   }
 }

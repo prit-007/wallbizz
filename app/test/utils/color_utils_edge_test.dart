@@ -74,17 +74,26 @@ void main() {
     });
 
     test('preserves red channel', () {
-      final color = ColorUtils.withAlpha(Color.fromRGBO(200, 100, 50, 1.0), 0.5);
+      final color = ColorUtils.withAlpha(
+        Color.fromRGBO(200, 100, 50, 1.0),
+        0.5,
+      );
       expect(color.r, closeTo(200 / 255, 0.01));
     });
 
     test('preserves green channel', () {
-      final color = ColorUtils.withAlpha(Color.fromRGBO(200, 100, 50, 1.0), 0.5);
+      final color = ColorUtils.withAlpha(
+        Color.fromRGBO(200, 100, 50, 1.0),
+        0.5,
+      );
       expect(color.g, closeTo(100 / 255, 0.01));
     });
 
     test('preserves blue channel', () {
-      final color = ColorUtils.withAlpha(Color.fromRGBO(200, 100, 50, 1.0), 0.5);
+      final color = ColorUtils.withAlpha(
+        Color.fromRGBO(200, 100, 50, 1.0),
+        0.5,
+      );
       expect(color.b, closeTo(50 / 255, 0.01));
     });
 
@@ -119,7 +128,13 @@ void main() {
     });
 
     test('hexToColor output is valid Color', () {
-      for (final hex in ['#FF0000', '#00FF00', '#0000FF', '#1a1a2e', '#424153']) {
+      for (final hex in [
+        '#FF0000',
+        '#00FF00',
+        '#0000FF',
+        '#1a1a2e',
+        '#424153',
+      ]) {
         final color = ColorUtils.hexToColor(hex);
         expect(color, isA<Color>());
       }

@@ -60,12 +60,17 @@ class Wallpaper {
       id: 'wh-${map['id'] ?? ''}',
       wallhavenId: map['id'] ?? '',
       urlFull: map['path'] ?? '',
-      urlThumb: (thumbs?['small'] as String?) ?? (thumbs?['original'] as String?) ?? '',
+      urlThumb:
+          (thumbs?['small'] as String?) ??
+          (thumbs?['original'] as String?) ??
+          '',
       resolution: map['resolution'] ?? '',
       width: map['dimension_x'] ?? 0,
       height: map['dimension_y'] ?? 0,
       fileSize: map['file_size'] ?? 0,
-      primaryColor: (colors != null && colors.isNotEmpty) ? colors[0] as String : '#000000',
+      primaryColor: (colors != null && colors.isNotEmpty)
+          ? colors[0] as String
+          : '#000000',
       category: map['category'] ?? 'general',
       sourceQuery: '',
       createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),

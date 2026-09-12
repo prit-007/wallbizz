@@ -61,7 +61,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to resend: $e'), behavior: SnackBarBehavior.floating),
+          SnackBar(
+            content: Text('Failed to resend: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -123,22 +126,36 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             children: [
               const Spacer(flex: 2),
               Center(
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.3), width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.15),
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      )
-                    ],
-                  ),
-                  child: Icon(Icons.mark_email_unread_rounded, size: 64, color: cs.primary),
-                ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(end: 1.05, duration: 1500.ms, curve: Curves.easeInOut),
+                child:
+                    Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: cs.primary.withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: cs.primary.withValues(alpha: 0.15),
+                                blurRadius: 40,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.mark_email_unread_rounded,
+                            size: 64,
+                            color: cs.primary,
+                          ),
+                        )
+                        .animate(onPlay: (c) => c.repeat(reverse: true))
+                        .scaleXY(
+                          end: 1.05,
+                          duration: 1500.ms,
+                          curve: Curves.easeInOut,
+                        ),
               ),
               const SizedBox(height: 48),
               Text(
@@ -164,11 +181,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               const SizedBox(height: 12),
               Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     widget.email,
@@ -188,17 +210,30 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isChecking ? null : _checkConfirmation,
                   icon: _isChecking
-                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: cs.surface))
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: cs.surface,
+                          ),
+                        )
                       : const Icon(Icons.verified_user_rounded, size: 22),
                   label: Text(
                     _isChecking ? 'VERIFYING...' : "I'VE VERIFIED MY EMAIL",
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cs.primary,
                     foregroundColor: cs.onPrimary,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ).animate().fade(duration: 500.ms, delay: 300.ms),
@@ -209,16 +244,31 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _isResending ? null : _resendEmail,
                   icon: _isResending
-                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: vk.onSurfaceSubtle))
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: vk.onSurfaceSubtle,
+                          ),
+                        )
                       : const Icon(Icons.refresh_rounded, size: 22),
                   label: Text(
                     _resent ? 'RESEND AGAIN' : 'RESEND EMAIL',
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ).animate().fade(duration: 500.ms, delay: 400.ms),
@@ -268,26 +318,40 @@ class _VerifiedScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.greenAccent.withValues(alpha: 0.15),
-                    border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4), width: 2),
+                    border: Border.all(
+                      color: Colors.greenAccent.withValues(alpha: 0.4),
+                      width: 2,
+                    ),
                     boxShadow: [
-                      BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.2), blurRadius: 40, spreadRadius: 10)
+                      BoxShadow(
+                        color: Colors.greenAccent.withValues(alpha: 0.2),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
                     ],
                   ),
-                  child: const Icon(Icons.check_circle_rounded, size: 64, color: Colors.greenAccent),
+                  child: const Icon(
+                    Icons.check_circle_rounded,
+                    size: 64,
+                    color: Colors.greenAccent,
+                  ),
                 ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
               ),
               const SizedBox(height: 48),
               Text(
-                'ACCESS\nGRANTED',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.oswald(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 4,
-                  height: 1.1,
-                ),
-              ).animate().fade(duration: 500.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
+                    'ACCESS\nGRANTED',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.oswald(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 4,
+                      height: 1.1,
+                    ),
+                  )
+                  .animate()
+                  .fade(duration: 500.ms, delay: 200.ms)
+                  .slideY(begin: 0.2, end: 0),
               const SizedBox(height: 16),
               Text(
                 'Your account is now active. You can save premium wallpapers and sync them across all your devices.',
@@ -300,26 +364,35 @@ class _VerifiedScreen extends StatelessWidget {
               ).animate().fade(duration: 500.ms, delay: 300.ms),
               const SizedBox(height: 48),
               SizedBox(
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text(
-                    'ENTER WALLBIZZ',
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1.5),
-                  ),
-                ),
-              ).animate().fade(duration: 500.ms, delay: 400.ms).slideY(begin: 0.2, end: 0),
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          (route) => false,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'ENTER WALLBIZZ',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                  )
+                  .animate()
+                  .fade(duration: 500.ms, delay: 400.ms)
+                  .slideY(begin: 0.2, end: 0),
             ],
           ),
         ),

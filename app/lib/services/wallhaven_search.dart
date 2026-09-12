@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/wallpaper.dart';
+import 'api_cache.dart';
 
 class SearchResult {
   final List<Wallpaper> wallpapers;
@@ -28,7 +29,7 @@ class WallhavenSearch {
   final http.Client _httpClient;
 
   WallhavenSearch({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? http.Client();
 
   static String buildPublicURL({
     required String query,
@@ -93,6 +94,8 @@ class WallhavenSearch {
     );
   }
 
+  String _buildCacheKey(String url) => 'search:${url.hashCode}';
+
   Future<SearchResult> searchPublic({
     required String query,
     required int page,
@@ -130,17 +133,37 @@ class WallhavenSearch {
       );
     }
 
+    final cacheKey = _buildCacheKey(url);
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final json = jsonDecode(cached) as Map<String, dynamic>;
+      return parseResponse(json);
+    }
+
     try {
       final response = await _httpClient.get(Uri.parse(url));
       if (response.statusCode == 200) {
+        ApiCache.set(cacheKey, response.body, const Duration(minutes: 5));
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }
       final body = response.body;
       final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: msg,
+      );
     } catch (e) {
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: e.toString(),
+      );
     }
   }
 
@@ -168,20 +191,40 @@ class WallhavenSearch {
       colors: colors,
     );
 
+    final cacheKey = _buildCacheKey(url);
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final json = jsonDecode(cached) as Map<String, dynamic>;
+      return parseResponse(json);
+    }
+
     try {
       final response = await _httpClient.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
+        ApiCache.set(cacheKey, response.body, const Duration(minutes: 5));
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return parseResponse(json);
       }
       final body = response.body;
       final msg = body.isNotEmpty ? body : 'HTTP ${response.statusCode}';
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: msg);
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: msg,
+      );
     } catch (e) {
-      return SearchResult(wallpapers: [], currentPage: 0, lastPage: 0, total: 0, error: e.toString());
+      return SearchResult(
+        wallpapers: [],
+        currentPage: 0,
+        lastPage: 0,
+        total: 0,
+        error: e.toString(),
+      );
     }
   }
 }

@@ -38,15 +38,10 @@ class LocalWallpaperCard extends StatelessWidget {
                   ? Image.file(file, fit: BoxFit.cover)
                   : Container(
                       color: vk.surfaceContainer,
-                      child: Icon(
-                        Icons.broken_image,
-                        color: vk.onSurfaceDim,
-                      ),
+                      child: Icon(Icons.broken_image, color: vk.onSurfaceDim),
                     ),
               if (isSelected)
-                Container(
-                  color: cs.primary.withValues(alpha: 0.25),
-                ),
+                Container(color: cs.primary.withValues(alpha: 0.25)),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -93,7 +88,9 @@ class LocalWallpaperCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: isSelected ? cs.primary : Colors.black.withValues(alpha: 0.4),
+                    color: isSelected
+                        ? cs.primary
+                        : Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -107,9 +104,6 @@ class LocalWallpaperCard extends StatelessWidget {
           ),
         ),
       ),
-    )
-        .animate()
-        .fade(duration: 400.ms)
-        .slideY(begin: 0.15, end: 0);
+    ).animate().fade(duration: 400.ms).slideY(begin: 0.15, end: 0);
   }
 }

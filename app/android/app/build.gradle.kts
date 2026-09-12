@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.wallbizz.app"
-    compileSdk = 36
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -16,24 +16,14 @@ android {
 
     defaultConfig {
         applicationId = "com.wallbizz.app"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    signingConfigs {
-        create("release") {
-            keyAlias = "vivek"
-            keyPassword = "vivek123"
-            storeFile = file("vivek.keystore")
-            storePassword = "vivek123"
-        }
-    }
-
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

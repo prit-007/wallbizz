@@ -10,6 +10,7 @@ class NetworkImageWidget extends StatelessWidget {
   final BoxFit fit;
   final double? width;
   final double? height;
+  final int? memCacheWidth;
 
   const NetworkImageWidget({
     super.key,
@@ -17,6 +18,7 @@ class NetworkImageWidget extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.width,
     this.height,
+    this.memCacheWidth,
   });
 
   String get _url => BackendConfig.proxyImageUrl(imageUrl);
@@ -28,10 +30,12 @@ class NetworkImageWidget extends StatelessWidget {
 
     Widget buildPlaceholder() {
       return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(color: vk.surfaceContainer),
-      ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
+            width: width,
+            height: height,
+            decoration: BoxDecoration(color: vk.surfaceContainer),
+          )
+          .animate(onPlay: (c) => c.repeat())
+          .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
     }
 
     if (kIsWeb) {
@@ -41,9 +45,13 @@ class NetworkImageWidget extends StatelessWidget {
         child: Image.network(
           url,
           fit: fit,
+          cacheWidth: memCacheWidth,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) {
-              return child.animate().fade(duration: 400.ms, curve: Curves.easeOut);
+              return child.animate().fade(
+                duration: 400.ms,
+                curve: Curves.easeOut,
+              );
             }
             return buildPlaceholder();
           },
@@ -60,6 +68,7 @@ class NetworkImageWidget extends StatelessWidget {
       fit: fit,
       width: width,
       height: height,
+      memCacheWidth: memCacheWidth,
       fadeInDuration: const Duration(milliseconds: 400),
       fadeOutDuration: const Duration(milliseconds: 200),
       fadeInCurve: Curves.easeOutCubic,

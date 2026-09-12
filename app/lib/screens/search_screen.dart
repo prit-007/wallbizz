@@ -9,7 +9,8 @@ import '../services/wallhaven_search.dart';
 import '../widgets/wallpaper_card.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import '../services/wallpaper_actions.dart';
-import 'detail_screen.dart';
+import '../services/recent_searches.dart';
+import 'wallpaper_swiper_screen.dart';
 import '../config/theme_config.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -37,6 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late WallhavenSearch _search;
 
   final List<Wallpaper> _results = [];
+  List<String> _recentSearches = [];
   int _page = 0;
   int _lastPage = 0;
   bool _isLoading = false;
@@ -66,6 +68,12 @@ class _SearchScreenState extends State<SearchScreen> {
     _search = WallhavenSearch(httpClient: widget.httpClient);
     _scrollController.addListener(_onScroll);
     _focusNode.addListener(() => setState(() {}));
+    _loadRecentSearches();
+  }
+
+  Future<void> _loadRecentSearches() async {
+    final searches = await RecentSearches.load();
+    if (mounted) setState(() => _recentSearches = searches);
   }
 
   @override
@@ -85,6 +93,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onSearch() {
     _focusNode.unfocus();
+    final query = _controller.text.trim();
+    if (query.isNotEmpty) {
+      RecentSearches.add(query);
+      _loadRecentSearches();
+    }
     _searchQuery(reset: true);
   }
 
@@ -328,7 +341,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             color: cs.primary.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
                       child: Icon(
@@ -357,19 +370,29 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             physics: const BouncingScrollPhysics(),
             children: [
-              _buildPurityChip('SFW', '100', true,
-                  Icons.verified_user_rounded, Colors.greenAccent),
+              _buildPurityChip(
+                'SFW',
+                '100',
+                true,
+                Icons.verified_user_rounded,
+                Colors.greenAccent,
+              ),
               const SizedBox(width: 8),
               _buildPurityChip(
-                  'Sketchy', '110', _isAuthed,
-                  _isAuthed
-                      ? Icons.remove_red_eye_rounded
-                      : Icons.lock_rounded,
-                  Colors.orangeAccent),
+                'Sketchy',
+                '110',
+                _isAuthed,
+                _isAuthed ? Icons.remove_red_eye_rounded : Icons.lock_rounded,
+                Colors.orangeAccent,
+              ),
               const SizedBox(width: 8),
-              _buildPurityChip('NSFW', '111', _isAuthed,
-                  _isAuthed ? Icons.explicit_rounded : Icons.lock_rounded,
-                  Colors.redAccent),
+              _buildPurityChip(
+                'NSFW',
+                '111',
+                _isAuthed,
+                _isAuthed ? Icons.explicit_rounded : Icons.lock_rounded,
+                Colors.redAccent,
+              ),
             ],
           ),
         ),
@@ -454,8 +477,13 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildPurityChip(String label, String value, bool enabled,
-      IconData icon, Color activeAccent) {
+  Widget _buildPurityChip(
+    String label,
+    String value,
+    bool enabled,
+    IconData icon,
+    Color activeAccent,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final isSelected = _purity == value;
@@ -470,9 +498,7 @@ class _SearchScreenState extends State<SearchScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? activeAccent.withValues(alpha: 0.2)
-              : (enabled
-                  ? vk.surfaceContainer
-                  : vk.surfaceContainerHigh),
+              : (enabled ? vk.surfaceContainer : vk.surfaceContainerHigh),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
@@ -625,16 +651,16 @@ class _SearchScreenState extends State<SearchScreen> {
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? cs.primary.withValues(alpha: 0.15)
                             : vk.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isSelected
-                              ? cs.primary
-                              : Colors.transparent,
+                          color: isSelected ? cs.primary : Colors.transparent,
                         ),
                       ),
                       child: Row(
@@ -643,9 +669,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           Text(
                             entry.value,
                             style: GoogleFonts.inter(
-                              color: isSelected
-                                  ? cs.primary
-                                  : cs.onSurface,
+                              color: isSelected ? cs.primary : cs.onSurface,
                               fontSize: 15,
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -653,8 +677,11 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                           ),
                           if (isSelected)
-                            Icon(Icons.check_circle_rounded,
-                                color: cs.primary, size: 20),
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: cs.primary,
+                              size: 20,
+                            ),
                         ],
                       ),
                     ),
@@ -744,7 +771,8 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics()),
+            parent: BouncingScrollPhysics(),
+          ),
           itemCount: _results.length + (_isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == _results.length) {
@@ -752,27 +780,34 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: CircularProgressIndicator(
-                      color: cs.primary, strokeWidth: 2),
+                    color: cs.primary,
+                    strokeWidth: 2,
+                  ),
                 ),
               );
             }
             return WallpaperCard(
-              wallpaper: _results[index],
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => DetailScreen(wallpaper: _results[index]),
-                  ),
+                  wallpaper: _results[index],
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WallpaperSwiperScreen(
+                          wallpapers: _results,
+                          initialIndex: index,
+                        ),
+                      ),
+                    );
+                  },
+                  onHeartTap: () =>
+                      WallpaperActions.handleHeartTap(context, _results[index]),
+                )
+                .animate()
+                .fade(duration: 350.ms)
+                .slideY(
+                  begin: 0.1,
+                  end: 0,
+                  delay: Duration(milliseconds: (index % crossAxisCount) * 40),
                 );
-              },
-              onHeartTap: () => WallpaperActions.handleHeartTap(
-                context,
-                _results[index],
-              ),
-            ).animate().fade(duration: 350.ms).slideY(
-                begin: 0.1,
-                end: 0,
-                delay: Duration(milliseconds: (index % crossAxisCount) * 40));
           },
         );
       },
@@ -788,10 +823,97 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_recentSearches.isNotEmpty) ...[
+            Row(
+              children: [
+                Icon(Icons.history_rounded, color: cs.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'RECENT SEARCHES',
+                  style: GoogleFonts.oswald(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                    color: vk.onSurfaceSubtle,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () async {
+                    await RecentSearches.clear();
+                    _loadRecentSearches();
+                  },
+                  child: Text(
+                    'CLEAR',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _recentSearches.map((query) {
+                return GestureDetector(
+                  onTap: () {
+                    _controller.text = query;
+                    _onSearch();
+                  },
+                  onLongPress: () async {
+                    await RecentSearches.remove(query);
+                    _loadRecentSearches();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: vk.surfaceContainer,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: vk.glassBorder.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.history_rounded,
+                          size: 14,
+                          color: vk.onSurfaceSubtle,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          query,
+                          style: GoogleFonts.inter(
+                            color: cs.onSurface,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 28),
+          ],
+
           Row(
             children: [
-              Icon(Icons.local_fire_department_rounded,
-                  color: cs.primary, size: 20),
+              Icon(
+                Icons.local_fire_department_rounded,
+                color: cs.primary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'POPULAR DISCOVERIES',
@@ -842,12 +964,12 @@ class _SearchScreenState extends State<SearchScreen> {
           itemCount: crossAxisCount * 3,
           itemBuilder: (context, index) {
             return Container(
-              height: heights[index % heights.length],
-              decoration: BoxDecoration(
-                color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            )
+                  height: heights[index % heights.length],
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                )
                 .animate(onPlay: (c) => c.repeat())
                 .shimmer(duration: 1200.ms, color: vk.shimmerHighlight);
           },

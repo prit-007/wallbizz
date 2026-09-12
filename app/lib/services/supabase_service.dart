@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 import '../models/moodboard.dart';
 import '../models/wallpaper.dart';
+import 'api_cache.dart';
 
 class SupabaseService {
   static final SupabaseService instance = SupabaseService._();
@@ -17,10 +18,10 @@ class SupabaseService {
   final String _anonKey = SupabaseConfig.anonKey;
 
   Map<String, String> get _headers => {
-        'apikey': _anonKey,
-        'Authorization': 'Bearer $_anonKey',
-        'Content-Type': 'application/json',
-      };
+    'apikey': _anonKey,
+    'Authorization': 'Bearer $_anonKey',
+    'Content-Type': 'application/json',
+  };
 
   String? get _userToken =>
       Supabase.instance.client.auth.currentSession?.accessToken;
@@ -43,6 +44,13 @@ class SupabaseService {
     int page = 0,
     int pageSize = 24,
   }) async {
+    final cacheKey = 'wallpapers:${category ?? 'all'}:$page';
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final List<dynamic> data = json.decode(cached);
+      return data.map((map) => Wallpaper.fromMap(map)).toList();
+    }
+
     final from = page * pageSize;
     final to = from + pageSize - 1;
 
@@ -54,13 +62,11 @@ class SupabaseService {
     final url = Uri.parse('$_baseUrl/rest/v1/wallpapers?$query');
     final response = await http.get(
       url,
-      headers: {
-        ..._headers,
-        'Range': '$from-$to',
-      },
+      headers: {..._headers, 'Range': '$from-$to'},
     );
 
     if (response.statusCode == 200) {
+      ApiCache.set(cacheKey, response.body, const Duration(minutes: 3));
       final List<dynamic> data = json.decode(response.body);
       return data.map((map) => Wallpaper.fromMap(map)).toList();
     }
@@ -73,16 +79,22 @@ class SupabaseService {
   // ----------------------------------------------------------
 
   Future<List<Wallpaper>> fetchWishlist(String userId) async {
+    final cacheKey = 'wishlist:$userId';
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final List<dynamic> data = json.decode(cached);
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
+    }
+
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/wishlists?select=wallpapers(*),created_at&order=created_at.desc',
+      '$_baseUrl/rest/v1/wishlists?select=wallpapers(*),created_at&user_id=eq.$userId&order=created_at.desc',
     );
     final response = await http.get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
+      ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
       final List<dynamic> data = json.decode(response.body);
-      return data
-          .map((item) => Wallpaper.fromMap(item['wallpapers']))
-          .toList();
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
     }
 
     return [];
@@ -93,27 +105,28 @@ class SupabaseService {
     final response = await http.post(
       url,
       headers: _authHeaders,
-      body: json.encode({
-        'user_id': userId,
-        'wallpaper_id': wallpaperId,
-      }),
+      body: json.encode({'user_id': userId, 'wallpaper_id': wallpaperId}),
     );
 
-    return response.statusCode == 201 || response.statusCode == 200;
+    final success = response.statusCode == 201 || response.statusCode == 200;
+    if (success) ApiCache.invalidatePrefix('wishlist:$userId');
+    return success;
   }
 
   Future<bool> removeFromWishlist(String userId, String wallpaperId) async {
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId',
+      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId',
     );
     final response = await http.delete(url, headers: _authHeaders);
 
-    return response.statusCode == 200 || response.statusCode == 204;
+    final success = response.statusCode == 200 || response.statusCode == 204;
+    if (success) ApiCache.invalidatePrefix('wishlist:$userId');
+    return success;
   }
 
   Future<bool> isInWishlist(String userId, String wallpaperId) async {
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&select=id',
+      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId&select=id',
     );
     final response = await http.get(url, headers: _authHeaders);
 
@@ -130,12 +143,20 @@ class SupabaseService {
   // ----------------------------------------------------------
 
   Future<List<Moodboard>> fetchMoodboards(String userId) async {
+    final cacheKey = 'moodboards:$userId';
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final List<dynamic> data = json.decode(cached);
+      return data.map((map) => Moodboard.fromJson(map)).toList();
+    }
+
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboards?select=id,name,created_at,item_count:moodboard_items(count)&user_id=eq.$userId&order=created_at.desc',
     );
     final response = await http.get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
+      ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
       final List<dynamic> data = json.decode(response.body);
       return data.map((map) => Moodboard.fromJson(map)).toList();
     }
@@ -148,14 +169,12 @@ class SupabaseService {
     final response = await http.post(
       url,
       headers: _authHeaders,
-      body: json.encode({
-        'user_id': userId,
-        'name': name,
-      }),
+      body: json.encode({'user_id': userId, 'name': name}),
     );
 
     if (response.statusCode == 201) {
       moodboardNotifier.value++;
+      ApiCache.invalidatePrefix('moodboards:$userId');
       return Moodboard.fromJson(json.decode(response.body));
     }
 
@@ -163,13 +182,12 @@ class SupabaseService {
   }
 
   Future<bool> deleteMoodboard(String moodboardId) async {
-    final url = Uri.parse(
-      '$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId',
-    );
+    final url = Uri.parse('$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId');
     final response = await http.delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       moodboardNotifier.value++;
+      ApiCache.invalidatePrefix('moodboards:');
       return true;
     }
 
@@ -189,12 +207,16 @@ class SupabaseService {
 
     if (response.statusCode == 201) {
       moodboardNotifier.value++;
+      ApiCache.invalidatePrefix('moodboard_items:$moodboardId');
       return true;
     }
     return false;
   }
 
-  Future<bool> removeFromMoodboard(String moodboardId, String wallpaperId) async {
+  Future<bool> removeFromMoodboard(
+    String moodboardId,
+    String wallpaperId,
+  ) async {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$wallpaperId',
     );
@@ -202,18 +224,27 @@ class SupabaseService {
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       moodboardNotifier.value++;
+      ApiCache.invalidatePrefix('moodboard_items:$moodboardId');
       return true;
     }
     return false;
   }
 
   Future<List<Wallpaper>> fetchMoodboardItems(String moodboardId) async {
+    final cacheKey = 'moodboard_items:$moodboardId';
+    final cached = ApiCache.get(cacheKey);
+    if (cached != null) {
+      final List<dynamic> data = json.decode(cached);
+      return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
+    }
+
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?select=wallpapers(*)&moodboard_id=eq.$moodboardId&order=added_at.desc',
     );
     final response = await http.get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
+      ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
       final List<dynamic> data = json.decode(response.body);
       return data.map((item) => Wallpaper.fromMap(item['wallpapers'])).toList();
     }

@@ -31,24 +31,27 @@ class WallpaperEditorScreen extends StatefulWidget {
   State<WallpaperEditorScreen> createState() => _WallpaperEditorScreenState();
 }
 
-class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with SingleTickerProviderStateMixin {
+class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
+    with SingleTickerProviderStateMixin {
   double _rotation = 0;
   bool _isApplying = false;
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
   late AnimationController _animationController;
   Animation<Matrix4>? _zoomAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..addListener(() {
-        if (_zoomAnimation != null) {
-          _transformationController.value = _zoomAnimation!.value;
-        }
-      });
+    _animationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 300),
+        )..addListener(() {
+          if (_zoomAnimation != null) {
+            _transformationController.value = _zoomAnimation!.value;
+          }
+        });
   }
 
   @override
@@ -82,25 +85,25 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
     final isZoomed = currentMatrix.getMaxScaleOnAxis() > 1.1;
 
     if (isZoomed) {
-      _zoomAnimation = Matrix4Tween(
-        begin: currentMatrix,
-        end: Matrix4.identity(),
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ));
+      _zoomAnimation =
+          Matrix4Tween(begin: currentMatrix, end: Matrix4.identity()).animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
     } else {
       final position = details.localPosition;
       final targetMatrix = Matrix4.identity()
         ..translate(-position.dx * 1.5, -position.dy * 1.5)
         ..scale(2.5);
-      _zoomAnimation = Matrix4Tween(
-        begin: currentMatrix,
-        end: targetMatrix,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ));
+      _zoomAnimation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
+          .animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
     }
     _animationController.forward(from: 0);
   }
@@ -119,12 +122,18 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
           ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
             child: ColorFiltered(
-              colorFilter: ColorFilter.mode(ambientColor.withValues(alpha: 0.3), BlendMode.srcOver),
+              colorFilter: ColorFilter.mode(
+                ambientColor.withValues(alpha: 0.3),
+                BlendMode.srcOver,
+              ),
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 1.5,
                 height: MediaQuery.of(context).size.height * 1.5,
                 child: Transform.translate(
-                  offset: Offset(-MediaQuery.of(context).size.width * 0.25, -MediaQuery.of(context).size.height * 0.25),
+                  offset: Offset(
+                    -MediaQuery.of(context).size.width * 0.25,
+                    -MediaQuery.of(context).size.height * 0.25,
+                  ),
                   child: hasLocalFile
                       ? Image.file(file, fit: BoxFit.cover)
                       : Image.network(widget.urlFull, fit: BoxFit.cover),
@@ -138,7 +147,10 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
               gradient: RadialGradient(
                 center: Alignment.center,
                 radius: 1.0,
-                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.5),
+                ],
                 stops: const [0.2, 1.0],
               ),
             ),
@@ -167,7 +179,13 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
                       : Image.network(
                           widget.urlFull,
                           fit: BoxFit.contain,
-                          loadingBuilder: (context, child, p) => p == null ? child : const Center(child: CircularProgressIndicator(color: Colors.white)),
+                          loadingBuilder: (context, child, p) => p == null
+                              ? child
+                              : const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                 ),
               ),
@@ -175,7 +193,9 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
           ),
 
           Positioned(
-            bottom: 0, left: 0, right: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
             child: Container(
               height: 350,
               decoration: BoxDecoration(
@@ -194,21 +214,31 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
           ),
 
           Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 16,
-            child: _EditorFrostedButton(
-              icon: Icons.arrow_back_ios_new_rounded,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
-              },
-            ),
-          ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: -0.2, end: 0),
+                top: MediaQuery.of(context).padding.top + 12,
+                left: 16,
+                child: _EditorFrostedButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              )
+              .animate()
+              .fade(duration: 400.ms, delay: 200.ms)
+              .slideX(begin: -0.2, end: 0),
 
           Positioned(
-            bottom: 0, left: 0, right: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(24, 40, 24, MediaQuery.of(context).padding.bottom + 24),
+              padding: EdgeInsets.fromLTRB(
+                24,
+                40,
+                24,
+                MediaQuery.of(context).padding.bottom + 24,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -241,18 +271,46 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _EditorCircleButton(icon: Icons.rotate_left_rounded, onTap: _rotateLeft),
+              _EditorCircleButton(
+                icon: Icons.rotate_left_rounded,
+                onTap: _rotateLeft,
+              ),
               const SizedBox(width: 16),
               Column(
                 children: [
-                  Text('$degrees\u00B0', style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text('ROTATION', style: GoogleFonts.oswald(color: Colors.white.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1)),
+                  Text(
+                    '$degrees\u00B0',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'ROTATION',
+                    style: GoogleFonts.oswald(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(width: 16),
-              _EditorCircleButton(icon: Icons.rotate_right_rounded, onTap: _rotateRight),
-              Container(height: 30, width: 1, color: Colors.white.withValues(alpha: 0.2), margin: const EdgeInsets.symmetric(horizontal: 16)),
-              _EditorCircleButton(icon: Icons.filter_center_focus_rounded, onTap: _resetView),
+              _EditorCircleButton(
+                icon: Icons.rotate_right_rounded,
+                onTap: _rotateRight,
+              ),
+              Container(
+                height: 30,
+                width: 1,
+                color: Colors.white.withValues(alpha: 0.2),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              _EditorCircleButton(
+                icon: Icons.filter_center_focus_rounded,
+                onTap: _resetView,
+              ),
             ],
           ),
         ),
@@ -265,19 +323,37 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
       width: double.infinity,
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: _isApplying ? null : () {
-          HapticFeedback.mediumImpact();
-          _showTargetDialog();
-        },
-        icon: _isApplying ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black)) : const Icon(Icons.wallpaper_rounded, color: Colors.black),
+        onPressed: _isApplying
+            ? null
+            : () {
+                HapticFeedback.mediumImpact();
+                _showTargetDialog();
+              },
+        icon: _isApplying
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.black,
+                ),
+              )
+            : const Icon(Icons.wallpaper_rounded, color: Colors.black),
         label: Text(
           _isApplying ? 'APPLYING...' : 'APPLY WALLPAPER',
-          style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.black),
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+            color: Colors.black,
+          ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorUtils.hexToColor(widget.primaryColor),
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -296,24 +372,58 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.8),
-                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.5)),
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1.5,
+                  ),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 48, height: 5,
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(3)),
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ).animate().fade(duration: 400.ms).slideY(begin: 0.5, end: 0),
                   const SizedBox(height: 32),
-                  Text('SET WALLPAPER', style: GoogleFonts.oswald(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2.5, color: Colors.white))
-                    .animate().fade(duration: 400.ms, delay: 80.ms).slideY(begin: 0.3, end: 0),
+                  Text(
+                        'SET WALLPAPER',
+                        style: GoogleFonts.oswald(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                      .animate()
+                      .fade(duration: 400.ms, delay: 80.ms)
+                      .slideY(begin: 0.3, end: 0),
                   const SizedBox(height: 32),
-                  _buildTargetOption('HOME SCREEN', Icons.home_rounded, WallpaperTarget.home, 100),
+                  _buildTargetOption(
+                    'HOME SCREEN',
+                    Icons.home_rounded,
+                    WallpaperTarget.home,
+                    100,
+                  ),
                   const SizedBox(height: 12),
-                  _buildTargetOption('LOCK SCREEN', Icons.lock_rounded, WallpaperTarget.lock, 200),
+                  _buildTargetOption(
+                    'LOCK SCREEN',
+                    Icons.lock_rounded,
+                    WallpaperTarget.lock,
+                    200,
+                  ),
                   const SizedBox(height: 12),
-                  _buildTargetOption('BOTH SCREENS', Icons.phone_android_rounded, WallpaperTarget.both, 300),
+                  _buildTargetOption(
+                    'BOTH SCREENS',
+                    Icons.phone_android_rounded,
+                    WallpaperTarget.both,
+                    300,
+                  ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom),
                 ],
               ),
@@ -324,7 +434,12 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
     );
   }
 
-  Widget _buildTargetOption(String title, IconData icon, WallpaperTarget target, int delay) {
+  Widget _buildTargetOption(
+    String title,
+    IconData icon,
+    WallpaperTarget target,
+    int delay,
+  ) {
     return _TargetOption(
       title: title,
       icon: icon,
@@ -349,7 +464,9 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
       final WallpaperResult result = await AsyncWallpaper.setWallpaper(
         WallpaperRequest(
           target: target,
-          sourceType: hasLocalFile ? WallpaperSourceType.file : WallpaperSourceType.url,
+          sourceType: hasLocalFile
+              ? WallpaperSourceType.file
+              : WallpaperSourceType.url,
           source: hasLocalFile ? widget.localPath : widget.urlFull,
           goToHome: true,
         ),
@@ -359,16 +476,26 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen> with Sing
       ScaffoldMessenger.of(context).clearSnackBars();
 
       if (result.isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wallpaper set successfully!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Wallpaper set successfully!')),
+        );
         Navigator.of(context).pop();
       } else {
         setState(() => _isApplying = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: ${result.error?.message ?? "Unknown error"}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed: ${result.error?.message ?? "Unknown error"}',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isApplying = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 }
@@ -403,7 +530,10 @@ class _EditorFrostedButtonState extends State<_EditorFrostedButton> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.4),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  width: 1,
+                ),
               ),
               child: Icon(widget.icon, color: Colors.white, size: 20),
             ),
@@ -438,7 +568,8 @@ class _EditorCircleButtonState extends State<_EditorCircleButton> {
         scale: _isPressed ? 0.85 : 1.0,
         duration: const Duration(milliseconds: 100),
         child: Container(
-          width: 44, height: 44,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
             shape: BoxShape.circle,
@@ -492,15 +623,33 @@ class _TargetOptionState extends State<_TargetOption> {
             border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             boxShadow: _isPressed
                 ? []
-                : [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))],
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
           child: Row(
             children: [
               Icon(widget.icon, color: Colors.white, size: 24),
               const SizedBox(width: 16),
-              Text(widget.title, style: GoogleFonts.inter(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              Text(
+                widget.title,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
               const Spacer(),
-              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.4), size: 16),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white.withValues(alpha: 0.4),
+                size: 16,
+              ),
             ],
           ),
         ),

@@ -230,10 +230,7 @@ void main() {
 
   group('Wallpaper.fromMap — date parsing', () {
     test('valid ISO date', () {
-      final map = {
-        'id': '1',
-        'created_at': '2024-06-15T14:30:00Z',
-      };
+      final map = {'id': '1', 'created_at': '2024-06-15T14:30:00Z'};
       final wp = Wallpaper.fromMap(map);
       expect(wp.createdAt.year, 2024);
       expect(wp.createdAt.month, 6);
@@ -241,35 +238,39 @@ void main() {
     });
 
     test('valid date with timezone offset', () {
-      final map = {
-        'id': '1',
-        'created_at': '2024-06-15T14:30:00+05:30',
-      };
+      final map = {'id': '1', 'created_at': '2024-06-15T14:30:00+05:30'};
       final wp = Wallpaper.fromMap(map);
       expect(wp.createdAt.year, 2024);
     });
 
     test('empty date string defaults to DateTime.now()', () {
       final before = DateTime.now();
-      final map = {
-        'id': '1',
-        'created_at': '',
-      };
+      final map = {'id': '1', 'created_at': ''};
       final wp = Wallpaper.fromMap(map);
       final after = DateTime.now();
-      expect(wp.createdAt.isAfter(before.subtract(const Duration(seconds: 1))), true);
-      expect(wp.createdAt.isBefore(after.add(const Duration(seconds: 1))), true);
+      expect(
+        wp.createdAt.isAfter(before.subtract(const Duration(seconds: 1))),
+        true,
+      );
+      expect(
+        wp.createdAt.isBefore(after.add(const Duration(seconds: 1))),
+        true,
+      );
     });
 
     test('null date defaults to DateTime.now()', () {
       final before = DateTime.now();
-      final map = <String, dynamic>{
-        'id': '1',
-      };
+      final map = <String, dynamic>{'id': '1'};
       final wp = Wallpaper.fromMap(map);
       final after = DateTime.now();
-      expect(wp.createdAt.isAfter(before.subtract(const Duration(seconds: 1))), true);
-      expect(wp.createdAt.isBefore(after.add(const Duration(seconds: 1))), true);
+      expect(
+        wp.createdAt.isAfter(before.subtract(const Duration(seconds: 1))),
+        true,
+      );
+      expect(
+        wp.createdAt.isBefore(after.add(const Duration(seconds: 1))),
+        true,
+      );
     });
   });
 }

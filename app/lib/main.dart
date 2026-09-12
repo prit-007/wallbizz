@@ -3,15 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/backend_config.dart';
+import 'config/scroll_config.dart';
 import 'config/supabase_config.dart';
 import 'config/theme_config.dart';
+import 'core/logger/logger.dart';
+import 'core/updates/update_checker.dart';
+import 'core/updates/widgets/update_dialog.dart';
 import 'screens/splash_screen.dart';
 import 'utils/share_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (details) {
+    logError(
+      details.exceptionAsString(),
+      error: details.exception,
+      stackTrace: details.stack,
+    );
+  };
   await dotenv.load();
   await Hive.initFlutter();
   await Hive.openBox('downloads');
@@ -60,6 +72,20 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.detached) {
       Hive.close();
     }
+    if (state == AppLifecycleState.resumed) {
+      _checkForUpdates();
+    }
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final checker = UpdateChecker();
+      final update = await checker.checkForUpdate(info.version);
+      if (update != null && mounted) {
+        UpdateDialog.show(context, update);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -70,6 +96,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
         return MaterialApp(
           title: 'Wallbizz',
           debugShowCheckedModeBanner: false,
+          scrollBehavior: WallbizzScrollBehavior(),
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: _lightTheme(),
           darkTheme: _darkTheme(),
@@ -189,14 +216,20 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
 
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return const Color(0xFF7B8CFF);
+          if (states.contains(WidgetState.selected)) {
+            return const Color(0xFF7B8CFF);
+          }
           return const Color(0xFF6B6980);
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return const Color(0xFF2C2C5A);
+          if (states.contains(WidgetState.selected)) {
+            return const Color(0xFF2C2C5A);
+          }
           return const Color(0xFF1E1E3A);
         }),
-        trackOutlineColor: WidgetStateProperty.resolveWith((_) => Colors.transparent),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (_) => Colors.transparent,
+        ),
       ),
 
       chipTheme: ChipThemeData(
@@ -214,9 +247,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           color: const Color(0xFF0F0F23),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: BorderSide.none,
       ),
 
@@ -228,7 +259,10 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
         ),
       ),
 
@@ -255,7 +289,10 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF7B8CFF), width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         prefixIconColor: const Color(0xFF6B6980),
         suffixIconColor: const Color(0xFF6B6980),
       ),
@@ -282,9 +319,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           fontSize: 14,
           color: const Color(0xFFEEEDF5),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
 
@@ -296,17 +331,13 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
       cardTheme: CardThemeData(
         color: const Color(0xFF18182E),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       popupMenuTheme: PopupMenuThemeData(
         color: const Color(0xFF1C1C2E),
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -421,14 +452,20 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
 
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return const Color(0xFF4A5BD9);
+          if (states.contains(WidgetState.selected)) {
+            return const Color(0xFF4A5BD9);
+          }
           return const Color(0xFF8B8A9E);
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return const Color(0xFFC4CAFF);
+          if (states.contains(WidgetState.selected)) {
+            return const Color(0xFFC4CAFF);
+          }
           return const Color(0xFFDFDDE8);
         }),
-        trackOutlineColor: WidgetStateProperty.resolveWith((_) => Colors.transparent),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (_) => Colors.transparent,
+        ),
       ),
 
       chipTheme: ChipThemeData(
@@ -446,9 +483,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           color: const Color(0xFFFFFFFF),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         side: BorderSide.none,
       ),
 
@@ -460,7 +495,10 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
         ),
       ),
 
@@ -487,7 +525,10 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF4A5BD9), width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         prefixIconColor: const Color(0xFF8B8A9E),
         suffixIconColor: const Color(0xFF8B8A9E),
       ),
@@ -514,9 +555,7 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           fontSize: 14,
           color: const Color(0xFFF8F7FF),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
 
@@ -528,17 +567,13 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
       cardTheme: CardThemeData(
         color: const Color(0xFFFFFFFF),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       popupMenuTheme: PopupMenuThemeData(
         color: const Color(0xFFFFFFFF),
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

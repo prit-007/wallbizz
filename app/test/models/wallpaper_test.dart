@@ -23,7 +23,10 @@ void main() {
 
       expect(wallpaper.id, 'uuid-123');
       expect(wallpaper.wallhavenId, '94x38z');
-      expect(wallpaper.urlFull, 'https://w.wallhaven.cc/full/94/wallhaven-94x38z.jpg');
+      expect(
+        wallpaper.urlFull,
+        'https://w.wallhaven.cc/full/94/wallhaven-94x38z.jpg',
+      );
       expect(wallpaper.urlThumb, 'https://th.wallhaven.cc/orig/94/94x38z.jpg');
       expect(wallpaper.resolution, '3840x2160');
       expect(wallpaper.width, 3840);
@@ -35,9 +38,7 @@ void main() {
     });
 
     test('handles missing fields gracefully', () {
-      final map = <String, dynamic>{
-        'id': 'uuid-456',
-      };
+      final map = <String, dynamic>{'id': 'uuid-456'};
 
       final wallpaper = Wallpaper.fromMap(map);
 
@@ -54,10 +55,7 @@ void main() {
     });
 
     test('parses invalid date gracefully', () {
-      final map = {
-        'id': 'uuid-789',
-        'created_at': 'not-a-date',
-      };
+      final map = {'id': 'uuid-789', 'created_at': 'not-a-date'};
 
       final wallpaper = Wallpaper.fromMap(map);
       expect(wallpaper.createdAt, isA<DateTime>());
@@ -139,51 +137,82 @@ void main() {
       );
 
       // 0 / 0 in Dart = NaN (not an exception), but we should be aware
-      expect(wallpaper.aspectRatio.isNaN || wallpaper.aspectRatio.isInfinite, true);
+      expect(
+        wallpaper.aspectRatio.isNaN || wallpaper.aspectRatio.isInfinite,
+        true,
+      );
     });
   });
 
   group('Wallpaper.formattedFileSize', () {
     test('formats bytes to KB', () {
       final wallpaper = Wallpaper(
-        id: '1', wallhavenId: '', urlFull: '', urlThumb: '',
-        resolution: '', width: 0, height: 0,
+        id: '1',
+        wallhavenId: '',
+        urlFull: '',
+        urlThumb: '',
+        resolution: '',
+        width: 0,
+        height: 0,
         fileSize: 512000,
-        primaryColor: '#000000', category: 'general',
-        sourceQuery: '', createdAt: DateTime.now(),
+        primaryColor: '#000000',
+        category: 'general',
+        sourceQuery: '',
+        createdAt: DateTime.now(),
       );
       expect(wallpaper.formattedFileSize, '500.0 KB');
     });
 
     test('formats bytes to MB', () {
       final wallpaper = Wallpaper(
-        id: '1', wallhavenId: '', urlFull: '', urlThumb: '',
-        resolution: '', width: 0, height: 0,
+        id: '1',
+        wallhavenId: '',
+        urlFull: '',
+        urlThumb: '',
+        resolution: '',
+        width: 0,
+        height: 0,
         fileSize: 4200000,
-        primaryColor: '#000000', category: 'general',
-        sourceQuery: '', createdAt: DateTime.now(),
+        primaryColor: '#000000',
+        category: 'general',
+        sourceQuery: '',
+        createdAt: DateTime.now(),
       );
       expect(wallpaper.formattedFileSize, '4.0 MB');
     });
 
     test('formats exactly 1MB', () {
       final wallpaper = Wallpaper(
-        id: '1', wallhavenId: '', urlFull: '', urlThumb: '',
-        resolution: '', width: 0, height: 0,
+        id: '1',
+        wallhavenId: '',
+        urlFull: '',
+        urlThumb: '',
+        resolution: '',
+        width: 0,
+        height: 0,
         fileSize: 1048576,
-        primaryColor: '#000000', category: 'general',
-        sourceQuery: '', createdAt: DateTime.now(),
+        primaryColor: '#000000',
+        category: 'general',
+        sourceQuery: '',
+        createdAt: DateTime.now(),
       );
       expect(wallpaper.formattedFileSize, '1.0 MB');
     });
 
     test('formats zero bytes', () {
       final wallpaper = Wallpaper(
-        id: '1', wallhavenId: '', urlFull: '', urlThumb: '',
-        resolution: '', width: 0, height: 0,
+        id: '1',
+        wallhavenId: '',
+        urlFull: '',
+        urlThumb: '',
+        resolution: '',
+        width: 0,
+        height: 0,
         fileSize: 0,
-        primaryColor: '#000000', category: 'general',
-        sourceQuery: '', createdAt: DateTime.now(),
+        primaryColor: '#000000',
+        category: 'general',
+        sourceQuery: '',
+        createdAt: DateTime.now(),
       );
       expect(wallpaper.formattedFileSize, '0.0 KB');
     });
@@ -211,7 +240,10 @@ void main() {
       final wallpaper = Wallpaper.fromWallhavenMap(map);
 
       expect(wallpaper.wallhavenId, '94x38z');
-      expect(wallpaper.urlFull, 'https://w.wallhaven.cc/full/94/wallhaven-94x38z.jpg');
+      expect(
+        wallpaper.urlFull,
+        'https://w.wallhaven.cc/full/94/wallhaven-94x38z.jpg',
+      );
       expect(wallpaper.urlThumb, 'https://th.wallhaven.cc/small/94/94x38z.jpg');
       expect(wallpaper.resolution, '6742x3534');
       expect(wallpaper.width, 6742);
@@ -232,7 +264,11 @@ void main() {
         'file_size': 1000000,
         'category': 'general',
         'colors': ['#ff0000', '#00ff00', '#0000ff'],
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
@@ -249,7 +285,11 @@ void main() {
         'file_size': 1000000,
         'category': 'general',
         'colors': <String>[],
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
@@ -265,7 +305,11 @@ void main() {
         'dimension_y': 1080,
         'file_size': 1000000,
         'category': 'general',
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
@@ -282,7 +326,11 @@ void main() {
         'file_size': 1000000,
         'category': 'general',
         'colors': <String>['#000000'],
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
@@ -316,7 +364,11 @@ void main() {
         'file_size': 0,
         'category': 'general',
         'colors': <String>['#000000'],
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
@@ -334,7 +386,11 @@ void main() {
         'file_size': 1000000,
         'category': 'general',
         'colors': <String>['#000000'],
-        'thumbs': {'large': '', 'original': 'https://example.com/thumb.jpg', 'small': ''},
+        'thumbs': {
+          'large': '',
+          'original': 'https://example.com/thumb.jpg',
+          'small': '',
+        },
       };
 
       final wallpaper = Wallpaper.fromWallhavenMap(map);
