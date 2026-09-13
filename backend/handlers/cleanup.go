@@ -31,7 +31,7 @@ func CleanupOldWallpapers(cfg config.Config) (int, error) {
 	url := fmt.Sprintf("%s/rest/v1/wallpapers?created_at=lt.%s", cfg.SupabaseURL, cutoffStr)
 
 	if len(protectedIDs) > 0 {
-		url += "&id=not.in." + strings.Join(protectedIDs, ",")
+		url += "&id=not.in.(" + strings.Join(protectedIDs, ",") + ")"
 	}
 
 	req, err := http.NewRequest("DELETE", url, nil)

@@ -11,12 +11,14 @@ jobs:
     steps:
       - name: Trigger sync
         run: |
-          curl -sf -X POST "${{ secrets.BACKEND_URL }}/api/v1/sync" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" || {
-            echo "Sync trigger failed"
+          HTTP_CODE=$(curl -s -o /tmp/sync_response.txt -w "%{http_code}" -X POST "${{ secrets.BACKEND_URL }}/api/v1/sync" -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          cat /tmp/sync_response.txt
+          echo ""
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "Sync trigger failed with HTTP $HTTP_CODE"
             exit 1
-          }
-          echo "Sync triggered successfully"
+          fi
+          echo "Sync triggered successfully (HTTP $HTTP_CODE)"
 
       - name: Wait for sync to complete
         run: sleep 30
