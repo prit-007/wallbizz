@@ -1,11 +1,25 @@
 package handlers
 
 import (
+	"time"
+
 	"wallpaper-backend/config"
 	"wallpaper-backend/logger"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+var istLocation = func() *time.Location {
+	loc, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		return time.UTC
+	}
+	return loc
+}()
+
+func istNow() string {
+	return time.Now().In(istLocation).Format("2006-01-02 15:04:05 IST")
+}
 
 // TriggerSync godoc
 // @Summary Trigger a manual sync
@@ -16,10 +30,12 @@ import (
 // @Router /sync [post]
 func TriggerSync(cfg config.Config) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		logger.Log().Info().Msg("Manual sync triggered via API")
+		now := istNow()
+		logger.Log().Info().Str("time_ist", now).Msg("Manual sync triggered via API")
 		go FetchAndSyncWallpapers(cfg)
 		return c.JSON(fiber.Map{
 			"status": "sync triggered",
+			"time_ist": now,
 		})
 	}
 }
@@ -35,7 +51,8 @@ func HealthCheck() func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		logger.Log().Debug().Msg("Health check requested")
 		return c.JSON(fiber.Map{
-			"status": "ok",
+			"status":   "ok",
+			"time_ist": istNow(),
 		})
 	}
 }

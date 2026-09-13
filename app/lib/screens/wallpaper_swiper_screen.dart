@@ -316,10 +316,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
           ),
 
           // Right: sidebar panel
-          SizedBox(
-            width: 380,
-            child: _buildDesktopSidebar(),
-          ),
+          SizedBox(width: 380, child: _buildDesktopSidebar()),
         ],
       ),
     );
@@ -836,9 +833,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -854,7 +849,9 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           CircularProgressIndicator(
                             value: value > 0 ? value : null,
                             strokeWidth: 4,
-                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.1,
+                            ),
                             valueColor: AlwaysStoppedAnimation<Color>(
                               ColorUtils.hexToColor(
                                 _currentWallpaper.primaryColor,

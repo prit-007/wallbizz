@@ -33,23 +33,24 @@ var httpClient = &http.Client{Timeout: httpTimeout}
 
 func FetchAndSyncWallpapers(cfg config.Config) {
 	log := logger.Log()
-	log.Info().Int("categories", len(categoryQueryMap)).Msg("Starting Wallhaven sync")
+	started := istNow()
+	log.Info().Str("time_ist", started).Int("categories", len(categoryQueryMap)).Msg("Starting Wallhaven sync")
 
 	for category, extraParams := range categoryQueryMap {
-		log.Info().Str("category", category).Msg("Syncing category")
+		log.Info().Str("category", category).Str("time_ist", istNow()).Msg("Syncing category")
 		count := fetchCategory(cfg, category, extraParams)
 		if count > 0 {
-			log.Info().Str("category", category).Int("count", count).Msg("Wallpapers synced")
+			log.Info().Str("category", category).Int("count", count).Str("time_ist", istNow()).Msg("Wallpapers synced")
 		}
 	}
 
-	log.Info().Msg("All categories synced successfully")
+	log.Info().Str("time_ist", istNow()).Msg("All categories synced successfully")
 
-	log.Info().Msg("Running cleanup of old wallpapers")
+	log.Info().Str("time_ist", istNow()).Msg("Running cleanup of old wallpapers")
 	if _, err := CleanupOldWallpapers(cfg); err != nil {
-		log.Error().Err(err).Msg("Cleanup failed after sync")
+		log.Error().Err(err).Str("time_ist", istNow()).Msg("Cleanup failed after sync")
 	} else {
-		log.Info().Msg("Cleanup completed successfully")
+		log.Info().Str("time_ist", istNow()).Msg("Cleanup completed successfully")
 	}
 }
 

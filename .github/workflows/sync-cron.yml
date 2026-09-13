@@ -2,8 +2,7 @@ name: Sync Wallpapers
 
 on:
   schedule:
-    - cron: '0 2,14 * * *'  # 2 AM and 2 PM UTC daily
-  workflow_dispatch:         # Manual trigger
+    - cron: '30 20,8 * * *'  # 2 AM and 2 PM IST (8:30 PM and 8:30 AM UTC)
 
 jobs:
   sync:

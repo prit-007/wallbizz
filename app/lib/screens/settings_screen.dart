@@ -370,7 +370,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return _buildMobileLayout(cs, vk, bottomInset);
   }
 
-  Widget _buildDesktopLayout(ColorScheme cs, VivekColors vk, double bottomInset) {
+  Widget _buildDesktopLayout(
+    ColorScheme cs,
+    VivekColors vk,
+    double bottomInset,
+  ) {
     final categories = [
       'PREFERENCES',
       if (!kIsWeb) 'DOWNLOAD LOCATION',
@@ -387,7 +391,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(
               width: 240,
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 12,
+                ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final isSelected = _selectedCategory == index;
@@ -406,8 +413,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             color: isSelected
                                 ? cs.primary.withValues(alpha: 0.12)
                                 : isHovered
-                                    ? vk.surfaceContainer
-                                    : Colors.transparent,
+                                ? vk.surfaceContainer
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -449,7 +456,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildMobileLayout(ColorScheme cs, VivekColors vk, double bottomInset) {
+  Widget _buildMobileLayout(
+    ColorScheme cs,
+    VivekColors vk,
+    double bottomInset,
+  ) {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 24, 20, bottomInset + 100),
       physics: const BouncingScrollPhysics(),
