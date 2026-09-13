@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_filex/open_filex.dart';
@@ -45,7 +46,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
   UpdateInfo get _info => widget.updateInfo;
 
   Future<void> _downloadAndInstall() async {
-    if (_info.apkUrl == null) return;
+    final url = _info.platformDownloadUrl;
+    if (url == null) return;
 
     setState(() {
       _isDownloading = true;
@@ -55,11 +57,11 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
     try {
       final client = http.Client();
-      final request = http.Request('GET', Uri.parse(_info.apkUrl!));
+      final request = http.Request('GET', Uri.parse(url));
       final response = await client.send(request);
 
       final dir = await getTemporaryDirectory();
-      final filePath = '${dir.path}/wallbizz_update.apk';
+      final filePath = '${dir.path}/${_info.platformFileName}';
       final file = File(filePath);
 
       final sink = file.openWrite();
@@ -79,7 +81,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
         setState(() => _isDownloading = false);
         final result = await OpenFilex.open(filePath);
         if (result.type != ResultType.done && mounted) {
-          setState(() => _error = 'Could not open APK file');
+          setState(() => _error = 'Could not open file. Check your downloads.');
         }
       }
     } catch (e) {
@@ -130,8 +132,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             color: cs.primary.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            Icons.system_update_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSystemUpdate01,
                             color: cs.primary,
                             size: 32,
                           ),
@@ -163,8 +165,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         _versionPill('Current', widget.currentVersion, vk),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Icon(
-                            Icons.arrow_forward_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedArrowRight01,
                             color: cs.primary,
                             size: 18,
                           ),
@@ -289,7 +291,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           child: GestureDetector(
                             onTap: _isDownloading
                                 ? null
-                                : (_info.apkUrl != null
+                                : (_info.hasDirectDownload
                                       ? _downloadAndInstall
                                       : _openReleasePage),
                             child: Container(
@@ -300,7 +302,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                               ),
                               child: Center(
                                 child: Text(
-                                  _info.apkUrl != null
+                                  _info.hasDirectDownload
                                       ? 'UPDATE'
                                       : 'VIEW RELEASE',
                                   style: GoogleFonts.inter(

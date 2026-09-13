@@ -1,0 +1,42 @@
+name: Flutter prep
+description: Install deps and setup env. Shared by all CI jobs.
+
+inputs:
+  supabase-url:
+    description: 'Supabase URL'
+    required: false
+    default: ''
+  supabase-anon-key:
+    description: 'Supabase anon key'
+    required: false
+    default: ''
+  backend-url:
+    description: 'Backend URL'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Create .env
+      shell: bash
+      working-directory: app
+      run: |
+        cat > .env << EOF
+        SUPABASE_URL=${{ inputs.supabase-url }}
+        SUPABASE_ANON_KEY=${{ inputs.supabase-anon-key }}
+        BACKEND_URL=${{ inputs.backend-url }}
+        EOF
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: app
+      run: flutter pub get
+
+    - name: Extract App Version
+      shell: bash
+      working-directory: app
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | tr -d '\r' | sed -E 's/\+[0-9]+$//')
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Resolved version: $VERSION"

@@ -1,0 +1,8 @@
+# Android signing configuration
+# Copy this file to key.properties and fill in the values.
+# NEVER commit key.properties to version control.
+
+storePassword=
+keyPassword=
+keyAlias=wallbizz
+storeFile=path/to/your/wallbizz.keystore

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
@@ -12,6 +13,7 @@ import '../widgets/hover_builder.dart';
 import '../core/updates/update_checker.dart';
 import '../core/updates/widgets/update_dialog.dart';
 import 'logs_screen.dart';
+import 'settings_about_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -92,8 +94,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                          Icons.person_off_rounded,
+                    HugeIcon(
+                          icon: HugeIcons.strokeRoundedUserBlock01,
                           size: 48,
                           color: Colors.redAccent.withValues(alpha: 0.9),
                         )
@@ -250,8 +252,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                          Icons.warning_amber_rounded,
+                    HugeIcon(
+                          icon: HugeIcons.strokeRoundedAlert01,
                           size: 48,
                           color: Colors.orange.withValues(alpha: 0.8),
                         )
@@ -586,7 +588,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           key: 'pictures',
           title: 'Pictures',
           subtitle: 'Visible in gallery, persists after uninstall',
-          icon: Icons.photo_library_outlined,
+          icon: HugeIcons.strokeRoundedImage02,
           colorAccent: Colors.blueAccent,
         ),
         const SizedBox(height: 12),
@@ -594,7 +596,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           key: 'download',
           title: 'Downloads',
           subtitle: 'Visible in Files app, persists after uninstall',
-          icon: Icons.download_outlined,
+          icon: HugeIcons.strokeRoundedDownload02,
           colorAccent: Colors.green,
         ),
         const SizedBox(height: 12),
@@ -602,7 +604,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           key: 'app_private',
           title: 'App Storage',
           subtitle: 'Hidden from gallery, deleted with app',
-          icon: Icons.lock_outline_rounded,
+          icon: HugeIcons.strokeRoundedCircleLock01,
           colorAccent: Colors.orange,
         ),
       ],
@@ -640,7 +642,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.person_rounded, size: 20, color: cs.primary),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedUser02,
+                          size: 20,
+                          color: cs.primary,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -673,8 +679,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _signOut,
-                        icon: const Icon(
-                          Icons.logout_rounded,
+                        icon: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedLogout01,
                           size: 18,
                           color: Colors.white,
                         ),
@@ -702,7 +708,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _deleteAccount,
-                        icon: const Icon(Icons.person_off_rounded, size: 18),
+                        icon: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedUserBlock01,
+                          size: 18,
+                        ),
                         label: Text(
                           'DELETE ACCOUNT',
                           style: GoogleFonts.inter(
@@ -737,8 +746,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () {
                     showAuthBottomSheet(context);
                   },
-                  icon: const Icon(
-                    Icons.login_rounded,
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedLogin01,
                     size: 18,
                     color: Colors.white,
                   ),
@@ -785,7 +794,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 16),
 
         _buildSettingsTile(
-          icon: Icons.description_outlined,
+          icon: HugeIcons.strokeRoundedFile01,
           title: 'App Logs',
           subtitle: 'View system diagnostics and debug info',
           onTap: () {
@@ -796,7 +805,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 12),
         _buildSettingsTile(
-          icon: Icons.system_update_rounded,
+          icon: HugeIcons.strokeRoundedSystemUpdate01,
           title: 'Check for Updates',
           subtitle: _appVersion.isNotEmpty
               ? 'Wallbizz v$_appVersion'
@@ -805,7 +814,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             final info = await PackageInfo.fromPlatform();
             final checker = UpdateChecker();
             final update = await checker.checkForUpdate(info.version);
-            if (!context.mounted) return;
+            if (!mounted) return;
             if (update != null) {
               UpdateDialog.show(context, update, currentVersion: info.version);
             } else {
@@ -820,17 +829,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 12),
         _buildSettingsTile(
-          icon: Icons.info_outline_rounded,
+          icon: HugeIcons.strokeRoundedInformationCircle,
           title: 'About Wallbizz',
           subtitle: 'Premium curated wallpapers',
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsAboutScreen()),
+            );
+          },
         ),
       ],
     );
   }
 
   Widget _buildSettingsTile({
-    required IconData icon,
+    required dynamic icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
@@ -859,7 +872,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: cs.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: cs.primary, size: 24),
+              child: HugeIcon(icon: icon, color: cs.primary, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -885,8 +898,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               color: vk.onSurfaceSubtle,
               size: 22,
             ),
@@ -900,7 +913,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String key,
     required String title,
     required String subtitle,
-    required IconData icon,
+    required dynamic icon,
     required Color colorAccent,
   }) {
     final cs = Theme.of(context).colorScheme;
@@ -944,8 +957,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     : vk.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                icon,
+              child: HugeIcon(
+                icon: icon,
                 color: isSelected ? cs.primary : vk.onSurfaceSubtle,
                 size: 24,
               ),
@@ -987,8 +1000,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: AnimatedScale(
                 duration: const Duration(milliseconds: 250),
                 scale: isSelected ? 1.0 : 0.5,
-                child: Icon(
-                  Icons.check_circle_rounded,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                   color: cs.primary,
                   size: 26,
                 ),

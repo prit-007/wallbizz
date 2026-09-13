@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../config/theme_config.dart';
 import '../models/downloaded_wallpaper.dart';
@@ -38,7 +39,10 @@ class LocalWallpaperCard extends StatelessWidget {
                   ? Image.file(file, fit: BoxFit.cover)
                   : Container(
                       color: vk.surfaceContainer,
-                      child: Icon(Icons.broken_image, color: vk.onSurfaceDim),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedImageNotFound01,
+                        color: vk.onSurfaceDim,
+                      ),
                     ),
               if (isSelected)
                 Container(color: cs.primary.withValues(alpha: 0.25)),
@@ -93,8 +97,10 @@ class LocalWallpaperCard extends StatelessWidget {
                         : Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    isSelected ? Icons.check_circle : Icons.check,
+                  child: HugeIcon(
+                    icon: isSelected
+                        ? HugeIcons.strokeRoundedCheckmarkCircle01
+                        : HugeIcons.strokeRoundedCheckmarkCircle01,
                     color: cs.onSurface,
                     size: 14,
                   ),

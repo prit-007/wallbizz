@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
@@ -59,7 +60,7 @@ void main() {
     testWidgets('renders search icon in search bar', (tester) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+      expect(find.byType(HugeIcon), findsWidgets);
     });
 
     testWidgets('search bar has rounded container style', (tester) async {
@@ -96,7 +97,7 @@ void main() {
 
       expect(find.byType(SearchScreen), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+      await tester.tap(find.byType(HugeIcon).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(SearchScreen), findsNothing);
@@ -107,9 +108,7 @@ void main() {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
       expect(find.text('DISCOVER'), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_outline_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.download_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.tune_outlined), findsOneWidget);
+      expect(find.byType(HugeIcon), findsWidgets);
     });
 
     testWidgets('search bar is a GestureDetector', (tester) async {

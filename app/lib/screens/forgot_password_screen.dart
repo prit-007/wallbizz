@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -85,8 +86,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.lock_reset_rounded,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCircleLock01,
                     size: 56,
                     color: cs.primary,
                   ),
@@ -129,8 +130,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       decoration: InputDecoration(
                         hintText: 'Email Address',
                         hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint),
-                        prefixIcon: Icon(
-                          Icons.alternate_email_rounded,
+                        prefixIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMailAtSign01,
                           color: vk.onSurfaceFaint,
                           size: 22,
                         ),
@@ -210,8 +211,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.check_circle_rounded,
+                          const HugeIcon(
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                             color: Colors.greenAccent,
                             size: 28,
                           ),
@@ -238,8 +239,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               const Spacer(),
               TextButton.icon(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(
-                  Icons.arrow_back_rounded,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
                   size: 18,
                   color: vk.onSurfaceSubtle,
                 ),

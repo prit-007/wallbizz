@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/wallpaper.dart';
@@ -130,10 +131,10 @@ class _WallpaperCardState extends State<WallpaperCard> {
                                   child: Container(
                                     padding: const EdgeInsets.all(7),
                                     color: Colors.black.withValues(alpha: 0.35),
-                                    child: Icon(
-                                      widget.isWishlisted
-                                          ? Icons.favorite_rounded
-                                          : Icons.favorite_outline_rounded,
+                                    child: HugeIcon(
+                                      icon: widget.isWishlisted
+                                          ? HugeIcons.strokeRoundedFavourite
+                                          : HugeIcons.strokeRoundedFavourite,
                                       color: widget.isWishlisted
                                           ? Colors.redAccent
                                           : Colors.white,

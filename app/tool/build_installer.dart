@@ -11,13 +11,14 @@ import 'dart:io';
 ///              the Inno Setup compiler. Use this to validate the script on any host.
 ///   --iscc     Absolute path to ISCC.exe when it is not resolvable from PATH.
 
-const _publisher = "Wallbizz";
+const _publisher = "Developer's Paradise";
 const _homeUrl = 'https://github.com/prit-007/wallbizz';
 const _appId = '{{a3b1c4d5-e6f7-4890-ab12-cd34ef56ab78}}';
 
 const _releaseDir = 'build/windows/x64/runner/Release';
 const _exeName = 'wallbizz.exe';
 const _iconPath = 'windows/runner/resources/app_icon.ico';
+const _licensePath = 'LICENSE';
 const _outputDir = 'build/installers';
 
 void main(List<String> args) {
@@ -74,6 +75,11 @@ String _buildIss(String version, File exe) {
   final icon = File(_iconPath).absolute.path;
   final outputDir = Directory(_outputDir).absolute.path;
 
+  final hasLicense = File(_licensePath).existsSync();
+  final licenseSection = hasLicense
+      ? 'LicenseFile=${File(_licensePath).absolute.path}'
+      : '';
+
   return '''
 [Setup]
 AppId=$_appId
@@ -86,32 +92,62 @@ AppSupportURL=$_homeUrl
 AppUpdatesURL=$_homeUrl
 DefaultDirName={localappdata}\\Wallbizz
 DefaultGroupName=Wallbizz
-DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 WizardStyle=modern
+WizardSizePercent=110
 OutputDir=$outputDir
 OutputBaseFilename=wallbizz_setup_$version
 SetupIconFile=$icon
-Compression=lzma2
+UninstallDisplayIcon={app}\\$_exeName
+Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\\$_exeName
 CloseApplications=yes
+RestartApplications=no
+DisableProgramGroupPage=yes
+$licenseSection
+VersionInfoVersion=$version
+VersionInfoCompany=$_publisher
+VersionInfoDescription=Wallbizz - Premium Curated Wallpapers
+VersionInfoCopyright=Copyright (c) $_publisher
+VersionInfoProductName=Wallbizz
+VersionInfoProductVersion=$version
+MinVersion=10.0.17763
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\\BrazilianPortuguese.isl"
+Name: "czech"; MessagesFile: "compiler:Languages\\Czech.isl"
+Name: "dutch"; MessagesFile: "compiler:Languages\\Dutch.isl"
+Name: "french"; MessagesFile: "compiler:Languages\\French.isl"
+Name: "german"; MessagesFile: "compiler:Languages\\German.isl"
+Name: "italian"; MessagesFile: "compiler:Languages\\Italian.isl"
+Name: "polish"; MessagesFile: "compiler:Languages\\Polish.isl"
+Name: "russian"; MessagesFile: "compiler:Languages\\Russian.isl"
+Name: "spanish"; MessagesFile: "compiler:Languages\\Spanish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1
 
 [Files]
 Source: "$exePath"; DestDir: "{app}"; Flags: ignoreversion
 Source: "$releaseDir\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
+Name: "{group}\\Wallbizz"; Filename: "{app}\\$_exeName"; Comment: "Launch Wallbizz"
+Name: "{group}\\Wallbizz Website"; Filename: "$_homeUrl"
+Name: "{group}\\{cm:UninstallProgram,Wallbizz}"; Filename: "{uninstallexe}"
 Name: "{autoprograms}\\Wallbizz"; Filename: "{app}\\$_exeName"
 Name: "{autodesktop}\\Wallbizz"; Filename: "{app}\\$_exeName"; Tasks: desktopicon
+Name: "{userappdata}\\Microsoft\\Internet Explorer\\Quick Launch\\Wallbizz"; Filename: "{app}\\$_exeName"; Tasks: quicklaunchicon
 
 [Run]
 Filename: "{app}\\$_exeName"; Description: "{cm:LaunchProgram,Wallbizz}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}"
 ''';
 }
 

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -53,7 +54,7 @@ Future<void> showSetWallpaperDialog(
               const SizedBox(height: 32),
               _WallpaperOption(
                 title: 'HOME SCREEN',
-                icon: Icons.home_rounded,
+                icon: HugeIcons.strokeRoundedHome01,
                 target: WallpaperTarget.home,
                 urlFull: urlFull,
                 delay: 100,
@@ -61,7 +62,7 @@ Future<void> showSetWallpaperDialog(
               const SizedBox(height: 12),
               _WallpaperOption(
                 title: 'LOCK SCREEN',
-                icon: Icons.lock_rounded,
+                icon: HugeIcons.strokeRoundedLock,
                 target: WallpaperTarget.lock,
                 urlFull: urlFull,
                 delay: 200,
@@ -69,7 +70,7 @@ Future<void> showSetWallpaperDialog(
               const SizedBox(height: 12),
               _WallpaperOption(
                 title: 'BOTH SCREENS',
-                icon: Icons.phone_android_rounded,
+                icon: HugeIcons.strokeRoundedSmartPhone01,
                 target: WallpaperTarget.both,
                 urlFull: urlFull,
                 delay: 300,
@@ -89,7 +90,7 @@ Future<void> showSetWallpaperDialog(
 
 class _WallpaperOption extends StatefulWidget {
   final String title;
-  final IconData icon;
+  final dynamic icon;
   final WallpaperTarget target;
   final String urlFull;
   final int delay;
@@ -142,7 +143,7 @@ class _WallpaperOptionState extends State<_WallpaperOption> {
               ),
               child: Row(
                 children: [
-                  Icon(widget.icon, color: Colors.white, size: 24),
+                  HugeIcon(icon: widget.icon, color: Colors.white, size: 24),
                   const SizedBox(width: 16),
                   Text(
                     widget.title,
@@ -154,8 +155,8 @@ class _WallpaperOptionState extends State<_WallpaperOption> {
                     ),
                   ),
                   const Spacer(),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
                     color: Colors.white.withValues(alpha: 0.4),
                     size: 16,
                   ),

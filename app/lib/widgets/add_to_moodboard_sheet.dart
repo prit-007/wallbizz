@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -150,7 +151,11 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add_rounded, size: 16, color: cs.primary),
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedAdd01,
+                            size: 16,
+                            color: cs.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'NEW',
@@ -219,10 +224,11 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    isAdded
-                                        ? Icons.check_circle_rounded
-                                        : Icons.add_circle_outline_rounded,
+                                  HugeIcon(
+                                    icon: isAdded
+                                        ? HugeIcons
+                                              .strokeRoundedCheckmarkCircle01
+                                        : HugeIcons.strokeRoundedAddCircle,
                                     color: isAdded
                                         ? cs.primary
                                         : v.onSurfaceSubtle,
@@ -252,10 +258,10 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
                                       ],
                                     ),
                                   ),
-                                  Icon(
-                                    isAdded
-                                        ? Icons.remove_rounded
-                                        : Icons.add_rounded,
+                                  HugeIcon(
+                                    icon: isAdded
+                                        ? HugeIcons.strokeRoundedRemove01
+                                        : HugeIcons.strokeRoundedAdd01,
                                     color: isAdded
                                         ? cs.primary
                                         : v.onSurfaceSubtle,

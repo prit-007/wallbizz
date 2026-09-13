@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,14 +37,26 @@ class _HomeScreenState extends State<HomeScreen> {
   final FocusNode _searchFocusNode = FocusNode();
 
   static const _navItems = [
-    _DockItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'DISCOVER'),
     _DockItem(
-      Icons.favorite_outline_rounded,
-      Icons.favorite_rounded,
+      HugeIcons.strokeRoundedGridView,
+      HugeIcons.strokeRoundedGridView,
+      'DISCOVER',
+    ),
+    _DockItem(
+      HugeIcons.strokeRoundedFavourite,
+      HugeIcons.strokeRoundedFavourite,
       'ARCHIVE',
     ),
-    _DockItem(Icons.download_outlined, Icons.download_rounded, 'VAULT'),
-    _DockItem(Icons.tune_outlined, Icons.tune_rounded, 'SYSTEM'),
+    _DockItem(
+      HugeIcons.strokeRoundedDownload02,
+      HugeIcons.strokeRoundedDownload01,
+      'VAULT',
+    ),
+    _DockItem(
+      HugeIcons.strokeRoundedSettings02,
+      HugeIcons.strokeRoundedSettings01,
+      'SYSTEM',
+    ),
   ];
 
   @override
@@ -167,8 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
             destinations: _navItems
                 .map(
                   (item) => NavigationRailDestination(
-                    icon: Icon(item.icon),
-                    selectedIcon: Icon(item.selectedIcon),
+                    icon: HugeIcon(icon: item.icon),
+                    selectedIcon: HugeIcon(icon: item.selectedIcon),
                     label: Text(item.label),
                   ),
                 )
@@ -389,8 +402,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const Spacer(),
-                Icon(
-                  Icons.search_rounded,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedSearch01,
                   color: cs.onSurface,
                   size: isCompact ? 20 : 24,
                 ),
@@ -435,8 +448,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.search_rounded,
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedSearch01,
                       color: isHovered ? cs.primary : vk.onSurfaceSubtle,
                       size: 22,
                     ),
@@ -484,8 +497,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _DockItem {
-  final IconData icon;
-  final IconData selectedIcon;
+  final dynamic icon;
+  final dynamic selectedIcon;
   final String label;
   const _DockItem(this.icon, this.selectedIcon, this.label);
 }
@@ -629,10 +642,10 @@ class _NavBarItemState extends State<_NavBarItem> {
                   backgroundColor: widget.isSelected
                       ? cs.surface
                       : cs.onSurface,
-                  child: Icon(iconData, size: 22, color: iconColor),
+                  child: HugeIcon(icon: iconData, size: 22, color: iconColor),
                 )
               else
-                Icon(iconData, size: 22, color: iconColor),
+                HugeIcon(icon: iconData, size: 22, color: iconColor),
               if (widget.isSelected) ...[
                 const SizedBox(width: 10),
                 AnimatedOpacity(

@@ -1,7 +1,7 @@
 name: wallbizz
 description: "Wallbizz — Premium curated wallpapers powered by Wallhaven"
 publish_to: 'none'
-version: 1.4.6+1406
+version: 1.6.0+1600
 
 environment:
   sdk: ^3.12.2
@@ -47,7 +47,7 @@ dependencies:
   package_info_plus: ^8.0.0
   open_filex: ^4.7.0
 
-  cupertino_icons: ^1.0.8
+  hugeicons: ^1.1.7
   flutter_native_splash: ^2.4.8
 
 dev_dependencies:

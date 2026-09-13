@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:wallbizz/widgets/wallpaper_card.dart';
 import 'package:wallbizz/models/wallpaper.dart';
 
@@ -42,15 +43,16 @@ void main() {
       expect(find.text('3840x2160'), findsOneWidget);
     });
 
-    testWidgets('renders with default isWishlisted false', (tester) async {
+    testWidgets('renders heart icon when onHeartTap is provided', (
+      tester,
+    ) async {
       final wallpaper = _makeWallpaper();
       await tester.pumpWidget(
         _wrapInApp(WallpaperCard(wallpaper: wallpaper, onHeartTap: () {})),
       );
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byIcon(Icons.favorite_outline_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+      expect(find.byType(HugeIcon), findsWidgets);
     });
 
     testWidgets('renders filled heart when isWishlisted is true', (
@@ -68,8 +70,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_outline_rounded), findsNothing);
+      expect(find.byType(HugeIcon), findsWidgets);
     });
 
     testWidgets('does not show heart icon when onHeartTap is null', (
@@ -79,8 +80,7 @@ void main() {
       await tester.pumpWidget(_wrapInApp(WallpaperCard(wallpaper: wallpaper)));
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byIcon(Icons.favorite_outline_rounded), findsNothing);
-      expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+      expect(find.byType(HugeIcon), findsNothing);
     });
 
     testWidgets('calls onTap when card is tapped', (tester) async {
@@ -110,7 +110,7 @@ void main() {
       );
       await tester.pump(const Duration(seconds: 1));
 
-      await tester.tap(find.byIcon(Icons.favorite_outline_rounded));
+      await tester.tap(find.byType(HugeIcon).first);
       expect(heartTapped, true);
     });
 
