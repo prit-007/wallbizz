@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"wallpaper-backend/config"
@@ -32,6 +33,7 @@ var categoryQueryMap = map[string]string{
 var (
 	httpClient = &http.Client{Timeout: httpTimeout}
 	syncMutex  bool
+	syncWg     sync.WaitGroup
 )
 
 func FetchAndSyncWallpapers(cfg config.Config) {
@@ -46,13 +48,25 @@ func FetchAndSyncWallpapers(cfg config.Config) {
 	started := istNow()
 	log.Info().Str("time_ist", started).Int("categories", len(categoryQueryMap)).Msg("Starting Wallhaven sync")
 
+	var mu sync.Mutex
+	results := make(map[string]int, len(categoryQueryMap))
+
 	for category, extraParams := range categoryQueryMap {
-		log.Info().Str("category", category).Str("time_ist", istNow()).Msg("Syncing category")
-		count := fetchCategory(cfg, category, extraParams)
-		if count > 0 {
-			log.Info().Str("category", category).Int("count", count).Str("time_ist", istNow()).Msg("Wallpapers synced")
-		}
+		syncWg.Add(1)
+		go func(cat, params string) {
+			defer syncWg.Done()
+			log.Info().Str("category", cat).Str("time_ist", istNow()).Msg("Syncing category")
+			count := fetchCategory(cfg, cat, params)
+			mu.Lock()
+			results[cat] = count
+			mu.Unlock()
+			if count > 0 {
+				log.Info().Str("category", cat).Int("count", count).Str("time_ist", istNow()).Msg("Wallpapers synced")
+			}
+		}(category, extraParams)
 	}
+
+	syncWg.Wait()
 
 	log.Info().Str("time_ist", istNow()).Msg("All categories synced successfully")
 
@@ -62,6 +76,11 @@ func FetchAndSyncWallpapers(cfg config.Config) {
 	} else {
 		log.Info().Str("time_ist", istNow()).Msg("Cleanup completed successfully")
 	}
+}
+
+// WaitForSync blocks until any in-flight sync completes. Used by graceful shutdown.
+func WaitForSync() {
+	syncWg.Wait()
 }
 
 func fetchCategory(cfg config.Config, category, extraParams string) int {

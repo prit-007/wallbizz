@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -46,6 +48,13 @@ Future<void> main() async {
     ),
   );
   logInfo('Supabase initialized', domain: LogDomain.general);
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 
   runApp(const WallbizzApp());
 }
@@ -103,6 +112,12 @@ class _WallbizzAppState extends State<WallbizzApp> with WidgetsBindingObserver {
           themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           theme: _lightTheme(),
           darkTheme: _darkTheme(),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
           home: const SplashScreen(),
         );
       },

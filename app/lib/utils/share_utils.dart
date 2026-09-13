@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path/path.dart' as p;
 
 class ShareUtils {
   ShareUtils._();
@@ -98,17 +100,61 @@ class ShareUtils {
 
       final tempDir = await getTemporaryDirectory();
       final file = File(
-        '${tempDir.path}/wallbizz_share_${DateTime.now().millisecondsSinceEpoch}.png',
+        p.join(
+          tempDir.path,
+          'wallbizz_share_${DateTime.now().millisecondsSinceEpoch}.png',
+        ),
       );
-      await file.writeAsBytes(byteData!.buffer.asUint8List());
+      await file.writeAsBytes(byteData!.buffer.asUint8List(), flush: true);
 
       originalImage.dispose();
       watermarkedImage.dispose();
 
       HapticFeedback.lightImpact();
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], subject: 'Wallbizz Wallpapers'),
-      );
+
+      if (kIsWeb) {
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'image/png')],
+            subject: 'Wallbizz Wallpapers',
+          ),
+        );
+        return;
+      }
+
+      try {
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'image/png')],
+            subject: 'Wallbizz Wallpapers',
+          ),
+        );
+      } catch (_) {
+        await _shareBytesAsFallback(byteData.buffer.asUint8List(), imageUrl);
+      }
+    } catch (_) {
+      _fallbackShare(imageUrl);
+    }
+  }
+
+  static Future<void> _shareBytesAsFallback(
+    Uint8List imageBytes,
+    String imageUrl,
+  ) async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.windows) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File(
+          p.join(
+            tempDir.path,
+            'wallbizz_share_${DateTime.now().millisecondsSinceEpoch}.png',
+          ),
+        );
+        await file.writeAsBytes(imageBytes, flush: true);
+        await Process.run('cmd', ['/c', 'start', '', file.path]);
+      } else {
+        _fallbackShare(imageUrl);
+      }
     } catch (_) {
       _fallbackShare(imageUrl);
     }
