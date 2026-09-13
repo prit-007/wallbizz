@@ -14,8 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const wallpaperRetentionDays = 3
-
 func CleanupOldWallpapers(cfg config.Config) (int, error) {
 	log := logger.Log()
 
@@ -135,6 +133,7 @@ func TriggerCleanup(cfg config.Config) func(*fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error":   "cleanup failed",
 				"details": err.Error(),
+				"skipped": count,
 				"time_ist": now,
 			})
 		}

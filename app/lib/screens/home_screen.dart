@@ -263,12 +263,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeTab() {
     final cs = Theme.of(context).colorScheme;
     final desktop = context.isDesktop;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
         final horizontalPadding = isCompact ? 20.0 : 32.0;
         final bottomPadding = desktop ? 24.0 : 90.0;
+        final topPadding = isLandscape ? 12.0 : 24.0;
+        final brandFontSize = isLandscape ? 32.0 : (isCompact ? 42.0 : 56.0);
+        final spacingAfterBrand = isLandscape ? 12.0 : 24.0;
 
         final content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                24,
+                topPadding,
                 horizontalPadding,
                 0,
               ),
@@ -286,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                         'WALLBIZZ',
                         style: GoogleFonts.oswald(
-                          fontSize: isCompact ? 42 : 56,
+                          fontSize: brandFontSize,
                           fontWeight: FontWeight.w900,
                           color: cs.onSurface,
                           letterSpacing: 4.5,
@@ -305,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         end: 1,
                         alignment: Alignment.centerLeft,
                       ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: spacingAfterBrand),
                 ],
               ),
             ),
@@ -317,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? _buildInlineSearch(horizontalPadding)
                   : _buildTapSearch(isCompact, horizontalPadding),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: isLandscape ? 12 : 24),
 
             CategoryTabs(
               selectedCategory: _selectedCategory,
@@ -539,6 +544,10 @@ class _FloatingNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final vk = context.vivek;
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final barHeight = isLandscape ? 48.0 : 72.0;
+    final barHPadding = isLandscape ? 48.0 : 24.0;
 
     return ValueListenableBuilder(
       valueListenable: Hive.box('downloads').listenable(),
@@ -547,16 +556,18 @@ class _FloatingNavBar extends StatelessWidget {
 
         return Padding(
           padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            bottom: bottomInset > 0 ? bottomInset + 8 : 24,
+            left: barHPadding,
+            right: barHPadding,
+            bottom: isLandscape
+                ? (bottomInset > 0 ? bottomInset + 4 : 12)
+                : (bottomInset > 0 ? bottomInset + 8 : 24),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isLandscape ? 12 : 16),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(
-                height: 72,
+                height: barHeight,
                 decoration: BoxDecoration(
                   color: vk.surfaceContainer.withValues(alpha: 0.7),
                   border: Border.all(color: vk.glassBorder, width: 1),

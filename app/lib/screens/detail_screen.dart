@@ -49,6 +49,13 @@ class _DetailScreenState extends State<DetailScreen>
 
   Wallpaper get wallpaper => widget.wallpaper;
 
+  void _precacheImage() {
+    final url = kIsWeb
+        ? BackendConfig.proxyImageUrl(wallpaper.urlFull)
+        : wallpaper.urlFull;
+    precacheImage(NetworkImage(url), context).catchError((_) {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +65,7 @@ class _DetailScreenState extends State<DetailScreen>
     );
     _checkDownloadState();
     _checkWishlist();
+    _precacheImage();
     _animationController =
         AnimationController(
           vsync: this,

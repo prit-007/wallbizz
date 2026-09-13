@@ -69,45 +69,50 @@ class _CategoryTabsState extends State<CategoryTabs> {
           final cat = _categories[index];
           final isSelected = widget.selectedCategory == cat['value'];
 
-          return GestureDetector(
-            onTap: () => widget.onCategorySelected(cat['value']!),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: isSelected ? cs.primary : vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? cs.primary
-                      : vk.glassBorder.withValues(alpha: 0.12),
-                  width: 1,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Row(
-                children: [
-                  Text(cat['icon']!, style: const TextStyle(fontSize: 14)),
-                  const SizedBox(width: 8),
-                  Text(
-                    cat['label']!.toUpperCase(),
-                    style: GoogleFonts.oswald(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? cs.onPrimary : cs.onSurface,
-                      letterSpacing: 1.2,
-                    ),
+          return Semantics(
+            label: '${cat['label']} category${isSelected ? ', selected' : ''}',
+            button: true,
+            selected: isSelected,
+            child: GestureDetector(
+              onTap: () => widget.onCategorySelected(cat['value']!),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? cs.primary : vk.surfaceContainer,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? cs.primary
+                        : vk.glassBorder.withValues(alpha: 0.12),
+                    width: 1,
                   ),
-                ],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: cs.primary.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  children: [
+                    Text(cat['icon']!, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 8),
+                    Text(
+                      cat['label']!.toUpperCase(),
+                      style: GoogleFonts.oswald(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? cs.onPrimary : cs.onSurface,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

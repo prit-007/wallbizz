@@ -80,11 +80,14 @@ func main() {
 	sig := <-quit
 	log.Warn().Str("signal", sig.String()).Msg("Shutdown signal received")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	log.Info().Msg("Stopping cron scheduler...")
 	c.Stop()
+
+	log.Info().Msg("Waiting for in-flight sync to complete...")
+	handlers.WaitForSync()
 
 	log.Info().Msg("Shutting down Fiber server...")
 	if err := app.ShutdownWithContext(ctx); err != nil {
