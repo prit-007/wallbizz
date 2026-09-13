@@ -125,7 +125,7 @@ func fetchCategory(cfg config.Config, category, extraParams string) int {
 }
 
 func upsertToSupabase(cfg config.Config, wallpapers []models.WallpaperInsert) error {
-	url := fmt.Sprintf("%s/rest/v1/wallpapers", cfg.SupabaseURL)
+	url := fmt.Sprintf("%s/rest/v1/wallpapers?on_conflict=wallhaven_id", cfg.SupabaseURL)
 
 	body, err := json.Marshal(wallpapers)
 	if err != nil {
