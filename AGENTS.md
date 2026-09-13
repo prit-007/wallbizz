@@ -1,4 +1,4 @@
-# AGENTS.md — Wallbizz v1.6.0
+# AGENTS.md — Wallbizz v1.7.0
 
 ## Structure
 
@@ -34,9 +34,9 @@ wallbizz/
 └── docs/               # Detailed docs
 ```
 
-## Key Architecture (v1.6.0)
+## Key Architecture (v1.7.0)
 
-- **Version:** v1.6.0 — HugeIcons, About page, Linux/macOS builds, Android signing.
+- **Version:** v1.7.0 — Security hardening, concurrent sync, landscape UX, Windows sharing fix.
 - **Flutter never calls Wallhaven directly for sync** — reads from Supabase REST via `http` package (not `supabase-flutter` for DB queries).
 - **Search is hybrid:** SFW queries go direct Flutter → Wallhaven (`wallhaven_search`); NSFW/Sketchy queries go through backend proxy (`GET /api/v1/search`). The proxy is auth-optional — unauthenticated requests pass through as SFW; requests with a valid Supabase JWT enable NSFW/Sketchy purity filters.
 - **Images are proxied on web:** `Image.network` on Flutter web uses XHR, so Wallhaven's CDN triggers CORS errors. `NetworkImageWidget` routes through `BackendConfig.proxyImageUrl()` → `GET /api/v1/proxy-image?url=...` on the Go backend. The backend restricts proxied hosts to `w.wallhaven.cc` and `th.wallhaven.cc` and returns responses with CORS headers.
