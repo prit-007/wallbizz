@@ -814,7 +814,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             final info = await PackageInfo.fromPlatform();
             final checker = UpdateChecker();
             final update = await checker.checkForUpdate(info.version);
-            if (!context.mounted) return;
+            if (!mounted) return;
             if (update != null) {
               UpdateDialog.show(context, update, currentVersion: info.version);
             } else {

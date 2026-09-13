@@ -165,7 +165,8 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
               final success = await SupabaseService.instance.deleteMoodboard(
                 widget.moodboard.id,
               );
-              if (success && mounted) {
+              if (!mounted) return;
+              if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -176,7 +177,7 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                   ),
                 );
                 Navigator.pop(context);
-              } else if (mounted) {
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(

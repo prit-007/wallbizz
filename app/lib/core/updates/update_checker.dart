@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class AppVersion {
@@ -38,6 +39,9 @@ class UpdateInfo {
   final String releaseUrl;
   final String? publishedAt;
   final String? apkUrl;
+  final String? windowsUrl;
+  final String? linuxUrl;
+  final String? macosUrl;
   final List<String> changelogLines;
 
   UpdateInfo({
@@ -47,8 +51,59 @@ class UpdateInfo {
     required this.releaseUrl,
     this.publishedAt,
     this.apkUrl,
+    this.windowsUrl,
+    this.linuxUrl,
+    this.macosUrl,
     this.changelogLines = const [],
   });
+
+  bool get hasDirectDownload {
+    if (kIsWeb) return false;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.android) return apkUrl != null;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      return windowsUrl != null;
+    }
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.linux) return linuxUrl != null;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.macOS) return macosUrl != null;
+    return false;
+  }
+
+  String? get platformDownloadUrl {
+    if (kIsWeb) return null;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.android) return apkUrl;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.windows) return windowsUrl;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.linux) return linuxUrl;
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.macOS) return macosUrl;
+    return null;
+  }
+
+  String get platformFileName {
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'wallbizz_update.apk';
+    }
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      return 'wallbizz_setup.exe';
+    }
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      return 'wallbizz_linux.tar.gz';
+    }
+    // ignore: deprecated_member_use
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      return 'wallbizz_macos.zip';
+    }
+    return 'wallbizz_update';
+  }
 }
 
 class UpdateChecker {
@@ -81,7 +136,7 @@ class UpdateChecker {
 
         if (latest.isNewerThan(current)) {
           final body = release['body'] as String? ?? '';
-          final apkUrl = _extractApkUrl(release['assets'] as List<dynamic>?);
+          final assets = release['assets'] as List<dynamic>?;
 
           return UpdateInfo(
             latestVersion: latest,
@@ -89,7 +144,18 @@ class UpdateChecker {
             releaseBody: body,
             releaseUrl: release['html_url'] as String? ?? '',
             publishedAt: release['published_at'] as String?,
-            apkUrl: apkUrl,
+            apkUrl: _findAsset(assets, endsWith: '.apk', exclude: 'unsigned'),
+            windowsUrl: _findAsset(
+              assets,
+              contains: 'windows',
+              endsWith: '.exe',
+            ),
+            linuxUrl: _findAsset(
+              assets,
+              contains: 'linux',
+              endsWith: '.tar.gz',
+            ),
+            macosUrl: _findAsset(assets, contains: 'macos', endsWith: '.zip'),
             changelogLines: _parseChangelog(body),
           );
         }
@@ -100,13 +166,19 @@ class UpdateChecker {
     }
   }
 
-  String? _extractApkUrl(List<dynamic>? assets) {
+  String? _findAsset(
+    List<dynamic>? assets, {
+    String? contains,
+    required String endsWith,
+    String? exclude,
+  }) {
     if (assets == null) return null;
     for (final asset in assets) {
       final name = asset['name'] as String? ?? '';
-      if (name.endsWith('.apk') && !name.contains('unsigned')) {
-        return asset['browser_download_url'] as String?;
-      }
+      if (!name.endsWith(endsWith)) continue;
+      if (contains != null && !name.contains(contains)) continue;
+      if (exclude != null && name.contains(exclude)) continue;
+      return asset['browser_download_url'] as String?;
     }
     return null;
   }
