@@ -20,6 +20,7 @@ runs:
   steps:
     - name: Create .env
       shell: bash
+      working-directory: app
       run: |
         cat > .env << EOF
         SUPABASE_URL=${{ inputs.supabase-url }}
@@ -29,10 +30,12 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      working-directory: app
       run: flutter pub get
 
     - name: Extract App Version
       shell: bash
+      working-directory: app
       run: |
         VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | tr -d '\r' | sed -E 's/\+[0-9]+$//')
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
