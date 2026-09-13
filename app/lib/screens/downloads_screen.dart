@@ -74,9 +74,11 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     int totalBytes = 0;
     for (var item in all) {
       final file = File(item.localPath);
-      if (file.existsSync()) {
-        totalBytes += file.lengthSync();
-      }
+      try {
+        if (file.existsSync()) {
+          totalBytes += file.lengthSync();
+        }
+      } catch (_) {}
     }
     if (totalBytes < 1024 * 1024) {
       _storageSizeStr = '${(totalBytes / 1024).toStringAsFixed(1)} KB';
@@ -217,11 +219,12 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
       await DownloadsService.removeDownload(id);
     }
     if (!mounted) return;
+    final deletedCount = _selectedIds.length;
     _exitSelectionMode();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Deleted ${_selectedIds.length} wallpaper${_selectedIds.length == 1 ? '' : 's'}',
+          'Deleted $deletedCount wallpaper${deletedCount == 1 ? '' : 's'}',
         ),
         behavior: SnackBarBehavior.floating,
       ),
@@ -447,11 +450,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 ),
               ),
 
-            Expanded(
-              child: filteredItems.isEmpty
-                  ? _buildEmptyView()
-                  : RefreshIndicator(
-                      onRefresh: () async => setState(() {}),
+                    Expanded(
+                      child: filteredItems.isEmpty
+                          ? _buildEmptyView()
+                          : RefreshIndicator(
+                              onRefresh: () async {
+                                _recalculateStorage();
+                                setState(() {});
+                              },
                       color: cs.primary,
                       backgroundColor: cs.surface,
                       child: LayoutBuilder(

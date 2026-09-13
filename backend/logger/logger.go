@@ -2,40 +2,46 @@ package logger
 
 import (
 	"os"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
 )
 
-var log *zerolog.Logger
+var (
+	log      *zerolog.Logger
+	initOnce sync.Once
+)
 
 // Init initializes the global zerolog logger.
 // Reads LOG_LEVEL from env (default: "info").
 func Init() {
-	levelStr := os.Getenv("LOG_LEVEL")
-	if levelStr == "" {
-		levelStr = "info"
-	}
+	initOnce.Do(func() {
+		levelStr := os.Getenv("LOG_LEVEL")
+		if levelStr == "" {
+			levelStr = "info"
+		}
 
-	level, err := zerolog.ParseLevel(levelStr)
-	if err != nil {
-		level = zerolog.InfoLevel
-	}
+		level, err := zerolog.ParseLevel(levelStr)
+		if err != nil {
+			level = zerolog.InfoLevel
+		}
 
-	output := zerolog.ConsoleWriter{
-		Out:        os.Stdout,
-		TimeFormat: time.RFC3339,
-	}
+		output := zerolog.ConsoleWriter{
+			Out:        os.Stdout,
+			TimeFormat: time.RFC3339,
+		}
 
-	logger := zerolog.New(output).
-		Level(level).
-		With().
-		Timestamp().
-		Logger()
+		logger := zerolog.New(output).
+			Level(level).
+			With().
+			Timestamp().
+			Logger()
 
-	log = &logger
+		log = &logger
 
-	zerolog.SetGlobalLevel(level)
+		zerolog.SetGlobalLevel(level)
+	})
 }
 
 // InitWithWriter initializes the logger with a custom writer (useful for testing).

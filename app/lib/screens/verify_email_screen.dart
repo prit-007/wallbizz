@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
 import '../services/wallpaper_actions.dart';
@@ -20,6 +21,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   bool _isResending = false;
   bool _isChecking = false;
   bool _resent = false;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
@@ -27,8 +29,14 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     _listenForConfirmation();
   }
 
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+
   void _listenForConfirmation() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.session != null && data.session!.user.emailConfirmedAt != null) {
         WallpaperActions.onAuthSuccess();
         if (mounted) {

@@ -47,6 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isLoading = false;
   bool _hasSearched = false;
   String? _errorMessage;
+  int _searchRequestId = 0;
 
   String _purity = '100';
   String _sorting = 'date_added';
@@ -88,6 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onScroll() {
+    if (!_scrollController.hasClients) return;
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMore();
@@ -126,6 +128,8 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_isLoading) return;
     final query = _controller.text.trim();
     if (query.isEmpty) return;
+
+    final requestId = ++_searchRequestId;
 
     if (reset) {
       setState(() {
@@ -181,7 +185,7 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    if (mounted) {
+    if (mounted && requestId == _searchRequestId) {
       setState(() {
         _hasSearched = true;
         _errorMessage = result.error;

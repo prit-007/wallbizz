@@ -17,6 +17,7 @@ class CategoryTabs extends StatefulWidget {
 }
 
 class _CategoryTabsState extends State<CategoryTabs> {
+  final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> _categories = [
     {'label': 'Trending', 'value': 'trending', 'icon': '\u{1F525}'},
     {'label': 'Anime', 'value': 'anime', 'icon': '\u{1F338}'},
@@ -28,6 +29,27 @@ class _CategoryTabsState extends State<CategoryTabs> {
   ];
 
   @override
+  void didUpdateWidget(CategoryTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedCategory != widget.selectedCategory) {
+      final idx = _categories.indexWhere((c) => c['value'] == widget.selectedCategory);
+      if (idx >= 0 && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          idx * 90.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
@@ -35,6 +57,7 @@ class _CategoryTabsState extends State<CategoryTabs> {
     return SizedBox(
       height: 54,
       child: ListView.separated(
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         physics: const BouncingScrollPhysics(),

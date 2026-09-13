@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
@@ -29,16 +30,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   User? _user;
   String _appVersion = '';
   int _selectedCategory = 0;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
     _user = Supabase.instance.client.auth.currentUser;
-    Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       if (mounted) setState(() => _user = event.session?.user);
     });
     _loadSettings();
     _loadVersion();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadVersion() async {
@@ -196,6 +204,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (confirmed != true || !mounted) return;
 
     try {
+      // NOTE: deleteUser requires service_role key. This will fail with anon key.
+      // Server-side deletion should be used instead.
       await Supabase.instance.client.auth.admin.deleteUser(_user!.id);
       await Supabase.instance.client.auth.signOut();
       if (mounted) {

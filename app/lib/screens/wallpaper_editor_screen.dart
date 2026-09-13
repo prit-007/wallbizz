@@ -113,7 +113,12 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
   Widget build(BuildContext context) {
     final ambientColor = ColorUtils.hexToColor(widget.primaryColor);
     final file = File(widget.localPath);
-    final hasLocalFile = file.existsSync();
+    late final bool hasLocalFile;
+    try {
+      hasLocalFile = file.existsSync();
+    } catch (_) {
+      hasLocalFile = false;
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -161,7 +166,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
             onDoubleTapDown: _handleDoubleTap,
             onVerticalDragUpdate: (details) {
               final scale = _transformationController.value.getMaxScaleOnAxis();
-              if (scale <= 1.1 && details.primaryDelta! > 10) {
+              if (scale <= 1.1 && (details.primaryDelta ?? 0) > 10) {
                 HapticFeedback.mediumImpact();
                 Navigator.of(context).pop();
               }

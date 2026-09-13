@@ -63,9 +63,11 @@ class DownloadService {
     final finalPath = _uniquePath(dir, fileName);
 
     final request = http.Request('GET', Uri.parse(imageUrl));
-    final response = await http.Client().send(request);
+    final client = http.Client();
+    final response = await client.send(request);
 
     if (response.statusCode != 200) {
+      client.close();
       throw HttpException(
         'Download failed: HTTP ${response.statusCode}',
         uri: Uri.parse(imageUrl),
@@ -88,6 +90,7 @@ class DownloadService {
       await sink.flush();
     } finally {
       await sink.close();
+      client.close();
     }
 
     return finalPath;

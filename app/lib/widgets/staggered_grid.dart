@@ -119,6 +119,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   }
 
   void _onScroll() {
+    if (!_scrollController.hasClients) return;
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadWallpapers();

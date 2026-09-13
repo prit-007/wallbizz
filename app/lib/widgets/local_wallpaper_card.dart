@@ -24,6 +24,7 @@ class LocalWallpaperCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final file = File(wallpaper.localPath);
+    final hasLocalFile = file.existsSync();
 
     return GestureDetector(
       onTap: onTap,
@@ -35,7 +36,7 @@ class LocalWallpaperCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              file.existsSync()
+              hasLocalFile
                   ? Image.file(file, fit: BoxFit.cover)
                   : Container(
                       color: vk.surfaceContainer,

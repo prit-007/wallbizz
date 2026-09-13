@@ -27,7 +27,7 @@ class Wallpaper {
     required this.createdAt,
   });
 
-  double get aspectRatio => width / height;
+  double get aspectRatio => height == 0 ? 1.0 : width / height;
 
   String get formattedFileSize {
     if (fileSize < 1024 * 1024) {

@@ -24,7 +24,7 @@ class Moodboard {
       id: json['id'] as String,
       name: json['name'] as String,
       itemCount: itemCount,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
 }
