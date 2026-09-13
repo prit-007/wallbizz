@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -37,9 +38,13 @@ func main() {
 	})
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "https://*.vercel.app,https://*.onrender.com,http://localhost:*",
-		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
-		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
+		AllowMethods:  "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders:  "Origin,Content-Type,Accept,Authorization",
+		AllowOriginsFunc: func(origin string) bool {
+			return strings.HasSuffix(origin, ".vercel.app") ||
+				strings.HasSuffix(origin, ".onrender.com") ||
+				strings.HasPrefix(origin, "http://localhost:")
+		},
 	}))
 
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
