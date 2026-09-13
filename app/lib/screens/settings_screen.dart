@@ -1,11 +1,14 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../services/gallery_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
+import '../widgets/hover_builder.dart';
 import '../core/updates/update_checker.dart';
 import '../core/updates/widgets/update_dialog.dart';
 import 'logs_screen.dart';
@@ -23,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _storageChoice = 'pictures';
   User? _user;
   String _appVersion = '';
+  int _selectedCategory = 0;
 
   @override
   void initState() {
@@ -357,15 +361,139 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final desktop = context.isDesktop;
 
+    if (desktop) {
+      return _buildDesktopLayout(cs, vk, bottomInset);
+    }
+
+    return _buildMobileLayout(cs, vk, bottomInset);
+  }
+
+  Widget _buildDesktopLayout(ColorScheme cs, VivekColors vk, double bottomInset) {
+    final categories = [
+      'PREFERENCES',
+      if (!kIsWeb) 'DOWNLOAD LOCATION',
+      'ACCOUNT',
+      'ABOUT',
+    ];
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: Row(
+          children: [
+            // Left: category list
+            SizedBox(
+              width: 240,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedCategory == index;
+                  return HoverBuilder(
+                    builder: (context, isHovered) {
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedCategory = index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? cs.primary.withValues(alpha: 0.12)
+                                : isHovered
+                                    ? vk.surfaceContainer
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            categories[index],
+                            style: GoogleFonts.oswald(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                              color: isSelected
+                                  ? cs.primary
+                                  : vk.onSurfaceSubtle,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            // Divider
+            VerticalDivider(
+              width: 1,
+              thickness: 1,
+              color: vk.glassBorder.withValues(alpha: 0.2),
+            ),
+
+            // Right: content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: _buildCategoryContent(_selectedCategory, cs, vk),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(ColorScheme cs, VivekColors vk, double bottomInset) {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 24, 20, bottomInset + 100),
       physics: const BouncingScrollPhysics(),
       children: [
+        _buildPreferencesSection(cs, vk),
+        if (!kIsWeb) ...[
+          const SizedBox(height: 40),
+          _buildDownloadLocationSection(cs, vk),
+        ],
+        const SizedBox(height: 40),
+        _buildAccountSection(cs, vk),
+        const SizedBox(height: 40),
+        _buildAboutSection(cs, vk),
+      ],
+    );
+  }
+
+  Widget _buildCategoryContent(int index, ColorScheme cs, VivekColors vk) {
+    int actualIndex = index;
+    if (kIsWeb && index == 1) actualIndex = 2;
+    if (kIsWeb && index == 2) actualIndex = 3;
+
+    switch (actualIndex) {
+      case 0:
+        return _buildPreferencesSection(cs, vk);
+      case 1:
+        return _buildDownloadLocationSection(cs, vk);
+      case 2:
+        return _buildAccountSection(cs, vk);
+      case 3:
+        return _buildAboutSection(cs, vk);
+      default:
+        return _buildPreferencesSection(cs, vk);
+    }
+  }
+
+  Widget _buildPreferencesSection(ColorScheme cs, VivekColors vk) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'PREFERENCES',
           style: GoogleFonts.oswald(
-            fontSize: 32,
+            fontSize: context.isDesktop ? 22 : 32,
             fontWeight: FontWeight.bold,
             color: cs.primary,
             letterSpacing: 3,
@@ -382,9 +510,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             letterSpacing: 2,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
 
-        // Dark Mode Card
         Container(
           decoration: BoxDecoration(
             color: vk.surfaceContainer,
@@ -425,13 +552,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+      ],
+    );
+  }
 
-        const SizedBox(height: 40),
-
+  Widget _buildDownloadLocationSection(ColorScheme cs, VivekColors vk) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'DOWNLOAD LOCATION',
           style: GoogleFonts.oswald(
-            fontSize: 14,
+            fontSize: context.isDesktop ? 22 : 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
             color: vk.onSurfaceSubtle,
@@ -462,13 +594,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: Icons.lock_outline_rounded,
           colorAccent: Colors.orange,
         ),
+      ],
+    );
+  }
 
-        const SizedBox(height: 40),
-
+  Widget _buildAccountSection(ColorScheme cs, VivekColors vk) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'ACCOUNT',
           style: GoogleFonts.oswald(
-            fontSize: 14,
+            fontSize: context.isDesktop ? 22 : 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
             color: vk.onSurfaceSubtle,
@@ -617,13 +754,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               .fade(duration: 300.ms, delay: 100.ms)
               .slideY(begin: 0.1, end: 0),
         ],
+      ],
+    );
+  }
 
-        const SizedBox(height: 40),
-
+  Widget _buildAboutSection(ColorScheme cs, VivekColors vk) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'ABOUT',
           style: GoogleFonts.oswald(
-            fontSize: 14,
+            fontSize: context.isDesktop ? 22 : 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
             color: vk.onSurfaceSubtle,

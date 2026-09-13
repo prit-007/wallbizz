@@ -12,6 +12,7 @@ import '../widgets/auth_bottom_sheet.dart';
 import '../services/wallpaper_actions.dart';
 import '../services/recent_searches.dart';
 import 'wallpaper_swiper_screen.dart';
+import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class SearchScreen extends StatefulWidget {
     super.key,
     this.httpClient,
     this.isAuthenticated = false,
-    this.backendBase = 'https://wallbizz.onrender.com',
+    this.backendBase = '',
     this.accessToken,
   });
 
@@ -773,9 +774,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : (constraints.maxWidth > 600 ? 3 : 2);
+        final crossAxisCount = context.gridColumns;
 
         return MasonryGridView.count(
           crossAxisCount: crossAxisCount,
@@ -963,9 +962,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final vk = context.vivek;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : (constraints.maxWidth > 600 ? 3 : 2);
+        final crossAxisCount = context.gridColumns;
         final heights = [220.0, 280.0, 240.0, 310.0, 190.0, 260.0];
 
         return MasonryGridView.count(

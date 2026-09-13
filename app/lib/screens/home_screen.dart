@@ -4,8 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../config/backend_config.dart';
+import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../widgets/category_tabs.dart';
+import '../widgets/hover_builder.dart';
 import '../widgets/staggered_grid.dart';
 import 'search_screen.dart';
 import 'wishlist_screen.dart';
@@ -30,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ScrollController(),
     ScrollController(),
   ];
+  final FocusNode _searchFocusNode = FocusNode();
 
   static const _navItems = [
     _DockItem(Icons.grid_view_outlined, Icons.grid_view_rounded, 'DISCOVER'),
@@ -47,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     for (final c in _scrollControllers) {
       c.dispose();
     }
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -63,37 +68,129 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final desktop = context.isDesktop;
 
     return Scaffold(
-      extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            if (_tabWidgets[0] != null || _currentNavIndex == 0)
-              Offstage(
-                offstage: _currentNavIndex != 0,
-                child: RepaintBoundary(child: _buildHomeTab(bottomInset + 90)),
+      extendBody: !desktop,
+      body: desktop ? _buildDesktopLayout() : _buildMobileLayout(),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    final vk = context.vivek;
+    final cs = Theme.of(context).colorScheme;
+
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+        }
+        // Ctrl+F or /: open search
+        if ((event.logicalKey == LogicalKeyboardKey.keyF &&
+                HardwareKeyboard.instance.isControlPressed) ||
+            event.logicalKey == LogicalKeyboardKey.slash) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => SearchScreen(backendBase: BackendConfig.baseUrl),
+            ),
+          );
+          return KeyEventResult.handled;
+        }
+        // 1-4: switch tabs
+        final keys = [
+          LogicalKeyboardKey.digit1,
+          LogicalKeyboardKey.digit2,
+          LogicalKeyboardKey.digit3,
+          LogicalKeyboardKey.digit4,
+        ];
+        final idx = keys.indexOf(event.logicalKey);
+        if (idx >= 0 && idx < _navItems.length) {
+          HapticFeedback.lightImpact();
+          if (idx == _currentNavIndex) {
+            _scrollToTop(idx);
+          } else {
+            setState(() {
+              _tabWidgets[idx] ??= _buildTabContent(idx);
+              _currentNavIndex = idx;
+            });
+          }
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Row(
+      children: [
+        NavigationRail(
+          selectedIndex: _currentNavIndex,
+          onDestinationSelected: (index) {
+            HapticFeedback.lightImpact();
+            if (index == _currentNavIndex) {
+              _scrollToTop(index);
+            } else {
+              setState(() {
+                _tabWidgets[index] ??= _buildTabContent(index);
+                _currentNavIndex = index;
+              });
+            }
+          },
+          backgroundColor: vk.surfaceContainer,
+          indicatorColor: cs.primary,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'WB',
+              style: GoogleFonts.oswald(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: cs.primary,
+                letterSpacing: 2,
               ),
-            if (_tabWidgets[1] != null)
-              Offstage(
-                offstage: _currentNavIndex != 1,
-                child: RepaintBoundary(child: _tabWidgets[1]!),
-              ),
-            if (_tabWidgets[2] != null)
-              Offstage(
-                offstage: _currentNavIndex != 2,
-                child: RepaintBoundary(child: _tabWidgets[2]!),
-              ),
-            if (_tabWidgets[3] != null)
-              Offstage(
-                offstage: _currentNavIndex != 3,
-                child: RepaintBoundary(child: _tabWidgets[3]!),
-              ),
-          ],
+            ),
+          ),
+          labelType: NavigationRailLabelType.all,
+          selectedIconTheme: IconThemeData(color: cs.onPrimary, size: 22),
+          unselectedIconTheme: IconThemeData(
+            color: cs.onSurface.withValues(alpha: 0.5),
+            size: 22,
+          ),
+          selectedLabelTextStyle: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: cs.primary,
+          ),
+          unselectedLabelTextStyle: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface.withValues(alpha: 0.5),
+          ),
+          destinations: _navItems
+              .map(
+                (item) => NavigationRailDestination(
+                  icon: Icon(item.icon),
+                  selectedIcon: Icon(item.selectedIcon),
+                  label: Text(item.label),
+                ),
+              )
+              .toList(),
         ),
+        VerticalDivider(
+          width: 1,
+          thickness: 1,
+          color: vk.glassBorder.withValues(alpha: 0.2),
+        ),
+        Expanded(
+          child: _buildTabBody(),
+        ),
+      ],
       ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      extendBody: true,
+      body: SafeArea(bottom: false, child: _buildTabBody()),
       bottomNavigationBar: _FloatingNavBar(
         currentIndex: _currentNavIndex,
         navItems: _navItems,
@@ -112,6 +209,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTabBody() {
+    return Stack(
+      children: [
+        if (_tabWidgets[0] != null || _currentNavIndex == 0)
+          Offstage(
+            offstage: _currentNavIndex != 0,
+            child: RepaintBoundary(child: _buildHomeTab()),
+          ),
+        if (_tabWidgets[1] != null)
+          Offstage(
+            offstage: _currentNavIndex != 1,
+            child: RepaintBoundary(child: _tabWidgets[1]!),
+          ),
+        if (_tabWidgets[2] != null)
+          Offstage(
+            offstage: _currentNavIndex != 2,
+            child: RepaintBoundary(child: _tabWidgets[2]!),
+          ),
+        if (_tabWidgets[3] != null)
+          Offstage(
+            offstage: _currentNavIndex != 3,
+            child: RepaintBoundary(child: _tabWidgets[3]!),
+          ),
+      ],
+    );
+  }
+
   Widget _buildTabContent(int index) {
     switch (index) {
       case 1:
@@ -125,16 +249,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildHomeTab(double bottomPadding) {
+  Widget _buildHomeTab() {
     final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
+    final desktop = context.isDesktop;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
         final horizontalPadding = isCompact ? 20.0 : 32.0;
+        final bottomPadding = desktop ? 24.0 : 90.0;
 
-        return Column(
+        final content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
@@ -174,56 +299,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // Search bar
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child:
-                  GestureDetector(
-                        key: const Key('search_bar'),
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SearchScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(0),
-                            border: Border.all(
-                              color: vk.glassBorder,
-                              width: 1.5,
-                            ),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isCompact ? 16 : 24,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                'EXPLORE CURATED ARCHIVES...',
-                                style: GoogleFonts.inter(
-                                  color: vk.onSurfaceSubtle,
-                                  fontSize: isCompact ? 12 : 14,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.search_rounded,
-                                color: cs.onSurface,
-                                size: isCompact ? 20 : 24,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                      .animate()
-                      .fade(delay: 300.ms)
-                      .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
+              child: desktop
+                  ? _buildInlineSearch(horizontalPadding)
+                  : _buildTapSearch(isCompact, horizontalPadding),
             ),
             const SizedBox(height: 24),
 
@@ -260,8 +341,146 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         );
+
+        if (!desktop) return content;
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: ResponsiveConfig.maxContentWidth,
+            ),
+            child: content,
+          ),
+        );
       },
     );
+  }
+
+  Widget _buildTapSearch(bool isCompact, double horizontalPadding) {
+    final vk = context.vivek;
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      key: const Key('search_bar'),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => SearchScreen(backendBase: BackendConfig.baseUrl),
+          ),
+        );
+      },
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(0),
+          border: Border.all(color: vk.glassBorder, width: 1.5),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 24),
+        child: Row(
+          children: [
+            Text(
+              'EXPLORE CURATED ARCHIVES...',
+              style: GoogleFonts.inter(
+                color: vk.onSurfaceSubtle,
+                fontSize: isCompact ? 12 : 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.search_rounded,
+              color: cs.onSurface,
+              size: isCompact ? 20 : 24,
+            ),
+          ],
+        ),
+      ),
+    )
+        .animate()
+        .fade(delay: 300.ms)
+        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic);
+  }
+
+  Widget _buildInlineSearch(double horizontalPadding) {
+    final vk = context.vivek;
+    final cs = Theme.of(context).colorScheme;
+
+    return HoverBuilder(
+      builder: (context, isHovered) {
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    SearchScreen(backendBase: BackendConfig.baseUrl),
+              ),
+            );
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 56,
+            decoration: BoxDecoration(
+              color: isHovered
+                  ? vk.surfaceContainerHigh
+                  : vk.surfaceContainer,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isHovered ? cs.primary : vk.glassBorder,
+                width: isHovered ? 1.5 : 1,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.search_rounded,
+                  color: isHovered ? cs.primary : vk.onSurfaceSubtle,
+                  size: 22,
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'Search wallpapers...',
+                  style: GoogleFonts.inter(
+                    color: vk.onSurfaceSubtle,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: vk.glassBorder.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '/',
+                    style: GoogleFonts.inter(
+                      color: vk.onSurfaceDim,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    )
+        .animate()
+        .fade(delay: 300.ms)
+        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic);
   }
 }
 

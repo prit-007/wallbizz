@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../models/moodboard.dart';
 import '../models/wallpaper.dart';
@@ -328,9 +329,7 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                       backgroundColor: Colors.black,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final crossAxisCount = constraints.maxWidth > 900
-                              ? 4
-                              : (constraints.maxWidth > 600 ? 3 : 2);
+                          final crossAxisCount = context.gridColumns;
                           return MasonryGridView.count(
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 10,
