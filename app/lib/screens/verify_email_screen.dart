@@ -36,7 +36,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   void _listenForConfirmation() {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      data,
+    ) {
       if (data.session != null && data.session!.user.emailConfirmedAt != null) {
         WallpaperActions.onAuthSuccess();
         if (mounted) {

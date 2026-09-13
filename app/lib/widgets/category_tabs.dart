@@ -32,7 +32,9 @@ class _CategoryTabsState extends State<CategoryTabs> {
   void didUpdateWidget(CategoryTabs oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedCategory != widget.selectedCategory) {
-      final idx = _categories.indexWhere((c) => c['value'] == widget.selectedCategory);
+      final idx = _categories.indexWhere(
+        (c) => c['value'] == widget.selectedCategory,
+      );
       if (idx >= 0 && _scrollController.hasClients) {
         _scrollController.animateTo(
           idx * 90.0,

@@ -36,7 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _user = Supabase.instance.client.auth.currentUser;
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      event,
+    ) {
       if (mounted) setState(() => _user = event.session?.user);
     });
     _loadSettings();

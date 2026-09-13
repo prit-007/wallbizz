@@ -450,14 +450,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 ),
               ),
 
-                    Expanded(
-                      child: filteredItems.isEmpty
-                          ? _buildEmptyView()
-                          : RefreshIndicator(
-                              onRefresh: () async {
-                                _recalculateStorage();
-                                setState(() {});
-                              },
+            Expanded(
+              child: filteredItems.isEmpty
+                  ? _buildEmptyView()
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        _recalculateStorage();
+                        setState(() {});
+                      },
                       color: cs.primary,
                       backgroundColor: cs.surface,
                       child: LayoutBuilder(
