@@ -329,7 +329,7 @@ func TestCleanupRoute_HandlesCleanupError(t *testing.T) {
 		t.Fatalf("Failed to make request: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Expected status 200 even on cleanup error, got %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Errorf("Expected status 500 on cleanup error, got %d", resp.StatusCode)
 	}
 }

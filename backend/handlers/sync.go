@@ -74,12 +74,26 @@ func fetchCategory(cfg config.Config, category, extraParams string) int {
 
 	totalInserted := 0
 
-	for page := 1; page <= 3; page++ {
+	for page := 1; page <= cfg.SyncMaxPages; page++ {
 		url := fmt.Sprintf("%s?%s&page=%d", wallhavenBaseURL, baseParams, page)
 
-		resp, err := httpClient.Get(url)
+		var resp *http.Response
+		var err error
+		for attempt := 0; attempt < 3; attempt++ {
+			resp, err = httpClient.Get(url)
+			if err == nil && resp.StatusCode != http.StatusTooManyRequests && resp.StatusCode < 500 {
+				break
+			}
+			if resp != nil {
+				resp.Body.Close()
+			}
+			backoff := time.Duration(1<<uint(attempt)) * time.Second
+			log.Warn().Str("category", category).Int("page", page).Int("attempt", attempt+1).Dur("backoff", backoff).Msg("Retrying Wallhaven request")
+			time.Sleep(backoff)
+		}
+
 		if err != nil {
-			log.Error().Str("category", category).Int("page", page).Err(err).Msg("Failed to fetch from Wallhaven")
+			log.Error().Str("category", category).Int("page", page).Err(err).Msg("Failed to fetch from Wallhaven after retries")
 			continue
 		}
 

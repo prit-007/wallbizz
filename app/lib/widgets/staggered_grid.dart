@@ -32,6 +32,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
   int _page = 0;
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _hasError = false;
   late final ScrollController _scrollController;
 
   @override
@@ -103,18 +104,30 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
   Future<void> _loadWallpapers() async {
     if (_isLoading || !_hasMore) return;
-    setState(() => _isLoading = true);
-    final newWallpapers = await SupabaseService.instance.fetchWallpapers(
-      category: widget.category,
-      page: _page,
-    );
-    if (mounted) {
-      setState(() {
-        _wallpapers.addAll(newWallpapers);
-        _page++;
-        _hasMore = newWallpapers.length == 24;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final newWallpapers = await SupabaseService.instance.fetchWallpapers(
+        category: widget.category,
+        page: _page,
+      );
+      if (mounted) {
+        setState(() {
+          _wallpapers.addAll(newWallpapers);
+          _page++;
+          _hasMore = newWallpapers.length == 24;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
@@ -136,6 +149,29 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
     if (_wallpapers.isEmpty && _isLoading) {
       return _buildLoadingSkeleton();
+    }
+
+    if (_wallpapers.isEmpty && _hasError) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: cs.error),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load wallpapers',
+              style: TextStyle(color: cs.onSurface),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _resetAndLoad,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(backgroundColor: cs.primary),
+            ),
+          ],
+        ),
+      );
     }
 
     return RefreshIndicator(

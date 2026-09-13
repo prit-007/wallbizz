@@ -330,23 +330,44 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(bottom: bottomPadding),
-                child: StaggeredGrid(
-                  key: ValueKey(_selectedCategory),
-                  category: _selectedCategory,
-                  scrollController: _scrollControllers[0],
-                  onWallpaperTap: (wallpaper, allWallpapers) {
-                    final index = allWallpapers.indexWhere(
-                      (w) => w.id == wallpaper.id,
-                    );
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => WallpaperSwiperScreen(
-                          wallpapers: allWallpapers,
-                          initialIndex: index >= 0 ? index : 0,
-                        ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0.02, 0),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                        child: child,
                       ),
                     );
                   },
+                  child: StaggeredGrid(
+                    key: ValueKey(_selectedCategory),
+                    category: _selectedCategory,
+                    scrollController: _scrollControllers[0],
+                    onWallpaperTap: (wallpaper, allWallpapers) {
+                      final index = allWallpapers.indexWhere(
+                        (w) => w.id == wallpaper.id,
+                      );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => WallpaperSwiperScreen(
+                            wallpapers: allWallpapers,
+                            initialIndex: index >= 0 ? index : 0,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

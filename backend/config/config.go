@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -14,11 +15,27 @@ type Config struct {
 	WallhavenAPIKey    string
 	CronSecret         string
 	LogLevel           string
+	SyncMaxPages       int
+	RetentionDays      int
 }
 
 func LoadConfig() Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
+	}
+
+	syncMaxPages := 3
+	if v := os.Getenv("SYNC_MAX_PAGES"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			syncMaxPages = n
+		}
+	}
+
+	retentionDays := 3
+	if v := os.Getenv("WALLPAPER_RETENTION_DAYS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			retentionDays = n
+		}
 	}
 
 	cfg := Config{
@@ -28,6 +45,8 @@ func LoadConfig() Config {
 		WallhavenAPIKey:    os.Getenv("WALLHAVEN_API_KEY"),
 		CronSecret:         os.Getenv("CRON_SECRET"),
 		LogLevel:           getEnv("LOG_LEVEL", "info"),
+		SyncMaxPages:       syncMaxPages,
+		RetentionDays:      retentionDays,
 	}
 
 	cfg.validate()

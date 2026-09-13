@@ -7,7 +7,12 @@ class ThemeConfig {
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    isDarkMode.value = prefs.getBool(_darkModeKey) ?? true;
+    final stored = prefs.getBool(_darkModeKey);
+    if (stored != null) {
+      isDarkMode.value = stored;
+    } else {
+      isDarkMode.value = true;
+    }
   }
 
   static Future<void> setDarkMode(bool value) async {
