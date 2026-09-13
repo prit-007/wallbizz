@@ -48,6 +48,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
       - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze --no-fatal-infos
       - run: flutter test
@@ -71,6 +75,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Decode keystore
         if: ${{ env.HAS_KEYSTORE == 'true' }}
@@ -132,6 +140,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Build release iOS (unsigned)
         working-directory: app
@@ -163,6 +175,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Build release Windows
         working-directory: app
@@ -219,6 +235,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             ninja-build libgtk-3-dev libsecret-1-dev
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Build release Linux
         working-directory: app
@@ -250,6 +270,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Build release macOS (unsigned)
         working-directory: app
@@ -282,6 +306,10 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/flutter-prep
+        with:
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
+          backend-url: ${{ secrets.BACKEND_URL }}
 
       - name: Build release web
         working-directory: app

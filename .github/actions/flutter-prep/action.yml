@@ -2,22 +2,29 @@ name: Flutter prep
 description: Install deps and setup env. Shared by all CI jobs.
 
 inputs:
-  setup-env:
-    description: 'Create .env file from secrets'
+  supabase-url:
+    description: 'Supabase URL'
     required: false
-    default: 'true'
+    default: ''
+  supabase-anon-key:
+    description: 'Supabase anon key'
+    required: false
+    default: ''
+  backend-url:
+    description: 'Backend URL'
+    required: false
+    default: ''
 
 runs:
   using: composite
   steps:
     - name: Create .env
-      if: ${{ inputs.setup-env == 'true' }}
       shell: bash
       run: |
         cat > .env << EOF
-        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-        BACKEND_URL=${{ secrets.BACKEND_URL }}
+        SUPABASE_URL=${{ inputs.supabase-url }}
+        SUPABASE_ANON_KEY=${{ inputs.supabase-anon-key }}
+        BACKEND_URL=${{ inputs.backend-url }}
         EOF
 
     - name: Install dependencies
