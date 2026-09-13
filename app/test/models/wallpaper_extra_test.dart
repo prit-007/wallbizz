@@ -58,22 +58,11 @@ void main() {
       expect(wp.sourceQuery, 'anime');
     });
 
-    test('completely empty map', () {
-      final wp = Wallpaper.fromMap({});
-      expect(wp.id, '');
-      expect(wp.wallhavenId, '');
-      expect(wp.urlFull, '');
-      expect(wp.urlThumb, '');
-      expect(wp.resolution, '');
-      expect(wp.width, 0);
-      expect(wp.height, 0);
-      expect(wp.fileSize, 0);
-      expect(wp.primaryColor, '#000000');
-      expect(wp.category, 'general');
-      expect(wp.sourceQuery, '');
+    test('completely empty map throws FormatException', () {
+      expect(() => Wallpaper.fromMap({}), throwsFormatException);
     });
 
-    test('null values in map', () {
+    test('null values in map throws FormatException', () {
       final map = <String, dynamic>{
         'id': null,
         'wallhaven_id': null,
@@ -89,10 +78,16 @@ void main() {
         'created_at': null,
       };
 
+      expect(() => Wallpaper.fromMap(map), throwsFormatException);
+    });
+
+    test('map with only wallhaven_id succeeds', () {
+      final map = {
+        'wallhaven_id': 'abc123',
+      };
       final wp = Wallpaper.fromMap(map);
+      expect(wp.wallhavenId, 'abc123');
       expect(wp.id, '');
-      expect(wp.primaryColor, '#000000');
-      expect(wp.category, 'general');
     });
 
     test('negative dimensions', () {

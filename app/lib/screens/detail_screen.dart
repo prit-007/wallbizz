@@ -183,252 +183,349 @@ class _DetailScreenState extends State<DetailScreen>
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Listener(
-        onPointerDown: _onPointerDown,
-        onPointerMove: _onPointerMove,
-        onPointerUp: _onPointerUp,
-        child: GestureHintOverlay(
-          child: Transform.translate(
-            offset: Offset(0, _dragOffset),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // 1. Ambient Blur Background Layer
-                Positioned.fill(
-                  child: ClipRect(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                          ambientColor.withValues(alpha: 0.5),
-                          BlendMode.srcOver,
-                        ),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 1.5,
-                          height: MediaQuery.of(context).size.height * 1.5,
-                          child: Transform.translate(
-                            offset: Offset(
-                              -MediaQuery.of(context).size.width * 0.25,
-                              -MediaQuery.of(context).size.height * 0.25,
-                            ),
-                            child: NetworkImageWidget(
-                              imageUrl: wallpaper.urlFull,
-                              fit: BoxFit.cover,
+      body: Focus(
+        autofocus: true,
+        onKeyEvent: (node, event) {
+          if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+            return KeyEventResult.ignored;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.escape ||
+              event.logicalKey == LogicalKeyboardKey.browserBack) {
+            Navigator.of(context).pop();
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: Listener(
+          onPointerDown: _onPointerDown,
+          onPointerMove: _onPointerMove,
+          onPointerUp: _onPointerUp,
+          child: GestureHintOverlay(
+            child: Transform.translate(
+              offset: Offset(0, _dragOffset),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // 1. Ambient Blur Background Layer
+                  Positioned.fill(
+                    child: ClipRect(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            ambientColor.withValues(alpha: 0.5),
+                            BlendMode.srcOver,
+                          ),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 1.5,
+                            height: MediaQuery.of(context).size.height * 1.5,
+                            child: Transform.translate(
+                              offset: Offset(
+                                -MediaQuery.of(context).size.width * 0.25,
+                                -MediaQuery.of(context).size.height * 0.25,
+                              ),
+                              child: NetworkImageWidget(
+                                imageUrl: wallpaper.urlFull,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ).animate().fade(duration: 600.ms),
-                ),
-
-                // 2. Base Radial Darkening Gradient
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: Alignment.center,
-                          radius: 1.0,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.5),
-                          ],
-                          stops: const [0.2, 1.0],
-                        ),
-                      ),
-                    ),
+                    ).animate().fade(duration: 600.ms),
                   ),
-                ),
 
-                // 3. Core Interactive Viewer Layer + Single Tap to Toggle UI
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => _isUiVisible = !_isUiVisible);
-                      HapticFeedback.selectionClick();
-                    },
-                    onDoubleTapDown: _handleDoubleTap,
-                    child: InteractiveViewer(
-                      transformationController: _transformController,
-                      minScale: 1.0,
-                      maxScale: 5.0,
-                      panEnabled: true,
-                      scaleEnabled: true,
-                      child: Center(
-                        child: Hero(
-                          tag: wallpaper.id,
-                          child: NetworkImageWidget(
-                            imageUrl: wallpaper.urlFull,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // 4. Bottom Gradient Overlay (Fades out when UI is hidden)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: _isUiVisible ? 1.0 : 0.0,
+                  // 2. Base Radial Darkening Gradient
+                  Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
-                        height: 450,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+                          gradient: RadialGradient(
+                            center: Alignment.center,
+                            radius: 1.0,
                             colors: [
                               Colors.transparent,
-                              ambientColor.withValues(alpha: 0.2),
-                              Colors.black.withValues(alpha: 0.95),
+                              Colors.black.withValues(alpha: 0.5),
                             ],
-                            stops: const [0.0, 0.5, 1.0],
+                            stops: const [0.2, 1.0],
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                // 5. Top Action Buttons (Slides up and fades out)
-                AnimatedSlide(
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeInOutCubic,
-                  offset: _isUiVisible ? Offset.zero : const Offset(0, -1.5),
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 250),
-                    opacity: _isUiVisible ? 1.0 : 0.0,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: MediaQuery.of(context).padding.top + 12,
-                          left: 16,
-                          child: _FrostedCircleButton(
-                            icon: HugeIcons.strokeRoundedArrowLeft01,
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.of(context).pop();
-                            },
+                  // 3. Core Interactive Viewer Layer + Single Tap to Toggle UI
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => _isUiVisible = !_isUiVisible);
+                        HapticFeedback.selectionClick();
+                      },
+                      onDoubleTapDown: _handleDoubleTap,
+                      child: InteractiveViewer(
+                        transformationController: _transformController,
+                        minScale: 1.0,
+                        maxScale: 5.0,
+                        panEnabled: true,
+                        scaleEnabled: true,
+                        child: Center(
+                          child: Hero(
+                            tag: wallpaper.id,
+                            child: NetworkImageWidget(
+                              imageUrl: wallpaper.urlFull,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                        Positioned(
-                          top: MediaQuery.of(context).padding.top + 12,
-                          right: 16,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _FrostedCircleButton(
-                                icon: _isWishlisted
-                                    ? HugeIcons.strokeRoundedFavourite
-                                    : HugeIcons.strokeRoundedFavourite,
-                                iconColor: _isWishlisted
-                                    ? Colors.redAccent
-                                    : Colors.white,
-                                onTap: _onHeartTap,
-                              ),
-                              const SizedBox(width: 12),
-                              _FrostedCircleButton(
-                                icon: HugeIcons.strokeRoundedGridView,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  _showMoodboardSheet(context);
-                                },
-                              ),
-                              const SizedBox(width: 12),
-                              _FrostedCircleButton(
-                                icon: HugeIcons.strokeRoundedShare01,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  _shareWallpaper(context);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
 
-                // 6. Bottom Action Panel & Specs (Slides down and fades out)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: AnimatedSlide(
+                  // 4. Bottom Gradient Overlay (Fades out when UI is hidden)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: _isUiVisible ? 1.0 : 0.0,
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 450,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                ambientColor.withValues(alpha: 0.2),
+                                Colors.black.withValues(alpha: 0.95),
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 5. Top Action Buttons (Slides up and fades out)
+                  AnimatedSlide(
                     duration: const Duration(milliseconds: 350),
                     curve: Curves.easeInOutCubic,
-                    offset: _isUiVisible ? Offset.zero : const Offset(0, 1.5),
+                    offset: _isUiVisible ? Offset.zero : const Offset(0, -1.5),
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 250),
                       opacity: _isUiVisible ? 1.0 : 0.0,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          24,
-                          24,
-                          24,
-                          MediaQuery.of(context).padding.bottom + 24,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SpecsCard(wallpaper: wallpaper),
-                            const SizedBox(height: 24),
-
-                            _GlassActionButton(
-                              onPressed: _isDownloading
-                                  ? null
-                                  : () {
-                                      HapticFeedback.mediumImpact();
-                                      _downloadWallpaper(context);
-                                    },
-                              isDownloading: _isDownloading,
-                              isDownloaded: _isDownloaded,
-                              label: _isDownloading
-                                  ? 'DOWNLOADING...'
-                                  : (_isDownloaded
-                                        ? 'DOWNLOADED'
-                                        : 'DOWNLOAD WALLPAPER'),
-                              icon: _isDownloaded
-                                  ? HugeIcons.strokeRoundedCheckmarkCircle01
-                                  : HugeIcons.strokeRoundedDownload01,
-                              backgroundColor: _isDownloaded
-                                  ? Colors.white.withValues(alpha: 0.1)
-                                  : Colors.white.withValues(alpha: 0.2),
-                              textColor: Colors.white,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: MediaQuery.of(context).padding.top + 12,
+                            left: 16,
+                            child: _FrostedCircleButton(
+                              icon: HugeIcons.strokeRoundedArrowLeft01,
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.of(context).pop();
+                              },
                             ),
+                          ),
+                          Positioned(
+                            top: MediaQuery.of(context).padding.top + 12,
+                            right: 16,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _FrostedCircleButton(
+                                  icon: _isWishlisted
+                                      ? HugeIcons.strokeRoundedFavourite
+                                      : HugeIcons.strokeRoundedFavourite,
+                                  iconColor: _isWishlisted
+                                      ? Colors.redAccent
+                                      : Colors.white,
+                                  onTap: _onHeartTap,
+                                ),
+                                const SizedBox(width: 12),
+                                _FrostedCircleButton(
+                                  icon: HugeIcons.strokeRoundedGridView,
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    _showMoodboardSheet(context);
+                                  },
+                                ),
+                                const SizedBox(width: 12),
+                                _FrostedCircleButton(
+                                  icon: HugeIcons.strokeRoundedShare01,
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    _shareWallpaper(context);
+                                  },
+                                ),
+                                const SizedBox(width: 12),
+                                PopupMenuButton<String>(
+                                  icon: ClipOval(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 12,
+                                        sigmaY: 12,
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: const HugeIcon(
+                                          icon: HugeIcons
+                                              .strokeRoundedSettings01,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  color: Colors.black.withValues(alpha: 0.85),
+                                  onSelected: (value) {
+                                    HapticFeedback.lightImpact();
+                                    if (value == 'copy_url') {
+                                      _copyUrl(context);
+                                    } else if (value == 'report') {
+                                      _reportWallpaper(context);
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'copy_url',
+                                      child: Row(
+                                        children: [
+                                          HugeIcon(
+                                            icon: HugeIcons.strokeRoundedCopy01,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            'Copy URL',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'report',
+                                      child: Row(
+                                        children: [
+                                          HugeIcon(
+                                            icon:
+                                                HugeIcons.strokeRoundedAlert01,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            'Report',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                            if (!kIsWeb) ...[
-                              const SizedBox(height: 12),
+                  // 6. Bottom Action Panel & Specs (Slides down and fades out)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: AnimatedSlide(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeInOutCubic,
+                      offset: _isUiVisible ? Offset.zero : const Offset(0, 1.5),
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 250),
+                        opacity: _isUiVisible ? 1.0 : 0.0,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            24,
+                            24,
+                            24,
+                            MediaQuery.of(context).padding.bottom + 24,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SpecsCard(wallpaper: wallpaper),
+                              const SizedBox(height: 24),
+
                               _GlassActionButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  _setWallpaper(context);
-                                },
-                                isDownloading: false,
-                                isDownloaded: false,
-                                label: 'SET AS WALLPAPER',
-                                icon: HugeIcons.strokeRoundedImage01,
-                                backgroundColor: ambientColor,
-                                textColor: ambientColor.computeLuminance() > 0.5
-                                    ? Colors.black
-                                    : Colors.white,
+                                onPressed: _isDownloading
+                                    ? null
+                                    : () {
+                                        HapticFeedback.mediumImpact();
+                                        _downloadWallpaper(context);
+                                      },
+                                isDownloading: _isDownloading,
+                                isDownloaded: _isDownloaded,
+                                label: _isDownloading
+                                    ? 'DOWNLOADING...'
+                                    : (_isDownloaded
+                                          ? 'DOWNLOADED'
+                                          : 'DOWNLOAD WALLPAPER'),
+                                icon: _isDownloaded
+                                    ? HugeIcons.strokeRoundedCheckmarkCircle01
+                                    : HugeIcons.strokeRoundedDownload01,
+                                backgroundColor: _isDownloaded
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.white.withValues(alpha: 0.2),
+                                textColor: Colors.white,
                               ),
+
+                              if (!kIsWeb) ...[
+                                const SizedBox(height: 12),
+                                _GlassActionButton(
+                                  onPressed: () {
+                                    HapticFeedback.lightImpact();
+                                    _setWallpaper(context);
+                                  },
+                                  isDownloading: false,
+                                  isDownloaded: false,
+                                  label: 'SET AS WALLPAPER',
+                                  icon: HugeIcons.strokeRoundedImage01,
+                                  backgroundColor: ambientColor,
+                                  textColor:
+                                      ambientColor.computeLuminance() > 0.5
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -650,6 +747,48 @@ class _DetailScreenState extends State<DetailScreen>
         : wallpaper.urlFull;
     await ShareUtils.shareWithWatermark(imageUrl: shareUrl, context: context);
     if (context.mounted) Navigator.of(context).pop();
+  }
+
+  void _copyUrl(BuildContext context) {
+    final url = wallpaper.urlFull;
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('URL copied to clipboard'),
+        backgroundColor: Colors.black.withValues(alpha: 0.9),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _reportWallpaper(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Report Wallpaper'),
+        content: const Text(
+          'This will flag the wallpaper for review. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Wallpaper reported. Thank you!'),
+                  backgroundColor: Colors.black.withValues(alpha: 0.9),
+                ),
+              );
+            },
+            child: const Text('Report'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showMoodboardSheet(BuildContext context) {

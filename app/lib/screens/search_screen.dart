@@ -235,14 +235,34 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  List<String> get _suggestions {
+    final query = _controller.text.trim().toLowerCase();
+    if (query.isEmpty) return [];
+    final suggestions = <String>{};
+    for (final tag in _trendingTags) {
+      if (tag['name']!.toLowerCase().contains(query)) {
+        suggestions.add(tag['name']!);
+      }
+    }
+    for (final search in _recentSearches) {
+      if (search.toLowerCase().contains(query)) {
+        suggestions.add(search);
+      }
+    }
+    return suggestions.take(5).toList();
+  }
+
   Widget _buildSearchBar() {
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final isFocused = _focusNode.hasFocus;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
@@ -376,6 +396,54 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
+    ),
+    if (_focusNode.hasFocus && _suggestions.isNotEmpty)
+      Container(
+        constraints: const BoxConstraints(maxHeight: 200),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: vk.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: vk.glassBorder.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
+        child: Material(
+          color: vk.surfaceContainerHigh,
+          child: ListView.builder(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            itemCount: _suggestions.length,
+            itemBuilder: (context, index) {
+              final suggestion = _suggestions[index];
+              return ListTile(
+                dense: true,
+                leading: HugeIcon(
+                  icon: _recentSearches.contains(suggestion)
+                      ? HugeIcons.strokeRoundedClock01
+                      : HugeIcons.strokeRoundedFire,
+                  size: 16,
+                  color: vk.onSurfaceSubtle,
+                ),
+                title: Text(
+                  suggestion,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: cs.onSurface,
+                  ),
+                ),
+                onTap: () {
+                  _controller.text = suggestion;
+                  _onSearch();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ],
     );
   }
 
