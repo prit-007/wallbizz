@@ -130,7 +130,6 @@ Name: "spanish"; MessagesFile: "compiler:Languages\\Spanish.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1
-Name: "associatefiles"; Description: "Associate wallpaper image files with Wallbizz"; GroupDescription: "File Associations:"; Flags: unchecked
 
 [Files]
 Source: "$exePath"; DestDir: "{app}"; Flags: ignoreversion
@@ -143,15 +142,6 @@ Name: "{group}\\{cm:UninstallProgram,Wallbizz}"; Filename: "{uninstallexe}"
 Name: "{autoprograms}\\Wallbizz"; Filename: "{app}\\$_exeName"
 Name: "{autodesktop}\\Wallbizz"; Filename: "{app}\\$_exeName"; Tasks: desktopicon
 Name: "{userappdata}\\Microsoft\\Internet Explorer\\Quick Launch\\Wallbizz"; Filename: "{app}\\$_exeName"; Tasks: quicklaunchicon
-
-[Registry]
-Root: HKA; Subkey: "Software\\Classes\\.jpg\\OpenWithProgids";  ValueType: string; ValueName: "Wallbizz.Image"; Flags: uninsdeletevalue; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\.jpeg\\OpenWithProgids"; ValueType: string; ValueName: "Wallbizz.Image"; Flags: uninsdeletevalue; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\.png\\OpenWithProgids";  ValueType: string; ValueName: "Wallbizz.Image"; Flags: uninsdeletevalue; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\.webp\\OpenWithProgids"; ValueType: string; ValueName: "Wallbizz.Image"; Flags: uninsdeletevalue; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\Wallbizz.Image";         ValueType: string; ValueName: "";                    Flags: uninsdeletekey; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\Wallbizz.Image\\DefaultIcon"; ValueType: string; ValueName: "{app}\\$_exeName,0"; Tasks: associatefiles
-Root: HKA; Subkey: "Software\\Classes\\Wallbizz.Image\\shell\\open\\command"; ValueType: string; ValueName: "\\"{app}\\$_exeName\\" \\"%1\\""; Tasks: associatefiles
 
 [Run]
 Filename: "{app}\\$_exeName"; Description: "{cm:LaunchProgram,Wallbizz}"; Flags: nowait postinstall skipifsilent
