@@ -291,7 +291,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       final prefs = await SharedPreferences.getInstance();
-      final searches = prefs.getStringList('recent_searches') ?? [];
+      final searches = prefs.getStringList('search_history') ?? [];
       expect(searches, contains('cyberpunk'));
     });
 

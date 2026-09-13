@@ -192,10 +192,41 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
   Widget build(BuildContext context) {
     final desktop = context.isDesktop;
 
-    if (desktop) {
-      return _buildDesktopLayout();
-    }
-    return _buildMobileLayout();
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape ||
+            event.logicalKey == LogicalKeyboardKey.browserBack) {
+          Navigator.of(context).pop();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          if (_currentIndex > 0) {
+            _pageController.animateToPage(
+              _currentIndex - 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+            );
+          }
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          if (_currentIndex < widget.wallpapers.length - 1) {
+            _pageController.animateToPage(
+              _currentIndex + 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+            );
+          }
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: desktop ? _buildDesktopLayout() : _buildMobileLayout(),
+    );
   }
 
   // ─── Desktop split-view layout ──────────────────────────────

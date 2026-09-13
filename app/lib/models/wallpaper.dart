@@ -37,19 +37,27 @@ class Wallpaper {
   }
 
   factory Wallpaper.fromMap(Map<String, dynamic> map) {
+    final id = map['id'] as String? ?? '';
+    final wallhavenId = map['wallhaven_id'] as String? ?? '';
+    final urlFull = map['url_full'] as String? ?? '';
+    if (id.isEmpty && wallhavenId.isEmpty) {
+      throw FormatException('Wallpaper missing both id and wallhaven_id');
+    }
     return Wallpaper(
-      id: map['id'] ?? '',
-      wallhavenId: map['wallhaven_id'] ?? '',
-      urlFull: map['url_full'] ?? '',
-      urlThumb: map['url_thumb'] ?? '',
-      resolution: map['resolution'] ?? '',
-      width: map['width'] ?? 0,
-      height: map['height'] ?? 0,
-      fileSize: map['file_size'] ?? 0,
-      primaryColor: map['primary_color'] ?? '#000000',
-      category: map['category'] ?? 'general',
-      sourceQuery: map['source_query'] ?? '',
-      createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),
+      id: id,
+      wallhavenId: wallhavenId,
+      urlFull: urlFull,
+      urlThumb: (map['url_thumb'] as String?) ?? '',
+      resolution: (map['resolution'] as String?) ?? '',
+      width: (map['width'] as int?) ?? 0,
+      height: (map['height'] as int?) ?? 0,
+      fileSize: (map['file_size'] as int?) ?? 0,
+      primaryColor: (map['primary_color'] as String?) ?? '#000000',
+      category: (map['category'] as String?) ?? 'general',
+      sourceQuery: (map['source_query'] as String?) ?? '',
+      createdAt:
+          DateTime.tryParse(map['created_at'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 

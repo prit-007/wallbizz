@@ -17,6 +17,8 @@ class SupabaseService {
 
   final String _baseUrl = SupabaseConfig.url;
   final String _anonKey = SupabaseConfig.anonKey;
+  static const _timeout = Duration(seconds: 15);
+  static final _client = http.Client();
 
   Map<String, String> get _headers => {
     'apikey': _anonKey,
@@ -35,6 +37,20 @@ class SupabaseService {
       'Content-Type': 'application/json',
     };
   }
+
+  Future<http.Response> _get(Uri url, {Map<String, String>? headers}) =>
+      _client.get(url, headers: headers ?? _headers).timeout(_timeout);
+
+  Future<http.Response> _post(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+  }) => _client
+      .post(url, headers: headers ?? _headers, body: body)
+      .timeout(_timeout);
+
+  Future<http.Response> _delete(Uri url, {Map<String, String>? headers}) =>
+      _client.delete(url, headers: headers ?? _headers).timeout(_timeout);
 
   // ----------------------------------------------------------
   // Wallpapers
@@ -66,7 +82,7 @@ class SupabaseService {
       'Fetching wallpapers: $category page=$page',
       domain: LogDomain.sync,
     );
-    final response = await http.get(
+    final response = await _get(
       url,
       headers: {..._headers, 'Range': '$from-$to'},
     );
@@ -103,7 +119,7 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/wishlists?select=wallpapers(*),created_at&user_id=eq.$userId&order=created_at.desc',
     );
-    final response = await http.get(url, headers: _authHeaders);
+    final response = await _get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
       ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
@@ -117,7 +133,7 @@ class SupabaseService {
   Future<bool> addToWishlist(String userId, String wallpaperId) async {
     final url = Uri.parse('$_baseUrl/rest/v1/wishlists');
     logInfo('Adding to wishlist: $wallpaperId', domain: LogDomain.auth);
-    final response = await http.post(
+    final response = await _post(
       url,
       headers: _authHeaders,
       body: json.encode({'user_id': userId, 'wallpaper_id': wallpaperId}),
@@ -141,7 +157,7 @@ class SupabaseService {
       '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId',
     );
     logInfo('Removing from wishlist: $wallpaperId', domain: LogDomain.auth);
-    final response = await http.delete(url, headers: _authHeaders);
+    final response = await _delete(url, headers: _authHeaders);
 
     final success = response.statusCode == 200 || response.statusCode == 204;
     if (success) {
@@ -160,7 +176,7 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId&select=id',
     );
-    final response = await http.get(url, headers: _authHeaders);
+    final response = await _get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -185,7 +201,7 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboards?select=id,name,created_at,item_count:moodboard_items(count)&user_id=eq.$userId&order=created_at.desc',
     );
-    final response = await http.get(url, headers: _authHeaders);
+    final response = await _get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
       ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
@@ -199,7 +215,7 @@ class SupabaseService {
   Future<Moodboard?> createMoodboard(String userId, String name) async {
     final url = Uri.parse('$_baseUrl/rest/v1/moodboards');
     logInfo('Creating moodboard: $name', domain: LogDomain.general);
-    final response = await http.post(
+    final response = await _post(
       url,
       headers: _authHeaders,
       body: json.encode({'user_id': userId, 'name': name}),
@@ -222,7 +238,7 @@ class SupabaseService {
   Future<bool> deleteMoodboard(String moodboardId) async {
     final url = Uri.parse('$_baseUrl/rest/v1/moodboards?id=eq.$moodboardId');
     logInfo('Deleting moodboard: $moodboardId', domain: LogDomain.general);
-    final response = await http.delete(url, headers: _authHeaders);
+    final response = await _delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       moodboardNotifier.value++;
@@ -244,7 +260,7 @@ class SupabaseService {
       'Adding to moodboard: $moodboardId <- $wallpaperId',
       domain: LogDomain.general,
     );
-    final response = await http.post(
+    final response = await _post(
       url,
       headers: _authHeaders,
       body: json.encode({
@@ -276,7 +292,7 @@ class SupabaseService {
       'Removing from moodboard: $moodboardId <- $wallpaperId',
       domain: LogDomain.general,
     );
-    final response = await http.delete(url, headers: _authHeaders);
+    final response = await _delete(url, headers: _authHeaders);
 
     if (response.statusCode == 200 || response.statusCode == 204) {
       moodboardNotifier.value++;
@@ -301,7 +317,7 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?select=wallpapers(*)&moodboard_id=eq.$moodboardId&order=added_at.desc',
     );
-    final response = await http.get(url, headers: _authHeaders);
+    final response = await _get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
       ApiCache.set(cacheKey, response.body, const Duration(minutes: 2));
@@ -316,7 +332,7 @@ class SupabaseService {
     final url = Uri.parse(
       '$_baseUrl/rest/v1/moodboard_items?select=moodboard_id&wallpaper_id=eq.$wallpaperId',
     );
-    final response = await http.get(url, headers: _authHeaders);
+    final response = await _get(url, headers: _authHeaders);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);

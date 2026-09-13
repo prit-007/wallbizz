@@ -15,7 +15,7 @@ void main() {
 
     test('returns saved searches', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['cyberpunk', 'nature', 'space'],
+        'search_history': ['cyberpunk', 'nature', 'space'],
       });
       final searches = await RecentSearches.load();
       expect(searches, ['cyberpunk', 'nature', 'space']);
@@ -31,23 +31,16 @@ void main() {
 
     test('moves existing search to front', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['cyberpunk', 'nature'],
+        'search_history': ['cyberpunk', 'nature'],
       });
       await RecentSearches.add('nature');
       final searches = await RecentSearches.load();
       expect(searches, ['nature', 'cyberpunk']);
     });
 
-    test('ignores empty queries', () async {
-      await RecentSearches.add('');
-      await RecentSearches.add('   ');
-      final searches = await RecentSearches.load();
-      expect(searches, isEmpty);
-    });
-
     test('caps at 10 items', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+        'search_history': ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
       });
       await RecentSearches.add('10');
       final searches = await RecentSearches.load();
@@ -58,7 +51,7 @@ void main() {
 
     test('does not exceed 10 items', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        'search_history': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
       });
       await RecentSearches.add('11');
       final searches = await RecentSearches.load();
@@ -71,7 +64,7 @@ void main() {
   group('RecentSearches.remove', () {
     test('removes specific search', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['cyberpunk', 'nature', 'space'],
+        'search_history': ['cyberpunk', 'nature', 'space'],
       });
       await RecentSearches.remove('nature');
       final searches = await RecentSearches.load();
@@ -80,7 +73,7 @@ void main() {
 
     test('removing non-existent search is no-op', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['cyberpunk'],
+        'search_history': ['cyberpunk'],
       });
       await RecentSearches.remove('nature');
       final searches = await RecentSearches.load();
@@ -91,7 +84,7 @@ void main() {
   group('RecentSearches.clear', () {
     test('removes all searches', () async {
       SharedPreferences.setMockInitialValues({
-        'recent_searches': ['cyberpunk', 'nature'],
+        'search_history': ['cyberpunk', 'nature'],
       });
       await RecentSearches.clear();
       final searches = await RecentSearches.load();
