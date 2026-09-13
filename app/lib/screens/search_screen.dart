@@ -11,6 +11,7 @@ import '../services/wallhaven_search.dart';
 import '../widgets/wallpaper_card.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import '../services/wallpaper_actions.dart';
+import '../services/download_service.dart';
 import '../services/recent_searches.dart';
 import 'wallpaper_swiper_screen.dart';
 import '../config/responsive_config.dart';
@@ -48,6 +49,9 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _hasSearched = false;
   String? _errorMessage;
   int _searchRequestId = 0;
+
+  bool _isMultiSelectMode = false;
+  final Set<int> _selectedIndices = {};
 
   String _purity = '100';
   String _sorting = 'date_added';
@@ -104,6 +108,65 @@ class _SearchScreenState extends State<SearchScreen> {
       _loadRecentSearches();
     }
     _searchQuery(reset: true);
+  }
+
+  void _toggleMultiSelect(int index) {
+    setState(() {
+      if (_selectedIndices.contains(index)) {
+        _selectedIndices.remove(index);
+        if (_selectedIndices.isEmpty) _isMultiSelectMode = false;
+      } else {
+        _selectedIndices.add(index);
+      }
+    });
+  }
+
+  void _enterMultiSelect(int index) {
+    setState(() {
+      _isMultiSelectMode = true;
+      _selectedIndices.add(index);
+    });
+  }
+
+  void _exitMultiSelect() {
+    setState(() {
+      _isMultiSelectMode = false;
+      _selectedIndices.clear();
+    });
+  }
+
+  void _selectAllResults() {
+    setState(() {
+      if (_selectedIndices.length == _results.length) {
+        _selectedIndices.clear();
+        _isMultiSelectMode = false;
+      } else {
+        _selectedIndices.addAll(List.generate(_results.length, (i) => i));
+      }
+    });
+  }
+
+  Future<void> _batchDownload() async {
+    if (_selectedIndices.isEmpty) return;
+    final selected = _selectedIndices.map((i) => _results[i]).toList();
+    int downloaded = 0;
+    for (final wallpaper in selected) {
+      try {
+        await DownloadService.downloadImage(imageUrl: wallpaper.urlFull);
+        downloaded++;
+      } catch (_) {}
+    }
+    if (mounted) {
+      _exitMultiSelect();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '$downloaded of ${selected.length} wallpapers downloaded',
+          ),
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
+        ),
+      );
+    }
   }
 
   bool get _isAuthed {
@@ -220,18 +283,72 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final vk = context.vivek;
     return Scaffold(
       backgroundColor: cs.surface,
+      appBar: _isMultiSelectMode
+          ? AppBar(
+              backgroundColor: cs.surface,
+              leading: IconButton(
+                icon: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedCancel01,
+                  size: 20,
+                ),
+                onPressed: _exitMultiSelect,
+              ),
+              title: Text(
+                '${_selectedIndices.length} SELECTED',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _selectAllResults,
+                  child: Text(
+                    _selectedIndices.length == _results.length
+                        ? 'DESELECT ALL'
+                        : 'SELECT ALL',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
       body: SafeArea(
         child: Column(
           children: [
-            _buildSearchBar(),
-            _buildFiltersBar(),
-            const SizedBox(height: 6),
+            if (!_isMultiSelectMode) ...[
+              _buildSearchBar(),
+              _buildFiltersBar(),
+              const SizedBox(height: 6),
+            ],
             Expanded(child: _buildBody()),
           ],
         ),
       ),
+      floatingActionButton: _isMultiSelectMode && _selectedIndices.isNotEmpty
+          ? FloatingActionButton.extended(
+              onPressed: _batchDownload,
+              backgroundColor: cs.primary,
+              icon: const Icon(Icons.download, color: Colors.white, size: 20),
+              label: Text(
+                'DOWNLOAD (${_selectedIndices.length})',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -807,20 +924,69 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               );
             }
-            return WallpaperCard(
-                  wallpaper: _results[index],
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => WallpaperSwiperScreen(
-                          wallpapers: _results,
-                          initialIndex: index,
+            final isSelected =
+                _isMultiSelectMode && _selectedIndices.contains(index);
+            return GestureDetector(
+                  onLongPress: _isMultiSelectMode
+                      ? null
+                      : () => _enterMultiSelect(index),
+                  child: Stack(
+                    children: [
+                      WallpaperCard(
+                        wallpaper: _results[index],
+                        onTap: () {
+                          if (_isMultiSelectMode) {
+                            _toggleMultiSelect(index);
+                          } else {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => WallpaperSwiperScreen(
+                                  wallpapers: _results,
+                                  initialIndex: index,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onHeartTap: () => WallpaperActions.handleHeartTap(
+                          context,
+                          _results[index],
                         ),
                       ),
-                    );
-                  },
-                  onHeartTap: () =>
-                      WallpaperActions.handleHeartTap(context, _results[index]),
+                      if (_isMultiSelectMode)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: GestureDetector(
+                            onTap: () => _toggleMultiSelect(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? cs.primary
+                                    : Colors.black.withValues(alpha: 0.5),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? cs.primary
+                                      : Colors.white.withValues(alpha: 0.5),
+                                  width: 2,
+                                ),
+                              ),
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 )
                 .animate()
                 .fade(duration: 350.ms)
