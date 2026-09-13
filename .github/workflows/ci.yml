@@ -53,8 +53,11 @@ jobs:
           supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
           backend-url: ${{ secrets.BACKEND_URL }}
       - run: dart format --output=none --set-exit-if-changed .
+        working-directory: app
       - run: flutter analyze --no-fatal-infos
+        working-directory: app
       - run: flutter test
+        working-directory: app
 
   # ── Android (signed via GitHub Secrets) ──────────────────────────────
   build-android:
