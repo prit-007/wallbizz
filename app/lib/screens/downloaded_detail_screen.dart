@@ -104,7 +104,12 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
     final cs = Theme.of(context).colorScheme;
     final vk = context.vivek;
     final file = File(downloadedWallpaper.localPath);
-    final hasLocalFile = file.existsSync();
+    late final bool hasLocalFile;
+    try {
+      hasLocalFile = file.existsSync();
+    } catch (_) {
+      hasLocalFile = false;
+    }
 
     return Scaffold(
       backgroundColor: cs.surface,

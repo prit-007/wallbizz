@@ -136,11 +136,8 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      // 0 / 0 in Dart = NaN (not an exception), but we should be aware
-      expect(
-        wallpaper.aspectRatio.isNaN || wallpaper.aspectRatio.isInfinite,
-        true,
-      );
+      // 0 / 0 in Dart = NaN, but our fix returns 1.0 as safe default
+      expect(wallpaper.aspectRatio, 1.0);
     });
   });
 

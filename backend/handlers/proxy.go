@@ -79,6 +79,9 @@ func ProxyImage() func(*fiber.Ctx) error {
 
 		c.Set("Content-Type", contentType)
 		c.Set("Cache-Control", "public, max-age=86400")
+		if contentLength := resp.Header.Get("Content-Length"); contentLength != "" {
+			c.Set("Content-Length", contentLength)
+		}
 		return c.SendStream(resp.Body)
 	}
 }

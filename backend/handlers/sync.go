@@ -29,9 +29,19 @@ var categoryQueryMap = map[string]string{
 	"mobile":    "ratios=9x16,10x16",
 }
 
-var httpClient = &http.Client{Timeout: httpTimeout}
+var (
+	httpClient = &http.Client{Timeout: httpTimeout}
+	syncMutex  bool
+)
 
 func FetchAndSyncWallpapers(cfg config.Config) {
+	if syncMutex {
+		logger.Log().Warn().Msg("Sync already in progress, skipping")
+		return
+	}
+	syncMutex = true
+	defer func() { syncMutex = false }()
+
 	log := logger.Log()
 	started := istNow()
 	log.Info().Str("time_ist", started).Int("categories", len(categoryQueryMap)).Msg("Starting Wallhaven sync")
