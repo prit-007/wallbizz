@@ -4,6 +4,53 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] - 2026-09-13
+
+### Fixed
+- **Splash screen too slow** — reduced delay from 3.5s to 2s, transition from 1000ms to 500ms (#19)
+- **Snackbar shows stale count** — now reads directly from Hive box length (#16)
+- **Auth listener leaks** — Settings and VerifyEmail screens properly dispose listener (#18)
+- **aspectRatio division by zero** — Wallpaper and DownloadedWallpaper models guard against zero height (#20)
+- **HTTP client never closed** — DownloadServiceNative now closes in finally block (#21)
+- **CronSecret empty bypass removed** — unauthenticated requests properly rejected (#23)
+- **hasClients crash** — SearchScreen and StaggeredGrid guard scroll controllers (#28)
+- **Search race condition** — request ID prevents stale responses overwriting fresh results (#43)
+- **Category tabs don't auto-scroll** — selected tab now scrolls into view (#46)
+- **Null-safe primaryDelta** — WallpaperEditorScreen handles null gesture data (#47)
+- **RefreshIndicator broken** — DownloadsScreen uses SingleChildScrollView wrapper (#51)
+- **Moodboard null created_at** — Moodboard model falls back to DateTime.now() (#53)
+- **Sync mutex race** — FetchAndSyncWallpapers uses bool guard to prevent concurrent runs (#34)
+- **Logger init race** — Logger now uses sync.Once for safe initialization (#59)
+- **Content-Length not forwarded** — ProxyImage forwards upstream Content-Length header (#60)
+- **Cleanup returns 200 on error** — now returns HTTP 500 with error details (#35)
+- **FlexInt 32-bit overflow** — widened from int to int64 for safe parsing (#62)
+- **Windows sharing broken** — cross-platform path construction, file flush, mimeType set, fallback via `cmd /c start` (#67)
+- **CORS wildcard panic** — replaced invalid `http://localhost:*` with AllowOriginsFunc (#67)
+- **Dockerfile skips tests** — now runs `go test ./...` before building (#63)
+- **Retry on failed wallpaper loads** — StaggeredGrid shows error state with retry button (#37)
+
+### Added
+- **Concurrent category sync** — goroutines + sync.WaitGroup syncs all 7 categories in parallel (#55)
+- **Health check verifies DB** — pings Supabase to confirm database connectivity, returns degraded (503) if unreachable (#56)
+- **Graceful shutdown waits for sync** — in-flight sync completes before server exits (#57)
+- **Configurable sync pages** — `SYNC_MAX_PAGES` env var (default 3) (#61)
+- **Configurable retention** — `WALLPAPER_RETENTION_DAYS` env var (default 3) (#61)
+- **Search proxy input validation** — whitelist of allowed query params, rejects unknown with 400 (#24)
+- **System theme detection** — first launch reads dark/light preference from OS (#41)
+- **Category switch animation** — AnimatedSwitcher wraps grid for smooth fade+slide transitions (#45)
+- **Landscape orientation support** — compact header, smaller nav bar, all 4 orientations enabled (#49)
+- **Image precaching on detail screen** — full-resolution image preloads for faster perceived load (#39)
+- **Accessibility semantics** — CategoryTabs and WallpaperCard labeled for screen readers (#29)
+- **flutter_localizations** — Material + Cupertino delegates for proper locale support (#52)
+- **Haptic feedback consistency** — selectionClick on category tab changes (#44)
+
+### Changed
+- **CORS tightened** — restricted to known frontend origins via AllowOriginsFunc (#24)
+- **Retry with exponential backoff** — Wallhaven API requests retry up to 3 times (1s/2s/4s delays) (#54)
+- **Error response format standardized** — consistent JSON error payloads across all endpoints (#58)
+- **FlexInt widened to int64** — prevents overflow on 32-bit platforms (#62)
+- **Shutdown timeout increased** — from 10s to 15s to accommodate sync wait (#57)
+
 ## [1.6.0] - 2026-09-13
 
 ### Added
