@@ -120,69 +120,67 @@ class _HomeScreenState extends State<HomeScreen> {
         return KeyEventResult.ignored;
       },
       child: Row(
-      children: [
-        NavigationRail(
-          selectedIndex: _currentNavIndex,
-          onDestinationSelected: (index) {
-            HapticFeedback.lightImpact();
-            if (index == _currentNavIndex) {
-              _scrollToTop(index);
-            } else {
-              setState(() {
-                _tabWidgets[index] ??= _buildTabContent(index);
-                _currentNavIndex = index;
-              });
-            }
-          },
-          backgroundColor: vk.surfaceContainer,
-          indicatorColor: cs.primary,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              'WB',
-              style: GoogleFonts.oswald(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: cs.primary,
-                letterSpacing: 2,
+        children: [
+          NavigationRail(
+            selectedIndex: _currentNavIndex,
+            onDestinationSelected: (index) {
+              HapticFeedback.lightImpact();
+              if (index == _currentNavIndex) {
+                _scrollToTop(index);
+              } else {
+                setState(() {
+                  _tabWidgets[index] ??= _buildTabContent(index);
+                  _currentNavIndex = index;
+                });
+              }
+            },
+            backgroundColor: vk.surfaceContainer,
+            indicatorColor: cs.primary,
+            leading: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'WB',
+                style: GoogleFonts.oswald(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: cs.primary,
+                  letterSpacing: 2,
+                ),
               ),
             ),
+            labelType: NavigationRailLabelType.all,
+            selectedIconTheme: IconThemeData(color: cs.onPrimary, size: 22),
+            unselectedIconTheme: IconThemeData(
+              color: cs.onSurface.withValues(alpha: 0.5),
+              size: 22,
+            ),
+            selectedLabelTextStyle: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: cs.primary,
+            ),
+            unselectedLabelTextStyle: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface.withValues(alpha: 0.5),
+            ),
+            destinations: _navItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    selectedIcon: Icon(item.selectedIcon),
+                    label: Text(item.label),
+                  ),
+                )
+                .toList(),
           ),
-          labelType: NavigationRailLabelType.all,
-          selectedIconTheme: IconThemeData(color: cs.onPrimary, size: 22),
-          unselectedIconTheme: IconThemeData(
-            color: cs.onSurface.withValues(alpha: 0.5),
-            size: 22,
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: vk.glassBorder.withValues(alpha: 0.2),
           ),
-          selectedLabelTextStyle: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: cs.primary,
-          ),
-          unselectedLabelTextStyle: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface.withValues(alpha: 0.5),
-          ),
-          destinations: _navItems
-              .map(
-                (item) => NavigationRailDestination(
-                  icon: Icon(item.icon),
-                  selectedIcon: Icon(item.selectedIcon),
-                  label: Text(item.label),
-                ),
-              )
-              .toList(),
-        ),
-        VerticalDivider(
-          width: 1,
-          thickness: 1,
-          color: vk.glassBorder.withValues(alpha: 0.2),
-        ),
-        Expanded(
-          child: _buildTabBody(),
-        ),
-      ],
+          Expanded(child: _buildTabBody()),
+        ],
       ),
     );
   }
@@ -361,44 +359,45 @@ class _HomeScreenState extends State<HomeScreen> {
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
-      key: const Key('search_bar'),
-      onTap: () {
-        HapticFeedback.lightImpact();
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => SearchScreen(backendBase: BackendConfig.baseUrl),
-          ),
-        );
-      },
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(0),
-          border: Border.all(color: vk.glassBorder, width: 1.5),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 24),
-        child: Row(
-          children: [
-            Text(
-              'EXPLORE CURATED ARCHIVES...',
-              style: GoogleFonts.inter(
-                color: vk.onSurfaceSubtle,
-                fontSize: isCompact ? 12 : 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
+          key: const Key('search_bar'),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    SearchScreen(backendBase: BackendConfig.baseUrl),
               ),
+            );
+          },
+          child: Container(
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(0),
+              border: Border.all(color: vk.glassBorder, width: 1.5),
             ),
-            const Spacer(),
-            Icon(
-              Icons.search_rounded,
-              color: cs.onSurface,
-              size: isCompact ? 20 : 24,
+            padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 24),
+            child: Row(
+              children: [
+                Text(
+                  'EXPLORE CURATED ARCHIVES...',
+                  style: GoogleFonts.inter(
+                    color: vk.onSurfaceSubtle,
+                    fontSize: isCompact ? 12 : 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.search_rounded,
+                  color: cs.onSurface,
+                  size: isCompact ? 20 : 24,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
         .animate()
         .fade(delay: 300.ms)
         .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic);
@@ -409,75 +408,75 @@ class _HomeScreenState extends State<HomeScreen> {
     final cs = Theme.of(context).colorScheme;
 
     return HoverBuilder(
-      builder: (context, isHovered) {
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    SearchScreen(backendBase: BackendConfig.baseUrl),
+          builder: (context, isHovered) {
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        SearchScreen(backendBase: BackendConfig.baseUrl),
+                  ),
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: 56,
+                decoration: BoxDecoration(
+                  color: isHovered
+                      ? vk.surfaceContainerHigh
+                      : vk.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isHovered ? cs.primary : vk.glassBorder,
+                    width: isHovered ? 1.5 : 1,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.search_rounded,
+                      color: isHovered ? cs.primary : vk.onSurfaceSubtle,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 14),
+                    Text(
+                      'Search wallpapers...',
+                      style: GoogleFonts.inter(
+                        color: vk.onSurfaceSubtle,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: vk.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: vk.glassBorder.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        '/',
+                        style: GoogleFonts.inter(
+                          color: vk.onSurfaceDim,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 56,
-            decoration: BoxDecoration(
-              color: isHovered
-                  ? vk.surfaceContainerHigh
-                  : vk.surfaceContainer,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isHovered ? cs.primary : vk.glassBorder,
-                width: isHovered ? 1.5 : 1,
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.search_rounded,
-                  color: isHovered ? cs.primary : vk.onSurfaceSubtle,
-                  size: 22,
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  'Search wallpapers...',
-                  style: GoogleFonts.inter(
-                    color: vk.onSurfaceSubtle,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: vk.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: vk.glassBorder.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    '/',
-                    style: GoogleFonts.inter(
-                      color: vk.onSurfaceDim,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    )
+        )
         .animate()
         .fade(delay: 300.ms)
         .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic);

@@ -122,21 +122,24 @@ func fetchIDsFromTable(cfg config.Config, table string) ([]string, error) {
 func TriggerCleanup(cfg config.Config) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		log := logger.Log()
-		log.Info().Msg("Cleanup triggered via API")
+		now := istNow()
+		log.Info().Str("time_ist", now).Msg("Cleanup triggered via API")
 
 		count, err := CleanupOldWallpapers(cfg)
 		if err != nil {
-			log.Error().Err(err).Msg("Cleanup failed")
+			log.Error().Err(err).Str("time_ist", istNow()).Msg("Cleanup failed")
 			return c.JSON(fiber.Map{
-				"status":  "cleanup completed with errors",
-				"error":   err.Error(),
-				"skipped": count,
+				"status":   "cleanup completed with errors",
+				"error":    err.Error(),
+				"skipped":  count,
+				"time_ist": now,
 			})
 		}
 
 		return c.JSON(fiber.Map{
-			"status":  "cleanup completed",
-			"skipped": count,
+			"status":   "cleanup completed",
+			"skipped":  count,
+			"time_ist": now,
 		})
 	}
 }
