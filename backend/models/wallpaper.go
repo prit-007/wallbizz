@@ -6,7 +6,7 @@ import (
 )
 
 // FlexInt accepts both JSON number and string when unmarshaling
-type FlexInt int
+type FlexInt int64
 
 func (f *FlexInt) UnmarshalJSON(data []byte) error {
 	if len(data) == 0 {
@@ -14,7 +14,7 @@ func (f *FlexInt) UnmarshalJSON(data []byte) error {
 	}
 	// Try number first
 	if data[0] != '"' {
-		var i int
+		var i int64
 		if err := json.Unmarshal(data, &i); err == nil {
 			*f = FlexInt(i)
 			return nil
@@ -25,7 +25,7 @@ func (f *FlexInt) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
-	n, err := strconv.Atoi(s)
+	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return err
 	}

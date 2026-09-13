@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"wallpaper-backend/config"
@@ -49,6 +50,21 @@ func searchProxyHandler(cfg config.Config, wallhavenBase string) func(*fiber.Ctx
 		}
 
 		query := c.Request().URI().QueryString()
+
+		// Input validation: only allow known query parameters
+		allowedParams := map[string]bool{
+			"q": true, "categories": true, "purity": true, "sorting": true,
+			"topRange": true, "ratios": true, "page": true, "seed": true,
+		}
+		parsedQuery, _ := url.ParseQuery(string(query))
+		for key := range parsedQuery {
+			if !allowedParams[key] {
+				return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+					"error": fmt.Sprintf("disallowed query parameter: %s", key),
+				})
+			}
+		}
+
 		wallhavenURL := fmt.Sprintf("%s?apikey=%s", wallhavenBase, cfg.WallhavenAPIKey)
 		if len(query) > 0 {
 			wallhavenURL += "&" + string(query)

@@ -25,7 +25,11 @@ func CleanupOldWallpapers(cfg config.Config) (int, error) {
 		protectedIDs = []string{}
 	}
 
-	cutoff := time.Now().UTC().Add(-wallpaperRetentionDays * 24 * time.Hour)
+	retentionDays := cfg.RetentionDays
+	if retentionDays <= 0 {
+		retentionDays = 3
+	}
+	cutoff := time.Now().UTC().Add(-time.Duration(retentionDays) * 24 * time.Hour)
 	cutoffStr := cutoff.Format("2006-01-02T15:04:05")
 
 	url := fmt.Sprintf("%s/rest/v1/wallpapers?created_at=lt.%s", cfg.SupabaseURL, cutoffStr)
@@ -128,10 +132,9 @@ func TriggerCleanup(cfg config.Config) func(*fiber.Ctx) error {
 		count, err := CleanupOldWallpapers(cfg)
 		if err != nil {
 			log.Error().Err(err).Str("time_ist", istNow()).Msg("Cleanup failed")
-			return c.JSON(fiber.Map{
-				"status":   "cleanup completed with errors",
-				"error":    err.Error(),
-				"skipped":  count,
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error":   "cleanup failed",
+				"details": err.Error(),
 				"time_ist": now,
 			})
 		}
