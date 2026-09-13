@@ -8,6 +8,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
+import '../config/responsive_config.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
 import '../services/downloads_service.dart';
@@ -18,6 +19,7 @@ import '../utils/share_utils.dart';
 import '../widgets/specs_card.dart';
 import '../widgets/network_image.dart';
 import '../widgets/gesture_hint_overlay.dart';
+import '../widgets/hover_builder.dart';
 import '../widgets/add_to_moodboard_sheet.dart';
 import 'wallpaper_editor_screen.dart';
 
@@ -187,6 +189,254 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
 
   @override
   Widget build(BuildContext context) {
+    final desktop = context.isDesktop;
+
+    if (desktop) {
+      return _buildDesktopLayout();
+    }
+    return _buildMobileLayout();
+  }
+
+  // ─── Desktop split-view layout ──────────────────────────────
+
+  Widget _buildDesktopLayout() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Row(
+        children: [
+          // Left: wallpaper viewer
+          Expanded(
+            flex: 6,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _buildAmbientBackground(),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 1.0,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.5),
+                          ],
+                          stops: const [0.2, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: widget.wallpapers.length,
+                    onPageChanged: _onPageChanged,
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final wp = widget.wallpapers[index];
+                      return GestureDetector(
+                        onDoubleTapDown: _handleDoubleTap,
+                        child: InteractiveViewer(
+                          transformationController: _transformController,
+                          minScale: 1.0,
+                          maxScale: 5.0,
+                          panEnabled: false,
+                          scaleEnabled: true,
+                          child: Center(
+                            child: Hero(
+                              tag: wp.id,
+                              child: NetworkImageWidget(
+                                imageUrl: wp.urlFull,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Back button
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 12,
+                  left: 16,
+                  child: _FrostedCircleButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                // Page counter
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 12,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Text(
+                      '${_currentIndex + 1} / ${widget.wallpapers.length}',
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                // Page dots
+                if (widget.wallpapers.length > 1)
+                  Positioned(
+                    bottom: 24,
+                    left: 0,
+                    right: 0,
+                    child: _buildPageIndicator(),
+                  ),
+              ],
+            ),
+          ),
+
+          // Divider
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: Colors.white.withValues(alpha: 0.1),
+          ),
+
+          // Right: sidebar panel
+          SizedBox(
+            width: 380,
+            child: _buildDesktopSidebar(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopSidebar() {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      color: const Color(0xFF0E0E1C),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Wallpaper title / ID
+              Text(
+                wallpaper.sourceQuery.toUpperCase(),
+                style: GoogleFonts.oswald(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: ColorUtils.hexToColor(wallpaper.primaryColor),
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${wallpaper.resolution.replaceAll('x', ' × ')} • ${wallpaper.formattedFileSize}',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Specs card (no glassmorphism background on desktop)
+              SpecsCard(wallpaper: _currentWallpaper),
+              const SizedBox(height: 24),
+
+              // Heart button
+              _DesktopActionButton(
+                icon: _isWishlisted
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                label: _isWishlisted ? 'WISHLISTED' : 'ADD TO WISHLIST',
+                color: _isWishlisted ? Colors.redAccent : cs.primary,
+                onTap: _onHeartTap,
+              ),
+              const SizedBox(height: 12),
+
+              // Download button
+              _DesktopActionButton(
+                icon: _isDownloaded
+                    ? Icons.check_circle_rounded
+                    : Icons.download_rounded,
+                label: _isDownloading
+                    ? 'DOWNLOADING...'
+                    : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD'),
+                color: cs.primary,
+                isLoading: _isDownloading,
+                onTap: _isDownloading
+                    ? null
+                    : () {
+                        HapticFeedback.mediumImpact();
+                        _downloadWallpaper(context);
+                      },
+              ),
+              const SizedBox(height: 12),
+
+              // Set as wallpaper (not on web)
+              if (!kIsWeb)
+                _DesktopActionButton(
+                  icon: Icons.wallpaper_rounded,
+                  label: 'SET AS WALLPAPER',
+                  color: ColorUtils.hexToColor(_currentWallpaper.primaryColor),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _setWallpaper(context);
+                  },
+                ),
+              if (!kIsWeb) const SizedBox(height: 12),
+
+              // Moodboard
+              _DesktopActionButton(
+                icon: Icons.dashboard_customize_rounded,
+                label: 'ADD TO MOODBOARD',
+                color: cs.tertiary,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _showMoodboardSheet(context);
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // Share
+              _DesktopActionButton(
+                icon: Icons.ios_share_rounded,
+                label: 'SHARE',
+                color: cs.secondary,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _shareWallpaper(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Wallpaper get wallpaper => _currentWallpaper;
+
+  // ─── Mobile layout (existing) ───────────────────────────────
+
+  Widget _buildMobileLayout() {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Listener(
@@ -199,10 +449,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Ambient blur background that transitions with swipe
                 _buildAmbientBackground(),
 
-                // Radial darkening gradient
                 Positioned.fill(
                   child: IgnorePointer(
                     child: Container(
@@ -221,7 +469,6 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   ),
                 ),
 
-                // PageView wallpaper swiper
                 Positioned.fill(
                   child: PageView.builder(
                     controller: _pageController,
@@ -257,7 +504,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   ),
                 ),
 
-                // Bottom gradient overlay
+                // Bottom gradient
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -287,7 +534,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   ),
                 ),
 
-                // Top action buttons
+                // Top buttons
                 AnimatedSlide(
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutCubic,
@@ -314,7 +561,6 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Page counter
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
@@ -325,7 +571,6 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: Colors.white.withValues(alpha: 0.15),
-                                    width: 1,
                                   ),
                                 ),
                                 child: Text(
@@ -371,7 +616,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   ),
                 ),
 
-                // Bottom action panel
+                // Bottom panel
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -450,7 +695,6 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   ),
                 ),
 
-                // Page indicator dots
                 if (widget.wallpapers.length > 1)
                   Positioned(
                     bottom:
@@ -539,7 +783,12 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
     final progress = ValueNotifier<double>(0.0);
     final fileName = DownloadService.fileNameFromUrl(_currentWallpaper.urlFull);
     setState(() => _isDownloading = true);
-    _showGlassmorphismProgress(context, progress);
+
+    if (context.isDesktop) {
+      _showDesktopDownloadProgress(progress);
+    } else {
+      _showGlassmorphismProgress(context, progress);
+    }
 
     try {
       await DownloadService.downloadImage(
@@ -570,6 +819,87 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
         ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
       }
     }
+  }
+
+  void _showDesktopDownloadProgress(ValueNotifier<double> progress) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              width: 300,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ValueListenableBuilder<double>(
+                    valueListenable: progress,
+                    builder: (_, value, _) => SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CircularProgressIndicator(
+                            value: value > 0 ? value : null,
+                            strokeWidth: 4,
+                            backgroundColor: Colors.white.withValues(alpha: 0.1),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              ColorUtils.hexToColor(
+                                _currentWallpaper.primaryColor,
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: value > 0
+                                ? Text(
+                                    '${(value * 100).toInt()}%',
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.cloud_download_rounded,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                    size: 32,
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'DOWNLOADING',
+                    style: GoogleFonts.oswald(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showGlassmorphismProgress(
@@ -810,6 +1140,80 @@ class _FrostedCircleButtonState extends State<_FrostedCircleButton> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DesktopActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+  final bool isLoading;
+
+  const _DesktopActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.onTap,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverBuilder(
+      builder: (context, isHovered) {
+        return GestureDetector(
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isHovered
+                  ? color.withValues(alpha: 0.15)
+                  : color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isHovered
+                    ? color.withValues(alpha: 0.4)
+                    : color.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: color,
+                    ),
+                  )
+                else
+                  Icon(icon, color: color, size: 20),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: color,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: color.withValues(alpha: 0.5),
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

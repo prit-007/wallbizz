@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../widgets/wallpaper_card.dart';
@@ -142,11 +143,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final crossAxisCount = constraints.maxWidth > 900
-              ? 4
-              : constraints.maxWidth > 600
-              ? 3
-              : 2;
+          final crossAxisCount = context.gridColumns;
 
           return MasonryGridView.count(
             crossAxisCount: crossAxisCount,
@@ -201,11 +198,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : constraints.maxWidth > 600
-            ? 3
-            : 2;
+        final crossAxisCount = context.gridColumns;
         final heights = [220.0, 300.0, 250.0, 340.0, 190.0, 280.0];
 
         return MasonryGridView.count(

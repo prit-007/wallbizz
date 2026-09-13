@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,12 +35,8 @@ Future<void> main() async {
   await ThemeConfig.load();
   ShareUtils.cleanOldShareFiles();
 
-  if (kIsWeb) {
-    BackendConfig.init(
-      dotenv.env['BACKEND_URL'] ?? 'https://wallbizz.onrender.com',
-    );
-    logInfo('Backend config initialized (web)', domain: LogDomain.general);
-  }
+  BackendConfig.init();
+  logInfo('Backend config initialized', domain: LogDomain.general);
 
   await Supabase.initialize(
     url: SupabaseConfig.url,
