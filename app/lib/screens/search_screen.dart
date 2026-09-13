@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -252,8 +253,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   width: 1,
                 ),
               ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowLeft01,
                 color: cs.onSurface,
                 size: 18,
               ),
@@ -290,8 +291,8 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.search_rounded,
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedSearch01,
                     color: isFocused ? cs.primary : vk.onSurfaceSubtle,
                     size: 22,
                   ),
@@ -334,8 +335,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: Icon(
-                          Icons.cancel_rounded,
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
                           color: vk.onSurfaceFaint,
                           size: 18,
                         ),
@@ -358,8 +359,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.arrow_forward_rounded,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
                         color: cs.onPrimary,
                         size: 16,
                       ),
@@ -388,7 +389,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 'SFW',
                 '100',
                 true,
-                Icons.verified_user_rounded,
+                HugeIcons.strokeRoundedShield01,
                 Colors.greenAccent,
               ),
               const SizedBox(width: 8),
@@ -396,7 +397,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 'Sketchy',
                 '110',
                 _isAuthed,
-                _isAuthed ? Icons.remove_red_eye_rounded : Icons.lock_rounded,
+                _isAuthed
+                    ? HugeIcons.strokeRoundedEye
+                    : HugeIcons.strokeRoundedLock,
                 Colors.orangeAccent,
               ),
               const SizedBox(width: 8),
@@ -404,7 +407,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 'NSFW',
                 '111',
                 _isAuthed,
-                _isAuthed ? Icons.explicit_rounded : Icons.lock_rounded,
+                _isAuthed
+                    ? HugeIcons.strokeRoundedSettings01
+                    : HugeIcons.strokeRoundedLock,
                 Colors.redAccent,
               ),
             ],
@@ -495,7 +500,7 @@ class _SearchScreenState extends State<SearchScreen> {
     String label,
     String value,
     bool enabled,
-    IconData icon,
+    dynamic icon,
     Color activeAccent,
   ) {
     final cs = Theme.of(context).colorScheme;
@@ -524,8 +529,8 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
+            HugeIcon(
+              icon: icon,
               size: 14,
               color: isSelected
                   ? activeAccent
@@ -594,8 +599,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowDown01,
               size: 16,
               color: isModified ? cs.primary : vk.onSurfaceSubtle,
             ),
@@ -691,8 +696,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                           ),
                           if (isSelected)
-                            Icon(
-                              Icons.check_circle_rounded,
+                            HugeIcon(
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               color: cs.primary,
                               size: 20,
                             ),
@@ -737,10 +742,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       : vk.surfaceContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  _errorMessage != null
-                      ? Icons.error_outline_rounded
-                      : Icons.search_off_rounded,
+                child: HugeIcon(
+                  icon: _errorMessage != null
+                      ? HugeIcons.strokeRoundedAlertCircle
+                      : HugeIcons.strokeRoundedSearch02,
                   size: 38,
                   color: _errorMessage != null ? cs.error : vk.onSurfaceDim,
                 ),
@@ -838,7 +843,11 @@ class _SearchScreenState extends State<SearchScreen> {
           if (_recentSearches.isNotEmpty) ...[
             Row(
               children: [
-                Icon(Icons.history_rounded, color: cs.primary, size: 20),
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedClock01,
+                  color: cs.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'RECENT SEARCHES',
@@ -896,8 +905,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.history_rounded,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedClock01,
                           size: 14,
                           color: vk.onSurfaceSubtle,
                         ),
@@ -921,8 +930,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
           Row(
             children: [
-              Icon(
-                Icons.local_fire_department_rounded,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedFire,
                 color: cs.primary,
                 size: 20,
               ),

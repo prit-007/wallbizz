@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -265,8 +266,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.dashboard_customize_rounded,
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedGridView,
                         size: 12,
                         color: cs.primary,
                       ),
@@ -322,8 +323,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                     ),
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  child: const Icon(
-                                    Icons.delete_outline_rounded,
+                                  child: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedDelete02,
                                     color: Colors.white,
                                     size: 26,
                                   ),
@@ -454,8 +455,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 color: vk.surfaceContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.lock_outline_rounded,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedCircleLock01,
                 size: 48,
                 color: vk.onSurfaceDim,
               ),
@@ -526,8 +527,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 color: vk.surfaceContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.favorite_border_rounded,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedFavourite,
                 size: 48,
                 color: vk.onSurfaceDim,
               ),
@@ -655,7 +656,11 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add_rounded, size: 16, color: cs.primary),
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedAdd01,
+                            size: 16,
+                            color: cs.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'NEW',
@@ -707,8 +712,8 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                                 color: Colors.redAccent.withValues(alpha: 0.85),
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              child: const Icon(
-                                Icons.delete_outline_rounded,
+                              child: const HugeIcon(
+                                icon: HugeIcons.strokeRoundedDelete02,
                                 color: Colors.white,
                                 size: 22,
                               ),
@@ -785,8 +790,8 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.dashboard_customize_rounded,
+                                    HugeIcon(
+                                      icon: HugeIcons.strokeRoundedGridView,
                                       color: cs.primary,
                                       size: 22,
                                     ),
@@ -814,8 +819,8 @@ class _MoodboardListSheetState extends State<_MoodboardListSheet> {
                                         ],
                                       ),
                                     ),
-                                    Icon(
-                                      Icons.arrow_forward_ios_rounded,
+                                    HugeIcon(
+                                      icon: HugeIcons.strokeRoundedArrowRight01,
                                       color: v.onSurfaceSubtle,
                                       size: 14,
                                     ),

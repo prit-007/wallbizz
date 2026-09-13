@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -214,8 +215,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.g_mobiledata_rounded,
+                          const HugeIcon(
+                            icon: HugeIcons.strokeRoundedSmartPhone01,
                             size: 28,
                             color: Colors.white,
                           ),
@@ -269,7 +270,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               _buildTextField(
                     controller: _emailController,
                     hint: 'Email Address',
-                    icon: Icons.alternate_email_rounded,
+                    icon: HugeIcons.strokeRoundedMailAtSign01,
                     vk: vk,
                   )
                   .animate()
@@ -279,7 +280,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               _buildTextField(
                     controller: _passwordController,
                     hint: 'Password',
-                    icon: Icons.lock_outline_rounded,
+                    icon: HugeIcons.strokeRoundedCircleLock01,
                     isPassword: true,
                     vk: vk,
                   )
@@ -384,7 +385,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
-    required IconData icon,
+    required dynamic icon,
     bool isPassword = false,
     required dynamic vk,
   }) {
@@ -398,7 +399,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(color: vk.onSurfaceFaint),
-        prefixIcon: Icon(icon, color: vk.onSurfaceFaint, size: 20),
+        prefixIcon: HugeIcon(icon: icon, color: vk.onSurfaceFaint, size: 20),
         filled: true,
         fillColor: vk.surfaceContainerLow.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),

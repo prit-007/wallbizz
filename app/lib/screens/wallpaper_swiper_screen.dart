@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -263,7 +264,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                   top: MediaQuery.of(context).padding.top + 12,
                   left: 16,
                   child: _FrostedCircleButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
+                    icon: HugeIcons.strokeRoundedArrowLeft01,
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.of(context).pop();
@@ -360,8 +361,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
               // Heart button
               _DesktopActionButton(
                 icon: _isWishlisted
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
+                    ? HugeIcons.strokeRoundedFavourite
+                    : HugeIcons.strokeRoundedFavourite,
                 label: _isWishlisted ? 'WISHLISTED' : 'ADD TO WISHLIST',
                 color: _isWishlisted ? Colors.redAccent : cs.primary,
                 onTap: _onHeartTap,
@@ -371,8 +372,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
               // Download button
               _DesktopActionButton(
                 icon: _isDownloaded
-                    ? Icons.check_circle_rounded
-                    : Icons.download_rounded,
+                    ? HugeIcons.strokeRoundedCheckmarkCircle01
+                    : HugeIcons.strokeRoundedDownload01,
                 label: _isDownloading
                     ? 'DOWNLOADING...'
                     : (_isDownloaded ? 'DOWNLOADED' : 'DOWNLOAD'),
@@ -390,7 +391,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
               // Set as wallpaper (not on web)
               if (!kIsWeb)
                 _DesktopActionButton(
-                  icon: Icons.wallpaper_rounded,
+                  icon: HugeIcons.strokeRoundedImage01,
                   label: 'SET AS WALLPAPER',
                   color: ColorUtils.hexToColor(_currentWallpaper.primaryColor),
                   onTap: () {
@@ -402,7 +403,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
 
               // Moodboard
               _DesktopActionButton(
-                icon: Icons.dashboard_customize_rounded,
+                icon: HugeIcons.strokeRoundedGridView,
                 label: 'ADD TO MOODBOARD',
                 color: cs.tertiary,
                 onTap: () {
@@ -414,7 +415,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
 
               // Share
               _DesktopActionButton(
-                icon: Icons.ios_share_rounded,
+                icon: HugeIcons.strokeRoundedShare01,
                 label: 'SHARE',
                 color: cs.secondary,
                 onTap: () {
@@ -545,7 +546,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           top: MediaQuery.of(context).padding.top + 12,
                           left: 16,
                           child: _FrostedCircleButton(
-                            icon: Icons.arrow_back_ios_new_rounded,
+                            icon: HugeIcons.strokeRoundedArrowLeft01,
                             onTap: () {
                               HapticFeedback.lightImpact();
                               Navigator.of(context).pop();
@@ -582,8 +583,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                               const SizedBox(width: 12),
                               _FrostedCircleButton(
                                 icon: _isWishlisted
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
+                                    ? HugeIcons.strokeRoundedFavourite
+                                    : HugeIcons.strokeRoundedFavourite,
                                 iconColor: _isWishlisted
                                     ? Colors.redAccent
                                     : Colors.white,
@@ -591,7 +592,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                               ),
                               const SizedBox(width: 12),
                               _FrostedCircleButton(
-                                icon: Icons.dashboard_customize_rounded,
+                                icon: HugeIcons.strokeRoundedGridView,
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   _showMoodboardSheet(context);
@@ -599,7 +600,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                               ),
                               const SizedBox(width: 12),
                               _FrostedCircleButton(
-                                icon: Icons.ios_share_rounded,
+                                icon: HugeIcons.strokeRoundedShare01,
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   _shareWallpaper(context);
@@ -654,8 +655,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                                         ? 'DOWNLOADED'
                                         : 'DOWNLOAD WALLPAPER'),
                               icon: _isDownloaded
-                                  ? Icons.check_circle_rounded
-                                  : Icons.download_rounded,
+                                  ? HugeIcons.strokeRoundedCheckmarkCircle01
+                                  : HugeIcons.strokeRoundedDownload01,
                               backgroundColor: _isDownloaded
                                   ? Colors.white.withValues(alpha: 0.1)
                                   : Colors.white.withValues(alpha: 0.2),
@@ -672,7 +673,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                                 isDownloading: false,
                                 isDownloaded: false,
                                 label: 'SET AS WALLPAPER',
-                                icon: Icons.wallpaper_rounded,
+                                icon: HugeIcons.strokeRoundedImage01,
                                 backgroundColor: ColorUtils.hexToColor(
                                   _currentWallpaper.primaryColor,
                                 ),
@@ -869,8 +870,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                                       decoration: TextDecoration.none,
                                     ),
                                   )
-                                : Icon(
-                                    Icons.cloud_download_rounded,
+                                : HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCloudDownload,
                                     color: Colors.white.withValues(alpha: 0.8),
                                     size: 32,
                                   ),
@@ -958,8 +959,9 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                                                       TextDecoration.none,
                                                 ),
                                               )
-                                            : Icon(
-                                                Icons.cloud_download_rounded,
+                                            : HugeIcon(
+                                                icon: HugeIcons
+                                                    .strokeRoundedCloudDownload,
                                                 color: Colors.white.withValues(
                                                   alpha: 0.8,
                                                 ),
@@ -1092,7 +1094,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
 }
 
 class _FrostedCircleButton extends StatefulWidget {
-  final IconData icon;
+  final dynamic icon;
   final VoidCallback onTap;
   final Color iconColor;
 
@@ -1132,7 +1134,11 @@ class _FrostedCircleButtonState extends State<_FrostedCircleButton> {
                   width: 1,
                 ),
               ),
-              child: Icon(widget.icon, color: widget.iconColor, size: 20),
+              child: HugeIcon(
+                icon: widget.icon,
+                color: widget.iconColor,
+                size: 20,
+              ),
             ),
           ),
         ),
@@ -1142,7 +1148,7 @@ class _FrostedCircleButtonState extends State<_FrostedCircleButton> {
 }
 
 class _DesktopActionButton extends StatelessWidget {
-  final IconData icon;
+  final dynamic icon;
   final String label;
   final Color color;
   final VoidCallback? onTap;
@@ -1188,7 +1194,7 @@ class _DesktopActionButton extends StatelessWidget {
                     ),
                   )
                 else
-                  Icon(icon, color: color, size: 20),
+                  HugeIcon(icon: icon, color: color, size: 20),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
@@ -1201,8 +1207,8 @@ class _DesktopActionButton extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
                   color: color.withValues(alpha: 0.5),
                   size: 18,
                 ),
@@ -1220,7 +1226,7 @@ class _GlassActionButton extends StatefulWidget {
   final bool isDownloading;
   final bool isDownloaded;
   final String label;
-  final IconData icon;
+  final dynamic icon;
   final Color backgroundColor;
   final Color textColor;
 
@@ -1277,7 +1283,7 @@ class _GlassActionButtonState extends State<_GlassActionButton> {
                   ),
                 )
               else
-                Icon(widget.icon, color: widget.textColor, size: 20),
+                HugeIcon(icon: widget.icon, color: widget.textColor, size: 20),
               const SizedBox(width: 12),
               Text(
                 widget.label,

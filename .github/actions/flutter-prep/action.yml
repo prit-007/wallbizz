@@ -1,0 +1,32 @@
+name: Flutter prep
+description: Install deps and setup env. Shared by all CI jobs.
+
+inputs:
+  setup-env:
+    description: 'Create .env file from secrets'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Create .env
+      if: ${{ inputs.setup-env == 'true' }}
+      shell: bash
+      run: |
+        cat > .env << EOF
+        SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+        BACKEND_URL=${{ secrets.BACKEND_URL }}
+        EOF
+
+    - name: Install dependencies
+      shell: bash
+      run: flutter pub get
+
+    - name: Extract App Version
+      shell: bash
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | tr -d '\r' | sed -E 's/\+[0-9]+$//')
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Resolved version: $VERSION"

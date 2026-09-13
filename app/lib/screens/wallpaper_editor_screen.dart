@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
@@ -217,7 +218,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
                 top: MediaQuery.of(context).padding.top + 12,
                 left: 16,
                 child: _EditorFrostedButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
+                  icon: HugeIcons.strokeRoundedArrowLeft01,
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.of(context).pop();
@@ -272,7 +273,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               _EditorCircleButton(
-                icon: Icons.rotate_left_rounded,
+                icon: HugeIcons.strokeRoundedImageCounterClockwise,
                 onTap: _rotateLeft,
               ),
               const SizedBox(width: 16),
@@ -298,7 +299,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
               ),
               const SizedBox(width: 16),
               _EditorCircleButton(
-                icon: Icons.rotate_right_rounded,
+                icon: HugeIcons.strokeRoundedImageRotationClockwise,
                 onTap: _rotateRight,
               ),
               Container(
@@ -308,7 +309,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
                 margin: const EdgeInsets.symmetric(horizontal: 16),
               ),
               _EditorCircleButton(
-                icon: Icons.filter_center_focus_rounded,
+                icon: HugeIcons.strokeRoundedFilter,
                 onTap: _resetView,
               ),
             ],
@@ -338,7 +339,10 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
                   color: Colors.black,
                 ),
               )
-            : const Icon(Icons.wallpaper_rounded, color: Colors.black),
+            : const HugeIcon(
+                icon: HugeIcons.strokeRoundedImage01,
+                color: Colors.black,
+              ),
         label: Text(
           _isApplying ? 'APPLYING...' : 'APPLY WALLPAPER',
           style: GoogleFonts.inter(
@@ -406,21 +410,21 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
                   const SizedBox(height: 32),
                   _buildTargetOption(
                     'HOME SCREEN',
-                    Icons.home_rounded,
+                    HugeIcons.strokeRoundedHome01,
                     WallpaperTarget.home,
                     100,
                   ),
                   const SizedBox(height: 12),
                   _buildTargetOption(
                     'LOCK SCREEN',
-                    Icons.lock_rounded,
+                    HugeIcons.strokeRoundedLock,
                     WallpaperTarget.lock,
                     200,
                   ),
                   const SizedBox(height: 12),
                   _buildTargetOption(
                     'BOTH SCREENS',
-                    Icons.phone_android_rounded,
+                    HugeIcons.strokeRoundedSmartPhone01,
                     WallpaperTarget.both,
                     300,
                   ),
@@ -436,7 +440,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
 
   Widget _buildTargetOption(
     String title,
-    IconData icon,
+    dynamic icon,
     WallpaperTarget target,
     int delay,
   ) {
@@ -501,7 +505,7 @@ class _WallpaperEditorScreenState extends State<WallpaperEditorScreen>
 }
 
 class _EditorFrostedButton extends StatefulWidget {
-  final IconData icon;
+  final dynamic icon;
   final VoidCallback onTap;
 
   const _EditorFrostedButton({required this.icon, required this.onTap});
@@ -535,7 +539,7 @@ class _EditorFrostedButtonState extends State<_EditorFrostedButton> {
                   width: 1,
                 ),
               ),
-              child: Icon(widget.icon, color: Colors.white, size: 20),
+              child: HugeIcon(icon: widget.icon, color: Colors.white, size: 20),
             ),
           ),
         ),
@@ -545,7 +549,7 @@ class _EditorFrostedButtonState extends State<_EditorFrostedButton> {
 }
 
 class _EditorCircleButton extends StatefulWidget {
-  final IconData icon;
+  final dynamic icon;
   final VoidCallback onTap;
 
   const _EditorCircleButton({required this.icon, required this.onTap});
@@ -575,7 +579,7 @@ class _EditorCircleButtonState extends State<_EditorCircleButton> {
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
-          child: Icon(widget.icon, color: Colors.white, size: 22),
+          child: HugeIcon(icon: widget.icon, color: Colors.white, size: 22),
         ),
       ),
     );
@@ -584,7 +588,7 @@ class _EditorCircleButtonState extends State<_EditorCircleButton> {
 
 class _TargetOption extends StatefulWidget {
   final String title;
-  final IconData icon;
+  final dynamic icon;
   final WallpaperTarget target;
   final int delay;
   final VoidCallback onApply;
@@ -633,7 +637,7 @@ class _TargetOptionState extends State<_TargetOption> {
           ),
           child: Row(
             children: [
-              Icon(widget.icon, color: Colors.white, size: 24),
+              HugeIcon(icon: widget.icon, color: Colors.white, size: 24),
               const SizedBox(width: 16),
               Text(
                 widget.title,
@@ -645,8 +649,8 @@ class _TargetOptionState extends State<_TargetOption> {
                 ),
               ),
               const Spacer(),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedArrowRight01,
                 color: Colors.white.withValues(alpha: 0.4),
                 size: 16,
               ),

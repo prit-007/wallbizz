@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_filex/open_filex.dart';
@@ -130,8 +131,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             color: cs.primary.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            Icons.system_update_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedSystemUpdate01,
                             color: cs.primary,
                             size: 32,
                           ),
@@ -163,8 +164,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         _versionPill('Current', widget.currentVersion, vk),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Icon(
-                            Icons.arrow_forward_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedArrowRight01,
                             color: cs.primary,
                             size: 18,
                           ),

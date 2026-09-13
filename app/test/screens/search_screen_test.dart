@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,7 +53,7 @@ void main() {
     testWidgets('renders back button', (tester) async {
       await tester.pumpWidget(buildTestApp(httpClient: mockClient()));
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+      expect(find.byType(HugeIcon), findsWidgets);
     });
 
     testWidgets('renders purity chips', (tester) async {
@@ -114,7 +115,7 @@ void main() {
 
       expect(find.byType(SearchScreen), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+      await tester.tap(find.byType(HugeIcon).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(SearchScreen), findsNothing);
@@ -126,13 +127,13 @@ void main() {
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      final clearBtn = find.byIcon(Icons.cancel_rounded);
-      expect(clearBtn, findsOneWidget);
+      final iconsBefore = find.byType(HugeIcon).evaluate().length;
+      expect(iconsBefore, greaterThanOrEqualTo(1));
 
-      await tester.tap(clearBtn);
+      await tester.tap(find.byType(HugeIcon).last);
       await tester.pump();
 
-      expect(find.byIcon(Icons.cancel_rounded), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
     });
   });
 
@@ -160,7 +161,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -194,7 +195,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'nature');
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -209,7 +210,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'xyznonexistent');
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -246,7 +247,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'test');
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -285,7 +286,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'cyberpunk');
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

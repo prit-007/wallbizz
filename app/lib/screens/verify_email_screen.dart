@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -144,8 +145,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.mark_email_unread_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedMail01,
                             size: 64,
                             color: cs.primary,
                           ),
@@ -218,7 +219,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             color: cs.surface,
                           ),
                         )
-                      : const Icon(Icons.verified_user_rounded, size: 22),
+                      : const HugeIcon(
+                          icon: HugeIcons.strokeRoundedShield01,
+                          size: 22,
+                        ),
                   label: Text(
                     _isChecking ? 'VERIFYING...' : "I'VE VERIFIED MY EMAIL",
                     style: GoogleFonts.inter(
@@ -252,7 +256,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             color: vk.onSurfaceSubtle,
                           ),
                         )
-                      : const Icon(Icons.refresh_rounded, size: 22),
+                      : const HugeIcon(
+                          icon: HugeIcons.strokeRoundedRefresh,
+                          size: 22,
+                        ),
                   label: Text(
                     _resent ? 'RESEND AGAIN' : 'RESEND EMAIL',
                     style: GoogleFonts.inter(
@@ -330,8 +337,8 @@ class _VerifiedScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.check_circle_rounded,
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                     size: 64,
                     color: Colors.greenAccent,
                   ),

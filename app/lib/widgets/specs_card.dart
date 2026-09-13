@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/wallpaper.dart';
 import '../utils/color_utils.dart';
@@ -91,19 +92,19 @@ class SpecsCard extends StatelessWidget {
                   _chip(
                     context,
                     '${wallpaper.width} \u00d7 ${wallpaper.height}',
-                    Icons.aspect_ratio_rounded,
+                    HugeIcons.strokeRoundedAspectRatio,
                   ),
                   _chip(
                     context,
                     'Ratio: ${wallpaper.aspectRatio.toStringAsFixed(2)}',
-                    Icons.crop_free_rounded,
+                    HugeIcons.strokeRoundedAspectRatio,
                   ),
                   if (wallpaper.category.isNotEmpty)
                     _chip(
                       context,
                       wallpaper.category[0].toUpperCase() +
                           wallpaper.category.substring(1),
-                      Icons.auto_awesome_mosaic_rounded,
+                      HugeIcons.strokeRoundedGrid,
                     ),
                 ],
               ),
@@ -156,7 +157,7 @@ class SpecsCard extends StatelessWidget {
     );
   }
 
-  Widget _chip(BuildContext context, String label, IconData icon) {
+  Widget _chip(BuildContext context, String label, dynamic icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -170,7 +171,11 @@ class SpecsCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: Colors.white.withValues(alpha: 0.7)),
+          HugeIcon(
+            icon: icon,
+            size: 12,
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
           const SizedBox(width: 6),
           Text(
             label,

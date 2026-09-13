@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -233,8 +234,8 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                           color: vk.glassBorder.withValues(alpha: 0.15),
                         ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
+                      child: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowLeft01,
                         color: Colors.white,
                         size: 18,
                       ),
@@ -302,8 +303,8 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                           color: Colors.redAccent.withValues(alpha: 0.25),
                         ),
                       ),
-                      child: Icon(
-                        Icons.delete_outline_rounded,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedDelete02,
                         size: 18,
                         color: Colors.redAccent,
                       ),
@@ -406,8 +407,8 @@ class _MoodboardScreenState extends State<MoodboardScreen> {
                     color: vk.surfaceContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.dashboard_customize_rounded,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedGridView,
                     size: 48,
                     color: vk.onSurfaceDim,
                   ),

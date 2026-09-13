@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,8 +141,8 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: vk.surfaceContainer,
-                              child: Icon(
-                                Icons.error_outline,
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedAlertCircle,
                                 color: vk.onSurfaceDim,
                               ),
                             );
@@ -184,7 +185,11 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.arrow_back, color: cs.onSurface, size: 24),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowLeft01,
+                    color: cs.onSurface,
+                    size: 24,
+                  ),
                 ),
               ),
             ),
@@ -201,7 +206,11 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
                         color: Colors.black.withValues(alpha: 0.4),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.share, color: cs.onSurface, size: 20),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedShare01,
+                        color: cs.onSurface,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -218,7 +227,11 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, color: cs.onSurface, size: 16),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+                          color: cs.onSurface,
+                          size: 16,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Downloaded',
@@ -250,7 +263,9 @@ class _DownloadedDetailScreenState extends State<DownloadedDetailScreen>
                       height: 52,
                       child: ElevatedButton.icon(
                         onPressed: () => _openEditor(context),
-                        icon: const Icon(Icons.wallpaper),
+                        icon: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedImage01,
+                        ),
                         label: Text(
                           'Set as Wallpaper',
                           style: GoogleFonts.inter(

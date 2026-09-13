@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../core/logger/logger.dart';
@@ -301,7 +302,7 @@ class _DetailScreenState extends State<DetailScreen>
                           top: MediaQuery.of(context).padding.top + 12,
                           left: 16,
                           child: _FrostedCircleButton(
-                            icon: Icons.arrow_back_ios_new_rounded,
+                            icon: HugeIcons.strokeRoundedArrowLeft01,
                             onTap: () {
                               HapticFeedback.lightImpact();
                               Navigator.of(context).pop();
@@ -316,8 +317,8 @@ class _DetailScreenState extends State<DetailScreen>
                             children: [
                               _FrostedCircleButton(
                                 icon: _isWishlisted
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
+                                    ? HugeIcons.strokeRoundedFavourite
+                                    : HugeIcons.strokeRoundedFavourite,
                                 iconColor: _isWishlisted
                                     ? Colors.redAccent
                                     : Colors.white,
@@ -325,7 +326,7 @@ class _DetailScreenState extends State<DetailScreen>
                               ),
                               const SizedBox(width: 12),
                               _FrostedCircleButton(
-                                icon: Icons.dashboard_customize_rounded,
+                                icon: HugeIcons.strokeRoundedGridView,
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   _showMoodboardSheet(context);
@@ -333,7 +334,7 @@ class _DetailScreenState extends State<DetailScreen>
                               ),
                               const SizedBox(width: 12),
                               _FrostedCircleButton(
-                                icon: Icons.ios_share_rounded,
+                                icon: HugeIcons.strokeRoundedShare01,
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   _shareWallpaper(context);
@@ -388,8 +389,8 @@ class _DetailScreenState extends State<DetailScreen>
                                         ? 'DOWNLOADED'
                                         : 'DOWNLOAD WALLPAPER'),
                               icon: _isDownloaded
-                                  ? Icons.check_circle_rounded
-                                  : Icons.download_rounded,
+                                  ? HugeIcons.strokeRoundedCheckmarkCircle01
+                                  : HugeIcons.strokeRoundedDownload01,
                               backgroundColor: _isDownloaded
                                   ? Colors.white.withValues(alpha: 0.1)
                                   : Colors.white.withValues(alpha: 0.2),
@@ -406,7 +407,7 @@ class _DetailScreenState extends State<DetailScreen>
                                 isDownloading: false,
                                 isDownloaded: false,
                                 label: 'SET AS WALLPAPER',
-                                icon: Icons.wallpaper_rounded,
+                                icon: HugeIcons.strokeRoundedImage01,
                                 backgroundColor: ambientColor,
                                 textColor: ambientColor.computeLuminance() > 0.5
                                     ? Colors.black
@@ -527,8 +528,9 @@ class _DetailScreenState extends State<DetailScreen>
                                                       TextDecoration.none,
                                                 ),
                                               )
-                                            : Icon(
-                                                Icons.cloud_download_rounded,
+                                            : HugeIcon(
+                                                icon: HugeIcons
+                                                    .strokeRoundedCloudDownload,
                                                 color: Colors.white.withValues(
                                                   alpha: 0.8,
                                                 ),
@@ -658,7 +660,7 @@ class _DetailScreenState extends State<DetailScreen>
 }
 
 class _FrostedCircleButton extends StatefulWidget {
-  final IconData icon;
+  final dynamic icon;
   final VoidCallback onTap;
   final Color iconColor;
 
@@ -698,7 +700,11 @@ class _FrostedCircleButtonState extends State<_FrostedCircleButton> {
                   width: 1,
                 ),
               ),
-              child: Icon(widget.icon, color: widget.iconColor, size: 20),
+              child: HugeIcon(
+                icon: widget.icon,
+                color: widget.iconColor,
+                size: 20,
+              ),
             ),
           ),
         ),
@@ -712,7 +718,7 @@ class _GlassActionButton extends StatefulWidget {
   final bool isDownloading;
   final bool isDownloaded;
   final String label;
-  final IconData icon;
+  final dynamic icon;
   final Color backgroundColor;
   final Color textColor;
 
@@ -769,7 +775,7 @@ class _GlassActionButtonState extends State<_GlassActionButton> {
                   ),
                 )
               else
-                Icon(widget.icon, color: widget.textColor, size: 20),
+                HugeIcon(icon: widget.icon, color: widget.textColor, size: 20),
               const SizedBox(width: 12),
               Text(
                 widget.label,

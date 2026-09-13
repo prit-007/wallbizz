@@ -1,4 +1,4 @@
-# AGENTS.md — Wallbizz v1.0
+# AGENTS.md — Wallbizz v1.6.0
 
 ## Structure
 
@@ -34,12 +34,14 @@ wallbizz/
 └── docs/               # Detailed docs
 ```
 
-## Key Architecture (v1.0)
+## Key Architecture (v1.6.0)
 
-- **Version:** v1.0 (tag v1.3) — production release.
+- **Version:** v1.6.0 — HugeIcons, About page, Linux/macOS builds, Android signing.
 - **Flutter never calls Wallhaven directly for sync** — reads from Supabase REST via `http` package (not `supabase-flutter` for DB queries).
 - **Search is hybrid:** SFW queries go direct Flutter → Wallhaven (`wallhaven_search`); NSFW/Sketchy queries go through backend proxy (`GET /api/v1/search`). The proxy is auth-optional — unauthenticated requests pass through as SFW; requests with a valid Supabase JWT enable NSFW/Sketchy purity filters.
 - **Images are proxied on web:** `Image.network` on Flutter web uses XHR, so Wallhaven's CDN triggers CORS errors. `NetworkImageWidget` routes through `BackendConfig.proxyImageUrl()` → `GET /api/v1/proxy-image?url=...` on the Go backend. The backend restricts proxied hosts to `w.wallhaven.cc` and `th.wallhaven.cc` and returns responses with CORS headers.
+- **HugeIcons everywhere** — all Material `Icons.*` replaced with `HugeIcons.strokeRounded*`. `IconData` parameters changed to `dynamic`. Widget: `HugeIcon(icon: HugeIcons.strokeRoundedXxx, ...)`.
+- **About Us / Manifesto screen** (`settings_about_screen.dart`) — full editorial about page with brand hero, vision, provenance ("Developer's Paradise"), and tech badges.
 - **Lazy tab loading:** Replaced `IndexedStack` with lazy-initialized `Offstage` widgets — tabs are created on first visit and kept alive without paying the cost upfront.
 - **Scroll-to-top on re-tap:** Tapping an already-active bottom nav item scrolls that tab's content to top.
 - **Swipe-down-to-go-back on detail screen:** Dragging the image down past 25% of screen height pops the screen; otherwise snaps back.
@@ -47,8 +49,11 @@ wallbizz/
 - **Watermarked share:** `ShareUtils.shareWithWatermark()` fetches the image, overlays "WALLBIZZ" branding, and shares via the share sheet. Temp files are cleaned up after sharing.
 - **Download:** `DownloadService.downloadImage()` uses platform-specific paths — `dart:html` Blob (web) or `http` streaming to File (mobile). Progress is reported via callback. Downloads are tracked locally in a Hive box and shown in the VAULT (Downloads) tab.
 - **Moodboard:** Authenticated users can create named moodboards via `MoodboardService`. Each moodboard is stored in the `moodboards` and `moodboard_items` Supabase tables.
-- **Gesture hint overlay** (`GestureHintOverlay`): First visit to detail screen shows a subtle hint ("swipe down to go back, tap to toggle UI") that fades after a few seconds. Dismissed permanently via SharedPreferences.
+- **Gesture hint overlay** (`GestureHintOverlay`): First visit to detail screen shows gesture guide (swipe down, swipe left/right, tap, double-tap, heart, share) with responsive grid on desktop. Dismissed permanently via SharedPreferences.
 - **Animated splash screen with pure black native splash:** `splash_screen.dart` shows "WALLBIZZ" with animated letter spacing. Native splash (Android) is configured pure black via `launch_background.xml` and `values/styles.xml`.
+- **Android signing:** CI uses GitHub Secrets (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`). Local dev uses `key.properties` (gitignored, template in `key.properties.example`).
+- **CI/CD:** Single `ci.yml` workflow — backend tests, Flutter analyze/test, then parallel builds for Android (signed), iOS, Windows (Inno Setup installer), Linux (tarball), macOS (zip), web. Release job downloads all platform artifacts and creates GitHub Release with CHANGELOG notes.
+- **`flutter-prep` composite action** — shared setup (pub get, version extraction, .env creation) used by all CI jobs.
 - **Backend cron schedule:** `0 2,14 * * *` UTC (2 AM + 2 PM daily). Manual trigger: `POST /api/v1/sync` (returns immediately, runs in goroutine).
 - **Backend env vars:** `PORT` (default 3000), `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WALLHAVEN_API_KEY`, `LOG_LEVEL` (default info).
 - **Flutter env vars (`app/.env`):** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `BACKEND_URL` (used only on web to override `BackendConfig._baseUrl`).

@@ -4,6 +4,30 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0] - 2026-09-13
+
+### Added
+- About Us / Manifesto screen — full editorial about page with developer provenance
+- HugeIcons across entire app — replaced all Material/Cupertino icons with HugeIcons
+- Linux release builds — CI now produces tarball artifacts for Linux
+- macOS release builds — CI now produces zip artifacts for macOS
+- Android release signing via GitHub Secrets — standard signing in CI/CD
+- ProGuard rules for Android release minification
+- `key.properties.example` template for local Android signing setup
+- Enhanced Windows installer — multi-language support, license page, file associations, Start Menu group, quick-launch shortcut
+- `flutter-prep` composite action for shared CI setup
+- Gesture hint overlay — added swipe left/right hints, responsive layout for desktop/tablet
+
+### Changed
+- Publisher changed to "Developer's Paradise" in Windows installer
+- All `IconData` parameters changed to `dynamic` for HugeIcons compatibility
+- CI workflow rewritten — single unified workflow inspired by nook, resilient release with per-platform success checks
+- Removed redundant `build-windows.yml` (merged into `ci.yml`)
+
+### Fixed
+- `HugeIcon` named parameter `icon:` missing in 14 files — all corrected
+- `IconData` → `dynamic` type mismatch across all widget parameters
+
 ## [1.4.6] - 2026-09-12
 
 ### Fixed

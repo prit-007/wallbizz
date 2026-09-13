@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -112,8 +113,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                          Icons.delete_sweep_rounded,
+                    HugeIcon(
+                          icon: HugeIcons.strokeRoundedDelete03,
                           size: 48,
                           color: c.error.withValues(alpha: 0.9),
                         )
@@ -318,8 +319,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           color: Colors.black.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.close_rounded,
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedCancel01,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -372,8 +373,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                               : Colors.black.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.delete_outline_rounded,
+                        child: const HugeIcon(
+                          icon: HugeIcons.strokeRoundedDelete02,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -404,8 +405,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.search_rounded,
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
                         color: vk.onSurfaceSubtle,
                         size: 20,
                       ),
@@ -435,8 +436,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                       if (_searchQuery.isNotEmpty)
                         GestureDetector(
                           onTap: () => setState(() => _searchQuery = ''),
-                          child: Icon(
-                            Icons.cancel_rounded,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedCancel01,
                             color: vk.onSurfaceFaint,
                             size: 18,
                           ),
@@ -530,8 +531,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                     color: vk.surfaceContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.download_done_rounded,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedDownload04,
                     size: 48,
                     color: vk.onSurfaceDim,
                   ),

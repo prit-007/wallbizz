@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -63,8 +64,8 @@ class _CreateMoodboardDialogState extends State<CreateMoodboardDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                      Icons.dashboard_customize_rounded,
+                HugeIcon(
+                      icon: HugeIcons.strokeRoundedGridView,
                       size: 44,
                       color: cs.primary,
                     )

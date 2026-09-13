@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../config/backend_config.dart';
@@ -57,7 +58,10 @@ class NetworkImageWidget extends StatelessWidget {
           },
           errorBuilder: (context, error, stackTrace) => Container(
             color: vk.surfaceContainer,
-            child: Icon(Icons.broken_image_rounded, color: vk.onSurfaceDim),
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedImageNotFound01,
+              color: vk.onSurfaceDim,
+            ),
           ),
         ),
       );
@@ -75,7 +79,10 @@ class NetworkImageWidget extends StatelessWidget {
       placeholder: (context, url) => buildPlaceholder(),
       errorWidget: (context, url, error) => Container(
         color: vk.surfaceContainer,
-        child: Icon(Icons.broken_image_rounded, color: vk.onSurfaceDim),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedImageNotFound01,
+          color: vk.onSurfaceDim,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -36,8 +37,8 @@ class LogsScreen extends StatelessWidget {
                           color: vk.glassBorder.withValues(alpha: 0.15),
                         ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
+                      child: const HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowLeft01,
                         color: Colors.white,
                         size: 18,
                       ),
