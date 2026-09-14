@@ -4,6 +4,14 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.8.6] - 2026-09-14
+
+### Fixed
+- **App icon** — custom W logo on dark background for consistent branding across web, Android, and splash screen (#78)
+- **Splash screen** — displays W logo above brand text for a polished first impression (#78)
+- **About screen** — replaced generic image icon with branded W logo (#78)
+- **Build artifacts** — auto-generated plugin registrants now properly gitignored (#77)
+
 ## [1.8.5] - 2026-09-14
 
 ### Fixed
