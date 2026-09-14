@@ -1,7 +1,7 @@
 name: wallbizz
 description: "Wallbizz — Premium curated wallpapers powered by Wallhaven"
 publish_to: 'none'
-version: 1.8.5+1805
+version: 1.8.6+1806
 
 environment:
   sdk: ^3.12.2
