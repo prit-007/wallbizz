@@ -4,6 +4,16 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.8.7] - 2026-09-14
+
+### Fixed
+- **Wishlist 400 error** — wallpapers from Wallhaven search had `wh-` prefixed IDs instead of DB UUIDs, causing foreign key violations when adding to wishlist (#80)
+- **Moodboard 400 error** — same UUID mismatch when adding wallpapers to moodboards (#80)
+- **Black screen on web** — Supabase.initialize() now wrapped in try-catch with diagnostic logging so empty URL/key no longer crashes the app (#80)
+
+### Changed
+- **UUID resolver** — `addToWishlist`, `removeFromWishlist`, `isInWishlist`, `addToMoodboard`, `removeFromMoodboard`, and `fetchMoodboardItemIds` now automatically resolve `wh-` prefixed wallhaven IDs to actual DB UUIDs before querying
+
 ## [1.8.6] - 2026-09-14
 
 ### Fixed
