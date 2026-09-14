@@ -14,12 +14,14 @@ class StaggeredGrid extends StatefulWidget {
   final Function(Wallpaper wallpaper, List<Wallpaper> allWallpapers)?
   onWallpaperTap;
   final ScrollController? scrollController;
+  final bool sliverMode;
 
   const StaggeredGrid({
     super.key,
     this.category,
     this.onWallpaperTap,
     this.scrollController,
+    this.sliverMode = false,
   });
 
   @override
@@ -145,6 +147,94 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.sliverMode) return _buildSliver();
+    return _buildScrollable();
+  }
+
+  Widget _buildSliver() {
+    if (_wallpapers.isEmpty && _isLoading) {
+      return _buildSliverLoadingSkeleton();
+    }
+
+    if (_wallpapers.isEmpty && _hasError) {
+      return SliverToBoxAdapter(child: _buildErrorWidget());
+    }
+
+    return _buildSliverGrid();
+  }
+
+  Widget _buildSliverLoadingSkeleton() {
+    final vk = context.vivek;
+    final crossAxisCount = context.gridColumns;
+    final heights = [220.0, 300.0, 250.0, 340.0, 190.0, 280.0];
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      sliver: SliverMasonryGrid.count(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childCount: crossAxisCount * 3,
+        itemBuilder: (context, index) {
+          return RepaintBoundary(
+            child:
+                Container(
+                      height: heights[index % heights.length],
+                      decoration: BoxDecoration(
+                        color: vk.surfaceContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSliverGrid() {
+    final cs = Theme.of(context).colorScheme;
+
+    return SliverMasonryGrid.count(
+      crossAxisCount: context.gridColumns,
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childCount: _wallpapers.length + (_hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == _wallpapers.length) {
+          return Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: cs.primary,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        final wp = _wallpapers[index];
+        return RepaintBoundary(
+              child: WallpaperCard(
+                wallpaper: wp,
+                isWishlisted: _wishlistedIds.contains(wp.id),
+                onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
+                onHeartTap: () => _onHeartTap(wp),
+              ),
+            )
+            .animate()
+            .fade(duration: 400.ms)
+            .slideY(
+              begin: 0.1,
+              end: 0,
+              delay: Duration(milliseconds: (index % context.gridColumns) * 50),
+            );
+      },
+    );
+  }
+
+  Widget _buildScrollable() {
     final cs = Theme.of(context).colorScheme;
 
     if (_wallpapers.isEmpty && _isLoading) {
@@ -152,26 +242,7 @@ class _StaggeredGridState extends State<StaggeredGrid> {
     }
 
     if (_wallpapers.isEmpty && _hasError) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: cs.error),
-            const SizedBox(height: 16),
-            Text(
-              'Failed to load wallpapers',
-              style: TextStyle(color: cs.onSurface),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: _resetAndLoad,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-              style: ElevatedButton.styleFrom(backgroundColor: cs.primary),
-            ),
-          ],
-        ),
-      );
+      return _buildErrorWidget();
     }
 
     return RefreshIndicator(
@@ -226,6 +297,31 @@ class _StaggeredGridState extends State<StaggeredGrid> {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    final cs = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: cs.error),
+          const SizedBox(height: 16),
+          Text(
+            'Failed to load wallpapers',
+            style: TextStyle(color: cs.onSurface),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: _resetAndLoad,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+            style: ElevatedButton.styleFrom(backgroundColor: cs.primary),
+          ),
+        ],
       ),
     );
   }

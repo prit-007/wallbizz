@@ -35,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ScrollController(),
   ];
   final FocusNode _searchFocusNode = FocusNode();
+  Key _landscapeKey = UniqueKey();
+  bool _lastWasLandscapeCompact = false;
 
   static const _navItems = [
     _DockItem(
@@ -99,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
         if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
           return KeyEventResult.ignored;
         }
-        // Ctrl+F or /: open search
         if ((event.logicalKey == LogicalKeyboardKey.keyF &&
                 HardwareKeyboard.instance.isControlPressed) ||
             event.logicalKey == LogicalKeyboardKey.slash) {
@@ -110,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
           return KeyEventResult.handled;
         }
-        // 1-4: switch tabs
         final keys = [
           LogicalKeyboardKey.digit1,
           LogicalKeyboardKey.digit2,
@@ -261,7 +261,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab() {
-    final cs = Theme.of(context).colorScheme;
     final desktop = context.isDesktop;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -269,111 +268,99 @@ class _HomeScreenState extends State<HomeScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
+        final isLandscapeCompact = isLandscape && constraints.maxHeight <= 350;
         final horizontalPadding = isCompact ? 20.0 : 32.0;
         final bottomPadding = desktop ? 24.0 : 90.0;
-        final topPadding = isLandscape ? 12.0 : 24.0;
-        final brandFontSize = isLandscape ? 32.0 : (isCompact ? 42.0 : 56.0);
-        final spacingAfterBrand = isLandscape ? 12.0 : 24.0;
 
-        final content = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                topPadding,
-                horizontalPadding,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                        'WALLBIZZ',
-                        style: GoogleFonts.oswald(
-                          fontSize: brandFontSize,
-                          fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
-                          letterSpacing: 4.5,
-                          height: 1.0,
-                        ),
-                      )
-                      .animate()
-                      .fade(duration: 600.ms)
-                      .slideX(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 8),
-                  Container(width: 48, height: 3, color: cs.primary)
-                      .animate()
-                      .fade(delay: 200.ms)
-                      .scaleX(
-                        begin: 0,
-                        end: 1,
-                        alignment: Alignment.centerLeft,
-                      ),
-                  SizedBox(height: spacingAfterBrand),
-                ],
-              ),
-            ),
+        if (_lastWasLandscapeCompact != isLandscapeCompact) {
+          _lastWasLandscapeCompact = isLandscapeCompact;
+          _landscapeKey = UniqueKey();
+        }
 
-            // Search bar
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: desktop
-                  ? _buildInlineSearch(horizontalPadding)
-                  : _buildTapSearch(isCompact, horizontalPadding),
-            ),
-            SizedBox(height: isLandscape ? 12 : 24),
+        final brandFontSize = isLandscapeCompact
+            ? 28.0
+            : (isLandscape ? 32.0 : (isCompact ? 42.0 : 56.0));
+        final topPadding = isLandscapeCompact
+            ? 8.0
+            : (isLandscape ? 12.0 : 24.0);
+        final spacingAfterBrand = isLandscapeCompact
+            ? 8.0
+            : (isLandscape ? 12.0 : 24.0);
+        final showAccentBar = !isLandscapeCompact;
+        final searchBarHeight = isLandscapeCompact ? 44.0 : 56.0;
+        final searchFontSize = isLandscapeCompact
+            ? 11.0
+            : (isCompact ? 12.0 : 14.0);
+        final searchIconSize = isLandscapeCompact
+            ? 18.0
+            : (isCompact ? 20.0 : 24.0);
 
-            CategoryTabs(
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
-                HapticFeedback.selectionClick();
-                setState(() => _selectedCategory = category);
-              },
-            ).animate().fade(delay: 400.ms),
+        final expandedHeight = isLandscapeCompact
+            ? 44.0 + 54.0
+            : (isLandscape
+                  ? 12.0 + 32.0 + 8.0 + 3.0 + 12.0 + 56.0 + 12.0 + 54.0
+                  : 24.0 + 42.0 + 8.0 + 3.0 + 24.0 + 56.0 + 24.0 + 54.0);
 
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: bottomPadding),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.02, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                              ),
-                            ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: StaggeredGrid(
-                    key: ValueKey(_selectedCategory),
-                    category: _selectedCategory,
-                    scrollController: _scrollControllers[0],
-                    onWallpaperTap: (wallpaper, allWallpapers) {
-                      final index = allWallpapers.indexWhere(
-                        (w) => w.id == wallpaper.id,
-                      );
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => WallpaperSwiperScreen(
-                            wallpapers: allWallpapers,
-                            initialIndex: index >= 0 ? index : 0,
-                          ),
-                        ),
-                      );
-                    },
+        final content = CustomScrollView(
+          controller: _scrollControllers[0],
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              expandedHeight: expandedHeight,
+              toolbarHeight: 0,
+              automaticallyImplyLeading: false,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                background: KeyedSubtree(
+                  key: _landscapeKey,
+                  child: _buildBrandHeader(
+                    cs: Theme.of(context).colorScheme,
+                    horizontalPadding: horizontalPadding,
+                    topPadding: topPadding,
+                    brandFontSize: brandFontSize,
+                    spacingAfterBrand: spacingAfterBrand,
+                    showAccentBar: showAccentBar,
+                    searchBarHeight: searchBarHeight,
+                    searchFontSize: searchFontSize,
+                    searchIconSize: searchIconSize,
+                    isCompact: isCompact,
+                    isLandscapeCompact: isLandscapeCompact,
+                    isLandscape: isLandscape,
                   ),
                 ),
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(54),
+                child: CategoryTabs(
+                  selectedCategory: _selectedCategory,
+                  onCategorySelected: (category) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedCategory = category);
+                  },
+                ).animate().fade(delay: 400.ms),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              sliver: StaggeredGrid(
+                key: ValueKey(_selectedCategory),
+                category: _selectedCategory,
+                scrollController: _scrollControllers[0],
+                sliverMode: true,
+                onWallpaperTap: (wallpaper, allWallpapers) {
+                  final index = allWallpapers.indexWhere(
+                    (w) => w.id == wallpaper.id,
+                  );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => WallpaperSwiperScreen(
+                        wallpapers: allWallpapers,
+                        initialIndex: index >= 0 ? index : 0,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -393,7 +380,84 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTapSearch(bool isCompact, double horizontalPadding) {
+  Widget _buildBrandHeader({
+    required ColorScheme cs,
+    required double horizontalPadding,
+    required double topPadding,
+    required double brandFontSize,
+    required double spacingAfterBrand,
+    required bool showAccentBar,
+    required double searchBarHeight,
+    required double searchFontSize,
+    required double searchIconSize,
+    required bool isCompact,
+    required bool isLandscapeCompact,
+    required bool isLandscape,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            topPadding,
+            horizontalPadding,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                    'WALLBIZZ',
+                    style: GoogleFonts.oswald(
+                      fontSize: brandFontSize,
+                      fontWeight: FontWeight.w900,
+                      color: cs.onSurface,
+                      letterSpacing: 4.5,
+                      height: 1.0,
+                    ),
+                  )
+                  .animate()
+                  .fade(duration: 600.ms)
+                  .slideX(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
+              if (showAccentBar) ...[
+                const SizedBox(height: 8),
+                Container(width: 48, height: 3, color: cs.primary)
+                    .animate()
+                    .fade(delay: 200.ms)
+                    .scaleX(begin: 0, end: 1, alignment: Alignment.centerLeft),
+              ],
+              SizedBox(height: spacingAfterBrand),
+            ],
+          ),
+        ),
+
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: context.isDesktop
+              ? _buildInlineSearch(horizontalPadding)
+              : _buildTapSearch(
+                  isCompact,
+                  horizontalPadding,
+                  searchBarHeight: searchBarHeight,
+                  searchFontSize: searchFontSize,
+                  searchIconSize: searchIconSize,
+                ),
+        ),
+        SizedBox(height: isLandscapeCompact ? 0 : (isLandscape ? 12 : 24)),
+      ],
+    );
+  }
+
+  Widget _buildTapSearch(
+    bool isCompact,
+    double horizontalPadding, {
+    double searchBarHeight = 56,
+    double searchFontSize = 12,
+    double searchIconSize = 20,
+  }) {
     final vk = context.vivek;
     final cs = Theme.of(context).colorScheme;
 
@@ -409,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
           child: Container(
-            height: 56,
+            height: searchBarHeight,
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(0),
@@ -422,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'EXPLORE CURATED ARCHIVES...',
                   style: GoogleFonts.inter(
                     color: vk.onSurfaceSubtle,
-                    fontSize: isCompact ? 12 : 14,
+                    fontSize: searchFontSize,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
                   ),
@@ -431,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 HugeIcon(
                   icon: HugeIcons.strokeRoundedSearch01,
                   color: cs.onSurface,
-                  size: isCompact ? 20 : 24,
+                  size: searchIconSize,
                 ),
               ],
             ),
