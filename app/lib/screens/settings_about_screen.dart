@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../config/theme_config.dart';
+import '../widgets/wallbizz_logo.dart';
 
 class SettingsAboutScreen extends StatefulWidget {
   const SettingsAboutScreen({super.key});
@@ -66,11 +66,7 @@ class _SettingsAboutScreenState extends State<SettingsAboutScreen> {
                   width: 1,
                 ),
               ),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedImage01,
-                color: cs.onSurface,
-                size: 56,
-              ),
+              child: const WallbizzLogo(size: 56),
             ),
           ),
           const SizedBox(height: 32),
