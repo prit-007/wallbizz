@@ -51,8 +51,14 @@ Future<void> main() async {
     logInfo('Supabase initialized', domain: LogDomain.general);
   } catch (e) {
     logError('Supabase init failed: $e', error: e);
-    logError('URL: ${SupabaseConfig.url.isNotEmpty ? "set" : "EMPTY"}', domain: LogDomain.general);
-    logError('Key: ${SupabaseConfig.anonKey.isNotEmpty ? "set" : "EMPTY"}', domain: LogDomain.general);
+    logError(
+      'URL: ${SupabaseConfig.url.isNotEmpty ? "set" : "EMPTY"}',
+      domain: LogDomain.general,
+    );
+    logError(
+      'Key: ${SupabaseConfig.anonKey.isNotEmpty ? "set" : "EMPTY"}',
+      domain: LogDomain.general,
+    );
   }
 
   SystemChrome.setPreferredOrientations([
