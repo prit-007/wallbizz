@@ -1,7 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/wallpaper.dart';
 import 'hover_builder.dart';
@@ -95,27 +93,22 @@ class _WallpaperCardState extends State<WallpaperCard> {
                           Positioned(
                             bottom: 10,
                             left: 10,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  color: Colors.black.withValues(alpha: 0.35),
-                                  child: Text(
-                                    widget.wallpaper.resolution,
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                widget.wallpaper.resolution,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ),
@@ -127,27 +120,20 @@ class _WallpaperCardState extends State<WallpaperCard> {
                               right: 10,
                               child: GestureDetector(
                                 onTap: widget.onHeartTap,
-                                child: ClipOval(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                      sigmaX: 8,
-                                      sigmaY: 8,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(7),
-                                      color: Colors.black.withValues(
-                                        alpha: 0.35,
-                                      ),
-                                      child: HugeIcon(
-                                        icon: widget.isWishlisted
-                                            ? HugeIcons.strokeRoundedFavourite
-                                            : HugeIcons.strokeRoundedFavourite,
-                                        color: widget.isWishlisted
-                                            ? Colors.redAccent
-                                            : Colors.white,
-                                        size: 18,
-                                      ),
-                                    ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.45),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: HugeIcon(
+                                    icon: widget.isWishlisted
+                                        ? HugeIcons.strokeRoundedFavourite
+                                        : HugeIcons.strokeRoundedFavourite,
+                                    color: widget.isWishlisted
+                                        ? Colors.redAccent
+                                        : Colors.white,
+                                    size: 18,
                                   ),
                                 ),
                               ),
@@ -162,6 +148,6 @@ class _WallpaperCardState extends State<WallpaperCard> {
           },
         ),
       ),
-    ).animate().fade(duration: 350.ms).slideY(begin: 0.1, end: 0);
+    );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/responsive_config.dart';
@@ -174,19 +173,31 @@ class _StaggeredGridState extends State<StaggeredGrid> {
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
-        childCount: crossAxisCount * 3,
+        childCount: crossAxisCount * 2,
         itemBuilder: (context, index) {
           return RepaintBoundary(
-            child:
-                Container(
-                      height: heights[index % heights.length],
-                      decoration: BoxDecoration(
-                        color: vk.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    )
-                    .animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: -1.0, end: 1.0),
+              duration: Duration(milliseconds: 1200 + (index * 100)),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return Container(
+                  height: heights[index % heights.length],
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment(value - 0.3, 0),
+                      end: Alignment(value + 0.3, 0),
+                      colors: [
+                        vk.surfaceContainer,
+                        vk.shimmerHighlight,
+                        vk.surfaceContainer,
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -216,20 +227,13 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
         final wp = _wallpapers[index];
         return RepaintBoundary(
-              child: WallpaperCard(
-                wallpaper: wp,
-                isWishlisted: _wishlistedIds.contains(wp.id),
-                onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
-                onHeartTap: () => _onHeartTap(wp),
-              ),
-            )
-            .animate()
-            .fade(duration: 400.ms)
-            .slideY(
-              begin: 0.1,
-              end: 0,
-              delay: Duration(milliseconds: (index % context.gridColumns) * 50),
-            );
+          child: WallpaperCard(
+            wallpaper: wp,
+            isWishlisted: _wishlistedIds.contains(wp.id),
+            onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
+            onHeartTap: () => _onHeartTap(wp),
+          ),
+        );
       },
     );
   }
@@ -278,22 +282,13 @@ class _StaggeredGridState extends State<StaggeredGrid> {
 
               final wp = _wallpapers[index];
               return RepaintBoundary(
-                    child: WallpaperCard(
-                      wallpaper: wp,
-                      isWishlisted: _wishlistedIds.contains(wp.id),
-                      onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
-                      onHeartTap: () => _onHeartTap(wp),
-                    ),
-                  )
-                  .animate()
-                  .fade(duration: 400.ms)
-                  .slideY(
-                    begin: 0.1,
-                    end: 0,
-                    delay: Duration(
-                      milliseconds: (index % crossAxisCount) * 50,
-                    ),
-                  );
+                child: WallpaperCard(
+                  wallpaper: wp,
+                  isWishlisted: _wishlistedIds.contains(wp.id),
+                  onTap: () => widget.onWallpaperTap?.call(wp, _wallpapers),
+                  onHeartTap: () => _onHeartTap(wp),
+                ),
+              );
             },
           );
         },
@@ -340,19 +335,31 @@ class _StaggeredGridState extends State<StaggeredGrid> {
           crossAxisSpacing: 10,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: crossAxisCount * 3,
+          itemCount: crossAxisCount * 2,
           itemBuilder: (context, index) {
             return RepaintBoundary(
-              child:
-                  Container(
-                        height: heights[index % heights.length],
-                        decoration: BoxDecoration(
-                          color: vk.surfaceContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      )
-                      .animate(onPlay: (controller) => controller.repeat())
-                      .shimmer(duration: 1200.ms, color: vk.shimmerHighlight),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: -1.0, end: 1.0),
+                duration: Duration(milliseconds: 1200 + (index * 100)),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return Container(
+                    height: heights[index % heights.length],
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment(value - 0.3, 0),
+                        end: Alignment(value + 0.3, 0),
+                        colors: [
+                          vk.surfaceContainer,
+                          vk.shimmerHighlight,
+                          vk.surfaceContainer,
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             );
           },
         );

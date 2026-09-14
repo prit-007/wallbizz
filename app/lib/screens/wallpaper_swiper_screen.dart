@@ -56,6 +56,8 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
   double _dragStartY = 0;
   bool _isSwiping = false;
 
+  bool get _isZoomed => _transformController.value.getMaxScaleOnAxis() > 1.1;
+
   Wallpaper get _currentWallpaper => widget.wallpapers[_currentIndex];
 
   @override
@@ -73,6 +75,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
           if (_zoomAnimation != null) {
             _transformController.value = _zoomAnimation!.value;
           }
+          setState(() {});
         });
   }
 
@@ -118,12 +121,12 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
   }
 
   void _onPointerDown(PointerDownEvent event) {
-    if (_transformController.value.getMaxScaleOnAxis() > 1.1) return;
+    if (_isZoomed) return;
     _dragStartY = event.position.dy;
   }
 
   void _onPointerMove(PointerMoveEvent event) {
-    if (_transformController.value.getMaxScaleOnAxis() > 1.1) {
+    if (_isZoomed) {
       _dragOffset = 0;
       _isSwiping = false;
       return;
@@ -265,7 +268,9 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                     controller: _pageController,
                     itemCount: widget.wallpapers.length,
                     onPageChanged: _onPageChanged,
-                    physics: const BouncingScrollPhysics(),
+                    physics: _isZoomed
+                        ? const NeverScrollableScrollPhysics()
+                        : const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       final wp = widget.wallpapers[index];
                       return GestureDetector(
@@ -274,7 +279,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           transformationController: _transformController,
                           minScale: 1.0,
                           maxScale: 5.0,
-                          panEnabled: false,
+                          panEnabled: true,
                           scaleEnabled: true,
                           child: Center(
                             child: Hero(
@@ -503,7 +508,9 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                     controller: _pageController,
                     itemCount: widget.wallpapers.length,
                     onPageChanged: _onPageChanged,
-                    physics: const BouncingScrollPhysics(),
+                    physics: _isZoomed
+                        ? const NeverScrollableScrollPhysics()
+                        : const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       final wp = widget.wallpapers[index];
                       return GestureDetector(
@@ -516,7 +523,7 @@ class _WallpaperSwiperScreenState extends State<WallpaperSwiperScreen>
                           transformationController: _transformController,
                           minScale: 1.0,
                           maxScale: 5.0,
-                          panEnabled: false,
+                          panEnabled: true,
                           scaleEnabled: true,
                           child: Center(
                             child: Hero(
