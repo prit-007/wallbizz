@@ -384,8 +384,8 @@ class _DetailScreenState extends State<DetailScreen>
                                           ),
                                         ),
                                         child: const HugeIcon(
-                                          icon: HugeIcons
-                                              .strokeRoundedSettings01,
+                                          icon:
+                                              HugeIcons.strokeRoundedSettings01,
                                           color: Colors.white,
                                           size: 20,
                                         ),

@@ -283,7 +283,6 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final vk = context.vivek;
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: _isMultiSelectMode
@@ -380,187 +379,187 @@ class _SearchScreenState extends State<SearchScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              height: 52,
-              width: 52,
-              decoration: BoxDecoration(
-                color: vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(
-                  color: vk.glassBorder.withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedArrowLeft01,
-                color: cs.onSurface,
-                size: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              height: 52,
-              decoration: BoxDecoration(
-                color: isFocused
-                    ? vk.surfaceContainerHigh
-                    : vk.surfaceContainer,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(
-                  color: isFocused
-                      ? cs.primary
-                      : vk.glassBorder.withValues(alpha: 0.15),
-                  width: isFocused ? 1.5 : 1,
-                ),
-                boxShadow: isFocused
-                    ? [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.2),
-                          blurRadius: 16,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : [],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedSearch01,
-                    color: isFocused ? cs.primary : vk.onSurfaceSubtle,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      autofocus: true,
-                      onSubmitted: (_) => _onSearch(),
-                      onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
-                        color: cs.onSurface,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Search 4K wallpapers, anime...',
-                        hintStyle: GoogleFonts.inter(
-                          color: vk.onSurfaceFaint,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  height: 52,
+                  width: 52,
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer,
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(
+                      color: vk.glassBorder.withValues(alpha: 0.15),
+                      width: 1,
                     ),
                   ),
-
-                  if (_controller.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        _controller.clear();
-                        setState(() {});
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedCancel01,
-                          color: vk.onSurfaceFaint,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-
-                  GestureDetector(
-                    onTap: _onSearch,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedArrowRight01,
-                        color: cs.onPrimary,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-    if (_focusNode.hasFocus && _suggestions.isNotEmpty)
-      Container(
-        constraints: const BoxConstraints(maxHeight: 200),
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: vk.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: vk.glassBorder.withValues(alpha: 0.15),
-            width: 1,
-          ),
-        ),
-        child: Material(
-          color: vk.surfaceContainerHigh,
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            itemCount: _suggestions.length,
-            itemBuilder: (context, index) {
-              final suggestion = _suggestions[index];
-              return ListTile(
-                dense: true,
-                leading: HugeIcon(
-                  icon: _recentSearches.contains(suggestion)
-                      ? HugeIcons.strokeRoundedClock01
-                      : HugeIcons.strokeRoundedFire,
-                  size: 16,
-                  color: vk.onSurfaceSubtle,
-                ),
-                title: Text(
-                  suggestion,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowLeft01,
                     color: cs.onSurface,
+                    size: 18,
                   ),
                 ),
-                onTap: () {
-                  _controller.text = suggestion;
-                  _onSearch();
-                },
-              );
-            },
+              ),
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isFocused
+                        ? vk.surfaceContainerHigh
+                        : vk.surfaceContainer,
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(
+                      color: isFocused
+                          ? cs.primary
+                          : vk.glassBorder.withValues(alpha: 0.15),
+                      width: isFocused ? 1.5 : 1,
+                    ),
+                    boxShadow: isFocused
+                        ? [
+                            BoxShadow(
+                              color: cs.primary.withValues(alpha: 0.2),
+                              blurRadius: 16,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : [],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: isFocused ? cs.primary : vk.onSurfaceSubtle,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          autofocus: true,
+                          onSubmitted: (_) => _onSearch(),
+                          onChanged: (_) => setState(() {}),
+                          style: GoogleFonts.inter(
+                            color: cs.onSurface,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Search 4K wallpapers, anime...',
+                            hintStyle: GoogleFonts.inter(
+                              color: vk.onSurfaceFaint,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+
+                      if (_controller.text.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _controller.clear();
+                            setState(() {});
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: vk.onSurfaceFaint,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+
+                      GestureDetector(
+                        onTap: _onSearch,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: cs.primary.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedArrowRight01,
+                            color: cs.onPrimary,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-    ],
+        if (_focusNode.hasFocus && _suggestions.isNotEmpty)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: vk.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: vk.glassBorder.withValues(alpha: 0.15),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: vk.surfaceContainerHigh,
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: _suggestions.length,
+                itemBuilder: (context, index) {
+                  final suggestion = _suggestions[index];
+                  return ListTile(
+                    dense: true,
+                    leading: HugeIcon(
+                      icon: _recentSearches.contains(suggestion)
+                          ? HugeIcons.strokeRoundedClock01
+                          : HugeIcons.strokeRoundedFire,
+                      size: 16,
+                      color: vk.onSurfaceSubtle,
+                    ),
+                    title: Text(
+                      suggestion,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    onTap: () {
+                      _controller.text = suggestion;
+                      _onSearch();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+      ],
     );
   }
 
