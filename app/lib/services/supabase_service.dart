@@ -105,6 +105,33 @@ class SupabaseService {
   }
 
   // ----------------------------------------------------------
+  // Wallpaper UUID resolver
+  // ----------------------------------------------------------
+
+  /// Resolves a wallhaven_id (or UUID) to the actual DB UUID.
+  /// If the id is already a valid UUID, returns it directly.
+  /// Otherwise looks up by wallhaven_id in the wallpapers table.
+  Future<String?> _resolveWallpaperUuid(String wallpaperId) async {
+    if (wallpaperId.contains('-') && wallpaperId.length == 36) {
+      return wallpaperId;
+    }
+    final whId = wallpaperId.startsWith('wh-')
+        ? wallpaperId.substring(3)
+        : wallpaperId;
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/wallpapers?wallhaven_id=eq.$whId&select=id',
+    );
+    final response = await _get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      if (data.isNotEmpty) {
+        return data[0]['id'] as String?;
+      }
+    }
+    return null;
+  }
+
+  // ----------------------------------------------------------
   // Wishlist
   // ----------------------------------------------------------
 
@@ -131,12 +158,23 @@ class SupabaseService {
   }
 
   Future<bool> addToWishlist(String userId, String wallpaperId) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) {
+      logError(
+        'addToWishlist: wallpaper not found in DB: $wallpaperId',
+        domain: LogDomain.auth,
+      );
+      return false;
+    }
     final url = Uri.parse('$_baseUrl/rest/v1/wishlists');
-    logInfo('Adding to wishlist: $wallpaperId', domain: LogDomain.auth);
+    logInfo(
+      'Adding to wishlist: $wallpaperId -> $uuid',
+      domain: LogDomain.auth,
+    );
     final response = await _post(
       url,
       headers: _authHeaders,
-      body: json.encode({'user_id': userId, 'wallpaper_id': wallpaperId}),
+      body: json.encode({'user_id': userId, 'wallpaper_id': uuid}),
     );
 
     final success = response.statusCode == 201 || response.statusCode == 200;
@@ -145,7 +183,7 @@ class SupabaseService {
       logInfo('Added to wishlist: $wallpaperId', domain: LogDomain.auth);
     } else {
       logError(
-        'Failed to add to wishlist: ${response.statusCode}',
+        'Failed to add to wishlist: ${response.statusCode} ${response.body}',
         domain: LogDomain.auth,
       );
     }
@@ -153,8 +191,10 @@ class SupabaseService {
   }
 
   Future<bool> removeFromWishlist(String userId, String wallpaperId) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) return false;
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId',
+      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$uuid&user_id=eq.$userId',
     );
     logInfo('Removing from wishlist: $wallpaperId', domain: LogDomain.auth);
     final response = await _delete(url, headers: _authHeaders);
@@ -173,8 +213,10 @@ class SupabaseService {
   }
 
   Future<bool> isInWishlist(String userId, String wallpaperId) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) return false;
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$wallpaperId&user_id=eq.$userId&select=id',
+      '$_baseUrl/rest/v1/wishlists?wallpaper_id=eq.$uuid&user_id=eq.$userId&select=id',
     );
     final response = await _get(url, headers: _authHeaders);
 
@@ -255,18 +297,23 @@ class SupabaseService {
   }
 
   Future<bool> addToMoodboard(String moodboardId, String wallpaperId) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) {
+      logError(
+        'addToMoodboard: wallpaper not found in DB: $wallpaperId',
+        domain: LogDomain.general,
+      );
+      return false;
+    }
     final url = Uri.parse('$_baseUrl/rest/v1/moodboard_items');
     logInfo(
-      'Adding to moodboard: $moodboardId <- $wallpaperId',
+      'Adding to moodboard: $moodboardId <- $uuid',
       domain: LogDomain.general,
     );
     final response = await _post(
       url,
       headers: _authHeaders,
-      body: json.encode({
-        'moodboard_id': moodboardId,
-        'wallpaper_id': wallpaperId,
-      }),
+      body: json.encode({'moodboard_id': moodboardId, 'wallpaper_id': uuid}),
     );
 
     if (response.statusCode == 201) {
@@ -285,8 +332,10 @@ class SupabaseService {
     String moodboardId,
     String wallpaperId,
   ) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) return false;
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$wallpaperId',
+      '$_baseUrl/rest/v1/moodboard_items?moodboard_id=eq.$moodboardId&wallpaper_id=eq.$uuid',
     );
     logInfo(
       'Removing from moodboard: $moodboardId <- $wallpaperId',
@@ -329,8 +378,10 @@ class SupabaseService {
   }
 
   Future<Set<String>> fetchMoodboardItemIds(String wallpaperId) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId);
+    if (uuid == null) return {};
     final url = Uri.parse(
-      '$_baseUrl/rest/v1/moodboard_items?select=moodboard_id&wallpaper_id=eq.$wallpaperId',
+      '$_baseUrl/rest/v1/moodboard_items?select=moodboard_id&wallpaper_id=eq.$uuid',
     );
     final response = await _get(url, headers: _authHeaders);
 

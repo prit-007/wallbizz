@@ -40,14 +40,26 @@ Future<void> main() async {
   BackendConfig.init();
   logInfo('Backend config initialized', domain: LogDomain.general);
 
-  await Supabase.initialize(
-    url: SupabaseConfig.url,
-    publishableKey: SupabaseConfig.anonKey,
-    authOptions: const FlutterAuthClientOptions(
-      authFlowType: AuthFlowType.pkce,
-    ),
-  );
-  logInfo('Supabase initialized', domain: LogDomain.general);
+  try {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      publishableKey: SupabaseConfig.anonKey,
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+      ),
+    );
+    logInfo('Supabase initialized', domain: LogDomain.general);
+  } catch (e) {
+    logError('Supabase init failed: $e', error: e);
+    logError(
+      'URL: ${SupabaseConfig.url.isNotEmpty ? "set" : "EMPTY"}',
+      domain: LogDomain.general,
+    );
+    logError(
+      'Key: ${SupabaseConfig.anonKey.isNotEmpty ? "set" : "EMPTY"}',
+      domain: LogDomain.general,
+    );
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
