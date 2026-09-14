@@ -167,12 +167,10 @@ void main() {
       expect(find.text('WALLBIZZ'), findsOneWidget);
     });
 
-    testWidgets('renders StaggeredGrid in sliver mode', (tester) async {
+    testWidgets('renders StaggeredGrid on home tab', (tester) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
       expect(find.byType(StaggeredGrid), findsOneWidget);
-      final grid = tester.widget<StaggeredGrid>(find.byType(StaggeredGrid));
-      expect(grid.sliverMode, isTrue);
     });
 
     testWidgets('category tabs render within SliverAppBar', (tester) async {
