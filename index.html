@@ -893,10 +893,8 @@
     if (dlBtnText) dlBtnText.textContent = 'Download APK';
     if (heroDlText) heroDlText.textContent = 'Download APK';
   } else if (isIOS) {
-    if (dlBtnText) dlBtnText.textContent = 'Coming Soon on iOS';
-    if (heroDlText) heroDlText.textContent = 'Coming Soon on iOS';
-    if (dlBtn) dlBtn.href = '#';
-    if (heroDlBtn) heroDlBtn.href = '#';
+    if (dlBtnText) dlBtnText.textContent = 'Download for iOS';
+    if (heroDlText) heroDlText.textContent = 'Download for iOS';
   } else {
     if (dlBtnText) dlBtnText.textContent = 'Download APK';
     if (heroDlText) heroDlText.textContent = 'Download APK';
@@ -920,6 +918,10 @@
       const vText = latest.tag_name.startsWith('v') ? latest.tag_name : 'v' + latest.tag_name;
       navVersion.textContent = vText;
       if (latestVersion2) latestVersion2.textContent = vText;
+
+      const apkAsset = latest.assets && latest.assets.find(a => a.name && a.name.endsWith('.apk'));
+      if (apkAsset && dlBtn) dlBtn.href = apkAsset.browser_download_url;
+      if (apkAsset && heroDlBtn) heroDlBtn.href = apkAsset.browser_download_url;
 
       let html = '';
       releases.forEach((rel, i) => {
