@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,12 @@ void main() {
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
+    if (!dotenv.isInitialized) {
+      dotenv.testLoad(
+        fileInput:
+            'SUPABASE_URL=https://test.supabase.co\nSUPABASE_ANON_KEY=test-anon-key',
+      );
+    }
     await Supabase.initialize(
       url: 'https://test.supabase.co',
       publishableKey: 'test-anon-key',
