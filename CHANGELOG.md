@@ -4,6 +4,33 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.8.5] - 2026-09-14
+
+### Fixed
+- **Swiper zoomed swipe** — zoomed images can now be panned instead of accidentally swiping to next image (#75)
+- **PageView steals gestures when zoomed** — horizontal swipes now pan the image, not switch pages (#75)
+
+### Changed
+- **Swiggy-style page transitions** — custom SlideFadeRoute with 350ms slide+fade push/pop (#75)
+- **WallpaperCard 120fps** — removed BackdropFilter from heart button and resolution badge (#75)
+- **Nav bar perf** — reduced BackdropFilter blur from 30→16 sigma, added RepaintBoundary isolation (#75)
+- **Shimmer skeleton perf** — replaced per-item .animate().repeat() with TweenAnimationBuilder (#75)
+- **Grid card perf** — removed redundant .animate().fade().slideY() per card (#75)
+
+### Added
+- **Comprehensive test coverage** — 380 Flutter tests, backend proxy and auth tests (#48, #72)
+- **CRON_SECRET configured** — secure 48-byte secret for sync endpoint (#73)
+- **Landscape compact layout** — smaller brand header and nav bar in landscape (#74)
+- **StaggeredGrid sliverMode** — supports embedding in CustomScrollView (#74)
+- **REQUEST_INSTALL_PACKAGES** — Android permission for APK installs (#74)
+
+## [1.8.0] - 2026-09-14
+
+### Added
+- Landscape compact layout for HomeScreen (smaller brand header, accent bar hiding)
+- StaggeredGrid sliverMode for CustomScrollView embedding
+- REQUEST_INSTALL_PACKAGES Android permission
+
 ## [1.7.0] - 2026-09-13
 
 ### Fixed
