@@ -82,9 +82,7 @@ void main() {
     });
 
     test('map with only wallhaven_id succeeds', () {
-      final map = {
-        'wallhaven_id': 'abc123',
-      };
+      final map = {'wallhaven_id': 'abc123'};
       final wp = Wallpaper.fromMap(map);
       expect(wp.wallhavenId, 'abc123');
       expect(wp.id, '');
