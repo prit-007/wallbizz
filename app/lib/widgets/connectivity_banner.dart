@@ -65,11 +65,7 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.wifi_off,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                      const Icon(Icons.wifi_off, color: Colors.white, size: 16),
                       const SizedBox(width: 8),
                       Text(
                         'You are offline',
