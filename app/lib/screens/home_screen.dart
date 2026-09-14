@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../config/backend_config.dart';
+import '../config/page_transitions.dart';
 import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../widgets/category_tabs.dart';
@@ -105,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 HardwareKeyboard.instance.isControlPressed) ||
             event.logicalKey == LogicalKeyboardKey.slash) {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => SearchScreen(backendBase: BackendConfig.baseUrl),
+            SlideFadeRoute(
+              page: SearchScreen(backendBase: BackendConfig.baseUrl),
             ),
           );
           return KeyEventResult.handled;
@@ -353,8 +354,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     (w) => w.id == wallpaper.id,
                   );
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => WallpaperSwiperScreen(
+                    SlideFadeRoute(
+                      page: WallpaperSwiperScreen(
                         wallpapers: allWallpapers,
                         initialIndex: index >= 0 ? index : 0,
                       ),
@@ -466,9 +467,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             HapticFeedback.lightImpact();
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    SearchScreen(backendBase: BackendConfig.baseUrl),
+              SlideFadeRoute(
+                page: SearchScreen(backendBase: BackendConfig.baseUrl),
               ),
             );
           },
@@ -516,9 +516,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SearchScreen(backendBase: BackendConfig.baseUrl),
+                  SlideFadeRoute(
+                    page: SearchScreen(backendBase: BackendConfig.baseUrl),
                   ),
                 );
               },
@@ -618,40 +617,42 @@ class _FloatingNavBar extends StatelessWidget {
       builder: (context, Box box, _) {
         final downloadCount = box.length;
 
-        return Padding(
-          padding: EdgeInsets.only(
-            left: barHPadding,
-            right: barHPadding,
-            bottom: isLandscape
-                ? (bottomInset > 0 ? bottomInset + 4 : 12)
-                : (bottomInset > 0 ? bottomInset + 8 : 24),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(isLandscape ? 12 : 16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: Container(
-                height: barHeight,
-                decoration: BoxDecoration(
-                  color: vk.surfaceContainer.withValues(alpha: 0.7),
-                  border: Border.all(color: vk.glassBorder, width: 1),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(navItems.length, (i) {
-                    final item = navItems[i];
-                    final isSelected = currentIndex == i;
-                    final isDownloadTab = i == 2;
+        return RepaintBoundary(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: barHPadding,
+              right: barHPadding,
+              bottom: isLandscape
+                  ? (bottomInset > 0 ? bottomInset + 4 : 12)
+                  : (bottomInset > 0 ? bottomInset + 8 : 24),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(isLandscape ? 12 : 16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  height: barHeight,
+                  decoration: BoxDecoration(
+                    color: vk.surfaceContainer.withValues(alpha: 0.7),
+                    border: Border.all(color: vk.glassBorder, width: 1),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(navItems.length, (i) {
+                      final item = navItems[i];
+                      final isSelected = currentIndex == i;
+                      final isDownloadTab = i == 2;
 
-                    return _NavBarItem(
-                      item: item,
-                      isSelected: isSelected,
-                      isDownloadTab: isDownloadTab,
-                      downloadCount: downloadCount,
-                      onTap: () => onTap(i),
-                    );
-                  }),
+                      return _NavBarItem(
+                        item: item,
+                        isSelected: isSelected,
+                        isDownloadTab: isDownloadTab,
+                        downloadCount: downloadCount,
+                        onTap: () => onTap(i),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
