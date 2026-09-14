@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../widgets/wallbizz_logo.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -68,6 +69,19 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const WallbizzLogo(size: 80)
+                    .animate()
+                    .fadeIn(delay: 200.ms, duration: 600.ms)
+                    .scale(
+                      delay: 200.ms,
+                      begin: const Offset(0.8, 0.8),
+                      end: const Offset(1.0, 1.0),
+                      duration: 800.ms,
+                      curve: Curves.easeOutBack,
+                    ),
+
+                const SizedBox(height: 24),
+
                 Text(
                       'CURATED 4K BACKGROUNDS & WALLPAPERS',
                       style: GoogleFonts.inter(
