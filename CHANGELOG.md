@@ -4,6 +4,29 @@ All notable changes to Wallbizz will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.9.0] - 2026-09-15
+
+### Added
+- **Local-first wishlist** — wishlists stored in Hive on-device, works offline without auth
+- **Local-first moodboard** — moodboards stored in Hive on-device, no auth required
+- **SyncService** — auto-sync on authentication, manual sync, bidirectional merge
+- **Manual + Auto sync** — toggle in settings, auto-sync on login, pull from cloud to local
+- **Wallhaven ID storage** — wishlists/moodboards use wallhaven_id directly, no FK to wallpapers table
+
+### Changed
+- **WallpaperActions** — heart tap works locally without auth, syncs to cloud when authenticated
+- **AddToMoodboardSheet** — reads from Hive, syncs to Supabase when authenticated
+- **AuthBottomSheet** — triggers sync on Google/email sign-in
+- **WishlistScreen** — reads directly from Hive, no Supabase dependency for display
+
+### Fixed
+- **Wishlist 400 error** — removed FK constraint dependency, wallpapers no longer need to exist in DB
+- **Moodboard 400 error** — same fix, wallhaven_id stored directly
+
+### Schema
+- New tables: `wishlists_v2`, `moodboards_v2`, `moodboard_items_v2` with `wallhaven_id VARCHAR(50)`
+- Data migration from old UUID-based tables preserved in `sql/007_local_first.sql`
+
 ## [1.8.7] - 2026-09-14
 
 ### Fixed

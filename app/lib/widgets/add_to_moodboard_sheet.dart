@@ -7,13 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
 import '../models/moodboard.dart';
-import '../services/supabase_service.dart';
+import '../models/wallpaper.dart';
+import '../services/hive_moodboard_service.dart';
 import 'create_moodboard_dialog.dart';
 
 class AddToMoodboardSheet extends StatefulWidget {
-  final String wallpaperId;
+  final Wallpaper wallpaper;
 
-  const AddToMoodboardSheet({super.key, required this.wallpaperId});
+  const AddToMoodboardSheet({super.key, required this.wallpaper});
 
   @override
   State<AddToMoodboardSheet> createState() => _AddToMoodboardSheetState();
@@ -24,6 +25,11 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
   Set<String> _alreadyAdded = {};
   bool _loading = true;
 
+  String get _userId {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user?.id ?? 'anonymous';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,13 +37,16 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
   }
 
   Future<void> _load() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
-    final boards = await SupabaseService.instance.fetchMoodboards(user.id);
-    final added = await SupabaseService.instance.fetchMoodboardItemIds(
-      widget.wallpaperId,
-    );
+    final boards = await HiveMoodboardService.getMoodboards(_userId);
+    final added = <String>{};
+    for (final board in boards) {
+      if (await HiveMoodboardService.containsWallpaper(
+        board.id,
+        widget.wallpaper.wallhavenId,
+      )) {
+        added.add(board.id);
+      }
+    }
 
     if (mounted) {
       setState(() {
@@ -50,16 +59,15 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
 
   Future<void> _toggle(Moodboard board) async {
     HapticFeedback.lightImpact();
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
 
     if (_alreadyAdded.contains(board.id)) {
-      final success = await SupabaseService.instance.removeFromMoodboard(
+      final success = await HiveMoodboardService.removeWallpaper(
         board.id,
-        widget.wallpaperId,
+        widget.wallpaper.wallhavenId,
       );
       if (success) {
         setState(() => _alreadyAdded.remove(board.id));
+        _syncToCloud(board.id, false);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -69,12 +77,13 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
         );
       }
     } else {
-      final success = await SupabaseService.instance.addToMoodboard(
+      final success = await HiveMoodboardService.addWallpaper(
         board.id,
-        widget.wallpaperId,
+        widget.wallpaper,
       );
       if (success) {
         setState(() => _alreadyAdded.add(board.id));
+        _syncToCloud(board.id, true);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -84,6 +93,25 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
         );
       }
     }
+  }
+
+  void _syncToCloud(String moodboardId, bool added) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      if (added) {
+        Supabase.instance.client.from('moodboard_items_v2').insert({
+          'moodboard_id': moodboardId,
+          'wallhaven_id': widget.wallpaper.wallhavenId,
+        });
+      } else {
+        Supabase.instance.client
+            .from('moodboard_items_v2')
+            .delete()
+            .eq('moodboard_id', moodboardId)
+            .eq('wallhaven_id', widget.wallpaper.wallhavenId);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -293,15 +321,27 @@ class _AddToMoodboardSheetState extends State<AddToMoodboardSheet> {
   }
 
   Future<void> _createMoodboard(String name) async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-    final board = await SupabaseService.instance.createMoodboard(user.id, name);
+    final board = await HiveMoodboardService.createMoodboard(_userId, name);
     if (board != null) {
-      await SupabaseService.instance.addToMoodboard(
-        board.id,
-        widget.wallpaperId,
-      );
+      await HiveMoodboardService.addWallpaper(board.id, widget.wallpaper);
+      _syncCreateToCloud(board);
     }
     if (mounted) _load();
+  }
+
+  void _syncCreateToCloud(Moodboard board) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      Supabase.instance.client.from('moodboards_v2').insert({
+        'id': board.id,
+        'user_id': user.id,
+        'name': board.name,
+      });
+      Supabase.instance.client.from('moodboard_items_v2').insert({
+        'moodboard_id': board.id,
+        'wallhaven_id': widget.wallpaper.wallhavenId,
+      });
+    } catch (_) {}
   }
 }

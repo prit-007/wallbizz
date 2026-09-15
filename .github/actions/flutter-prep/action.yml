@@ -21,12 +21,15 @@ runs:
     - name: Create .env
       shell: bash
       working-directory: app
+      env:
+        SV_SUPABASE_URL: ${{ inputs.supabase-url }}
+        SV_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}
+        SV_BACKEND_URL: ${{ inputs.backend-url }}
       run: |
-        cat > .env << EOF
-        SUPABASE_URL=${{ inputs.supabase-url }}
-        SUPABASE_ANON_KEY=${{ inputs.supabase-anon-key }}
-        BACKEND_URL=${{ inputs.backend-url }}
-        EOF
+        printf '# Supabase\nSUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n\n# Backend (for web image proxy)\nBACKEND_URL=%s\n' \
+          "$SV_SUPABASE_URL" "$SV_SUPABASE_ANON_KEY" "$SV_BACKEND_URL" > .env
+        echo "Created .env:"
+        cat .env
 
     - name: Install dependencies
       shell: bash

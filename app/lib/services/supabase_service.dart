@@ -111,23 +111,73 @@ class SupabaseService {
   /// Resolves a wallhaven_id (or UUID) to the actual DB UUID.
   /// If the id is already a valid UUID, returns it directly.
   /// Otherwise looks up by wallhaven_id in the wallpapers table.
-  Future<String?> _resolveWallpaperUuid(String wallpaperId) async {
+  /// If not found and [wallpaper] is provided, upserts it first.
+  Future<String?> _resolveWallpaperUuid(
+    String wallpaperId, {
+    Wallpaper? wallpaper,
+  }) async {
     if (wallpaperId.contains('-') && wallpaperId.length == 36) {
       return wallpaperId;
     }
     final whId = wallpaperId.startsWith('wh-')
         ? wallpaperId.substring(3)
         : wallpaperId;
-    final url = Uri.parse(
+    final lookupUrl = Uri.parse(
       '$_baseUrl/rest/v1/wallpapers?wallhaven_id=eq.$whId&select=id',
     );
-    final response = await _get(url, headers: _headers);
+    final response = await _get(lookupUrl, headers: _headers);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       if (data.isNotEmpty) {
         return data[0]['id'] as String?;
       }
     }
+
+    if (wallpaper != null) {
+      return _upsertWallpaper(wallpaper);
+    }
+
+    return null;
+  }
+
+  /// Upserts a wallpaper into the DB and returns its UUID.
+  Future<String?> _upsertWallpaper(Wallpaper wallpaper) async {
+    final whId = wallpaper.wallhavenId.isNotEmpty
+        ? wallpaper.wallhavenId
+        : wallpaper.id.replaceFirst('wh-', '');
+    final url = Uri.parse(
+      '$_baseUrl/rest/v1/wallpapers?on_conflict=wallhaven_id',
+    );
+    final body = json.encode({
+      'wallhaven_id': whId,
+      'url_full': wallpaper.urlFull,
+      'url_thumb': wallpaper.urlThumb,
+      'resolution': wallpaper.resolution,
+      'width': wallpaper.width,
+      'height': wallpaper.height,
+      'file_size': wallpaper.fileSize,
+      'primary_color': wallpaper.primaryColor,
+      'category': wallpaper.category,
+      'source_query': wallpaper.sourceQuery,
+    });
+    final upsertResp = await _post(
+      url,
+      headers: {
+        ..._authHeaders,
+        'Prefer': 'resolution=merge-duplicates,return=representation',
+      },
+      body: body,
+    );
+    if (upsertResp.statusCode == 200 || upsertResp.statusCode == 201) {
+      final List<dynamic> data = json.decode(upsertResp.body);
+      if (data.isNotEmpty) {
+        return data[0]['id'] as String?;
+      }
+    }
+    logError(
+      'Failed to upsert wallpaper $whId: ${upsertResp.statusCode} ${upsertResp.body}',
+      domain: LogDomain.sync,
+    );
     return null;
   }
 
@@ -157,8 +207,12 @@ class SupabaseService {
     return [];
   }
 
-  Future<bool> addToWishlist(String userId, String wallpaperId) async {
-    final uuid = await _resolveWallpaperUuid(wallpaperId);
+  Future<bool> addToWishlist(
+    String userId,
+    String wallpaperId, {
+    Wallpaper? wallpaper,
+  }) async {
+    final uuid = await _resolveWallpaperUuid(wallpaperId, wallpaper: wallpaper);
     if (uuid == null) {
       logError(
         'addToWishlist: wallpaper not found in DB: $wallpaperId',

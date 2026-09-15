@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -31,9 +31,12 @@ jobs:
       - name: Setup env
         working-directory: app
         run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
-          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> .env
+          cat > .env << EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          BACKEND_URL=${{ secrets.BACKEND_URL }}
+          EOF
+          cat .env
 
       - name: Install dependencies
         working-directory: app
@@ -42,6 +45,16 @@ jobs:
       - name: Build Flutter web
         working-directory: app
         run: flutter build web --release
+
+      - name: Verify .env in build output
+        working-directory: app
+        run: |
+          if [ ! -f build/web/assets/.env ]; then
+            echo "ERROR: .env not found in build output — copying from source"
+            cp .env build/web/assets/.env
+          fi
+          echo "build/web/assets/.env contents:"
+          cat build/web/assets/.env
 
       - name: Prepare deploy directory
         run: |

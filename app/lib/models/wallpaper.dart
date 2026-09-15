@@ -36,6 +36,33 @@ class Wallpaper {
     return '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'wallhaven_id': wallhavenId,
+      'url_full': urlFull,
+      'url_thumb': urlThumb,
+      'resolution': resolution,
+      'width': width,
+      'height': height,
+      'file_size': fileSize,
+      'primary_color': primaryColor,
+      'category': category,
+      'source_query': sourceQuery,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Wallpaper &&
+          runtimeType == other.runtimeType &&
+          wallhavenId == other.wallhavenId;
+
+  @override
+  int get hashCode => wallhavenId.hashCode;
+
   factory Wallpaper.fromMap(Map<String, dynamic> map) {
     final id = map['id'] as String? ?? '';
     final wallhavenId = map['wallhaven_id'] as String? ?? '';

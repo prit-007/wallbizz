@@ -10,6 +10,7 @@ import '../config/responsive_config.dart';
 import '../config/theme_config.dart';
 import '../models/wallpaper.dart';
 import '../models/moodboard.dart';
+import '../services/hive_wishlist_service.dart';
 import '../services/supabase_service.dart';
 import '../widgets/auth_bottom_sheet.dart';
 import '../widgets/network_image.dart';
@@ -33,51 +34,42 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuthAndLoad();
+    _load();
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
-      (_) => _checkAuthAndLoad(),
+      (_) => _load(),
     );
-    SupabaseService.wishlistNotifier.addListener(_onWishlistChanged);
+    HiveWishlistService.wishlistNotifier.addListener(_load);
   }
 
   @override
   void dispose() {
     _authSubscription?.cancel();
-    SupabaseService.wishlistNotifier.removeListener(_onWishlistChanged);
+    HiveWishlistService.wishlistNotifier.removeListener(_load);
     super.dispose();
   }
 
-  void _onWishlistChanged() {
-    _checkAuthAndLoad();
+  String get _userId {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user?.id ?? 'anonymous';
   }
 
-  Future<void> _checkAuthAndLoad() async {
-    final user = Supabase.instance.client.auth.currentUser;
+  Future<void> _load() async {
     if (!mounted) return;
-    setState(() => _isLoggedIn = user != null);
+    final user = Supabase.instance.client.auth.currentUser;
+    setState(() {
+      _isLoggedIn = user != null;
+      _isLoading = true;
+    });
 
-    if (user != null) {
-      final items = await SupabaseService.instance.fetchWishlist(user.id);
-      if (mounted) {
-        setState(() {
-          _wishlist = items;
-          _isLoading = false;
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _wishlist = [];
-          _isLoading = false;
-        });
-      }
-    }
+    final wallpapers = await HiveWishlistService.getWallpapers(_userId);
+    if (mounted)
+      setState(() {
+        _wishlist = wallpapers;
+        _isLoading = false;
+      });
   }
 
   void _removeItemOptimistically(int index, Wallpaper wallpaper) async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
     setState(() {
       _wishlist.removeAt(index);
     });
@@ -140,12 +132,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
     await Future.delayed(const Duration(seconds: 4));
     if (!undoClicked) {
-      final success = await SupabaseService.instance.removeFromWishlist(
-        user.id,
-        wallpaper.id,
+      final success = await HiveWishlistService.remove(
+        _userId,
+        wallpaper.wallhavenId,
       );
       if (success && mounted) {
-        SupabaseService.wishlistNotifier.value++;
+        HiveWishlistService.wishlistNotifier.value++;
       } else if (!success && mounted) {
         setState(() {
           _wishlist.insert(index, wallpaper);
@@ -293,7 +285,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           child: _wishlist.isEmpty
               ? _buildEmptyView()
               : RefreshIndicator(
-                  onRefresh: _checkAuthAndLoad,
+                  onRefresh: _load,
                   color: cs.primary,
                   backgroundColor: cs.surface,
                   child: LayoutBuilder(
