@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/logger/logger.dart';
 import '../models/wallpaper.dart';
-import '../services/supabase_service.dart';
-import '../widgets/auth_bottom_sheet.dart';
+import '../services/hive_wishlist_service.dart';
 
 class WallpaperActions {
   static Wallpaper? _pendingWallpaper;
@@ -17,78 +16,33 @@ class WallpaperActions {
   }) {
     if (_isProcessing) return;
 
-    final user = Supabase.instance.client.auth.currentUser;
-
-    if (user == null) {
-      _pendingWallpaper = wallpaper;
-      showAuthBottomSheet(
-        context,
-        onDismissed: () {
-          _pendingWallpaper = null;
-        },
-      );
-      return;
-    }
-
     onToggle?.call();
-    _toggleWishlist(context, user.id, wallpaper, onComplete);
+    _toggleLocal(context, wallpaper, onComplete);
   }
 
-  static Future<void> _toggleWishlist(
+  static Future<void> _toggleLocal(
     BuildContext context,
-    String userId,
     Wallpaper wallpaper,
     VoidCallback? onComplete,
   ) async {
     _isProcessing = true;
     try {
+      final userId = _localUserId;
       logInfo(
-        'Checking wishlist: ${wallpaper.wallhavenId}',
+        'Toggling wishlist locally: ${wallpaper.wallhavenId}',
         domain: LogDomain.auth,
       );
-      final isInList = await SupabaseService.instance.isInWishlist(
-        userId,
-        wallpaper.id,
+      final added = await HiveWishlistService.toggle(userId, wallpaper);
+
+      logInfo(
+        'Wishlist toggle: ${added ? "added" : "removed"} ${wallpaper.wallhavenId}',
+        domain: LogDomain.auth,
       );
+      onComplete?.call();
 
-      bool success;
-      if (isInList) {
-        logInfo(
-          'Removing from wishlist: ${wallpaper.wallhavenId}',
-          domain: LogDomain.auth,
-        );
-        success = await SupabaseService.instance.removeFromWishlist(
-          userId,
-          wallpaper.id,
-        );
-      } else {
-        logInfo(
-          'Adding to wishlist: ${wallpaper.wallhavenId}',
-          domain: LogDomain.auth,
-        );
-        success = await SupabaseService.instance.addToWishlist(
-          userId,
-          wallpaper.id,
-        );
-      }
-
-      if (success) {
-        logInfo(
-          'Wishlist toggle success: ${wallpaper.wallhavenId}',
-          domain: LogDomain.auth,
-        );
-        onComplete?.call();
-      } else if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isInList
-                  ? 'Failed to remove from collection'
-                  : 'Failed to add to collection',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        _syncToCloud(user.id, wallpaper.wallhavenId, added);
       }
     } catch (e, st) {
       logError(
@@ -110,14 +64,44 @@ class WallpaperActions {
     }
   }
 
+  static String get _localUserId {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user?.id ?? 'anonymous';
+  }
+
+  static Future<void> _syncToCloud(
+    String userId,
+    String wallhavenId,
+    bool added,
+  ) async {
+    try {
+      if (added) {
+        await Supabase.instance.client.from('wishlists_v2').insert({
+          'user_id': userId,
+          'wallhaven_id': wallhavenId,
+        });
+      } else {
+        await Supabase.instance.client
+            .from('wishlists_v2')
+            .delete()
+            .eq('user_id', userId)
+            .eq('wallhaven_id', wallhavenId);
+      }
+    } catch (e) {
+      logWarning(
+        'Cloud sync failed for wishlist: $wallhavenId',
+        domain: LogDomain.auth,
+      );
+    }
+  }
+
   static void onAuthSuccess() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null && _pendingWallpaper != null) {
       final wp = _pendingWallpaper!;
       _pendingWallpaper = null;
       _isProcessing = true;
-      SupabaseService.instance
-          .addToWishlist(user.id, wp.id)
+      HiveWishlistService.toggle(user.id, wp)
           .then((_) {
             _isProcessing = false;
           })

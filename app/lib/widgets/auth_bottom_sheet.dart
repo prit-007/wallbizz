@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/theme_config.dart';
+import '../services/sync_service.dart';
 import '../services/wallpaper_actions.dart';
 import '../screens/verify_email_screen.dart';
 import '../screens/forgot_password_screen.dart';
@@ -67,6 +68,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             );
           } else {
             WallpaperActions.onAuthSuccess();
+            final user = Supabase.instance.client.auth.currentUser;
+            if (user != null) SyncService.onAuthStateChanged(user.id);
             Navigator.of(context).pop();
           }
         }
@@ -87,6 +90,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             );
           } else {
             WallpaperActions.onAuthSuccess();
+            if (user != null) SyncService.onAuthStateChanged(user.id);
             Navigator.of(context).pop();
           }
         }
@@ -130,6 +134,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
       );
       if (mounted) {
         WallpaperActions.onAuthSuccess();
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user != null) SyncService.onAuthStateChanged(user.id);
         Navigator.of(context).pop();
       }
     } catch (e) {

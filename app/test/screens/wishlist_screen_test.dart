@@ -26,6 +26,8 @@ void main() {
     tempDir = Directory.systemTemp.createTempSync('wishlist_test_');
     Hive.init(tempDir.path);
     await Hive.openBox('downloads');
+    await Hive.openBox('wishlists');
+    await Hive.openBox('moodboards');
     await ThemeConfig.load();
     await Supabase.initialize(
       url: 'https://test.supabase.co',

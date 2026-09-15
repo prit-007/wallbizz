@@ -12,7 +12,7 @@ import '../core/logger/logger.dart';
 import '../models/wallpaper.dart';
 import '../services/download_service.dart';
 import '../services/downloads_service.dart';
-import '../services/supabase_service.dart';
+import '../services/hive_wishlist_service.dart';
 import '../services/wallpaper_actions.dart';
 import '../utils/color_utils.dart';
 import '../utils/share_utils.dart';
@@ -95,12 +95,12 @@ class _DetailScreenState extends State<DetailScreen>
   }
 
   Future<void> _checkWishlist() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
     try {
-      final inList = await SupabaseService.instance.isInWishlist(
-        user.id,
-        wallpaper.id,
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id ?? 'anonymous';
+      final inList = await HiveWishlistService.isWishlisted(
+        userId,
+        wallpaper.wallhavenId,
       );
       if (mounted) setState(() => _isWishlisted = inList);
     } catch (_) {}
@@ -112,7 +112,7 @@ class _DetailScreenState extends State<DetailScreen>
       context,
       wallpaper,
       onToggle: () => setState(() => _isWishlisted = !_isWishlisted),
-      onComplete: () => SupabaseService.wishlistNotifier.value++,
+      onComplete: () => HiveWishlistService.wishlistNotifier.value++,
     );
   }
 
@@ -801,7 +801,7 @@ class _DetailScreenState extends State<DetailScreen>
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => AddToMoodboardSheet(wallpaperId: wallpaper.id),
+      builder: (_) => AddToMoodboardSheet(wallpaper: wallpaper),
     );
   }
 }

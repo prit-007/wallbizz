@@ -14,6 +14,7 @@ import 'core/logger/logger.dart';
 import 'core/updates/update_checker.dart';
 import 'core/updates/widgets/update_dialog.dart';
 import 'screens/splash_screen.dart';
+import 'services/sync_service.dart';
 import 'utils/share_utils.dart';
 
 Future<void> main() async {
@@ -32,6 +33,9 @@ Future<void> main() async {
 
   await Hive.initFlutter();
   await Hive.openBox('downloads');
+  await Hive.openBox('wishlists');
+  await Hive.openBox('moodboards');
+  await SyncService.loadPreferences();
   logInfo('Hive initialized', domain: LogDomain.general);
 
   await ThemeConfig.load();
