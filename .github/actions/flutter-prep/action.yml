@@ -21,21 +21,13 @@ runs:
     - name: Create .env
       shell: bash
       working-directory: app
+      env:
+        SV_SUPABASE_URL: ${{ inputs.supabase-url }}
+        SV_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}
+        SV_BACKEND_URL: ${{ inputs.backend-url }}
       run: |
-        if [ ! -f .env.example ]; then
-          echo "ERROR: .env.example not found — cannot create .env"
-          exit 1
-        fi
-        cp .env.example .env
-        if [ -n "${{ inputs.supabase-url }}" ]; then
-          sed -i "s|^SUPABASE_URL=.*|SUPABASE_URL=${{ inputs.supabase-url }}|" .env
-        fi
-        if [ -n "${{ inputs.supabase-anon-key }}" ]; then
-          sed -i "s|^SUPABASE_ANON_KEY=.*|SUPABASE_ANON_KEY=${{ inputs.supabase-anon-key }}|" .env
-        fi
-        if [ -n "${{ inputs.backend-url }}" ]; then
-          sed -i "s|^BACKEND_URL=.*|BACKEND_URL=${{ inputs.backend-url }}|" .env
-        fi
+        printf '# Supabase\nSUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n\n# Backend (for web image proxy)\nBACKEND_URL=%s\n' \
+          "$SV_SUPABASE_URL" "$SV_SUPABASE_ANON_KEY" "$SV_BACKEND_URL" > .env
         echo "Created .env:"
         cat .env
 
