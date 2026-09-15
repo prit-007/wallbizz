@@ -28,8 +28,13 @@ Future<void> main() async {
       stackTrace: details.stack,
     );
   };
-  await dotenv.load();
-  logInfo('Environment loaded', domain: LogDomain.general);
+  try {
+    await dotenv.load();
+    logInfo('Environment loaded', domain: LogDomain.general);
+  } catch (e) {
+    logWarning('Could not load .env — using defaults: $e',
+        domain: LogDomain.general);
+  }
 
   await Hive.initFlutter();
   await Hive.openBox('downloads');
