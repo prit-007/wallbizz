@@ -32,8 +32,10 @@ Future<void> main() async {
     await dotenv.load();
     logInfo('Environment loaded', domain: LogDomain.general);
   } catch (e) {
-    logWarning('Could not load .env — using defaults: $e',
-        domain: LogDomain.general);
+    logWarning(
+      'Could not load .env — using defaults: $e',
+      domain: LogDomain.general,
+    );
   }
 
   await Hive.initFlutter();
